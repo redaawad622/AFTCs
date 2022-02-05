@@ -9,49 +9,57 @@ datasource db {
 
 model T_Answers {
   Ans_Qus_ID  Int
-  Ans_ID      Int                  @id @default(autoincrement())
-  Ans_Is_Pic  Unsupported("BOOL")?
+  Ans_ID      Int         @id @default(autoincrement())
+  Ans_Is_Pic  Boolean     @default(false)
   Ans_Text    String?
   Ans_Pic_UNC String?
   Ans_Value   Float?
   Ans_audio   Bytes?
   Ans_image   Bytes?
   Ans_Cat     String?
-  TRIAL956    String?
-  T_Questions T_Questions          @relation(fields: [Ans_Qus_ID], references: [Qus_ID], onDelete: Cascade, onUpdate: NoAction)
+  T_Questions T_Questions @relation(fields: [Ans_Qus_ID], references: [Qus_ID], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model T_Categories {
-  Cat_ID   Int                  @id @default(autoincrement())
-  Cat_Name String?
-  flag     Unsupported("BOOL")? @default(dbgenerated("FALSE"))
-  TRIAL959 String?
+  Cat_ID   Int     @id @default(autoincrement())
+  Cat_Name String  @unique
+  flag     Boolean @default(false)
+  password String  @default("$2a$08$oAi0Hoi5q949I/bLp9QxkeHvakgwmbApRkxVOU2YDEoYSaXoyU6My")
 }
 
 model T_Exams {
   Exm_Cat_ID                Int?
-  Exm_ID                    Int                 @id @default(autoincrement())
+  Exm_ID                    Int     @id @default(autoincrement())
   Exm_Name                  String?
   Exm_Display_Name          String?
-  Exm_Duration_In_Mins      Int?                @default(0)
-  Exm_Given_Questions_Count Int?                @default(-1)
+  Exm_Duration_In_Mins      Int?    @default(0)
+  Exm_Given_Questions_Count Int?    @default(-1)
   Exm_Description           String?
-  Exm_Is_Custom             Unsupported("BOOL") @default(dbgenerated("FALSE"))
-  Exm_Is_Computerized       Unsupported("BOOL") @default(dbgenerated("TRUE"))
+  Exm_Is_Custom             Boolean @default(false)
+  Exm_Is_Computerized       Boolean @default(false)
   Exm_mlhoz                 Int?
   Exm_mokser                Int?
-  TRIAL959                  String?
 }
 
 model T_Questions {
   Qus_Exm_ID    Int
-  Qus_ID        Int                  @id @default(autoincrement())
-  Qus_Is_Pic    Unsupported("BOOL")?
+  Qus_ID        Int         @id @default(autoincrement())
+  Qus_Is_Pic    Boolean     @default(false)
   Qus_Text      String?
   Qus_Pic_UNC   String?
   Qus_audio     Bytes?
   Qus_image     Bytes?
   Qus_Order_Cat Int?
-  TRIAL959      String?
   T_Answers     T_Answers[]
+}
+
+model Examiners {
+  id            Int      @id @default(autoincrement())
+  national_id   String   @unique
+  triple_number String?  @unique
+  name          String
+  stage         String
+  barcode       String?  @unique
+  sold_id       String?  @unique
+  created_at    DateTime @default(now())
 }

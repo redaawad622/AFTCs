@@ -720,7 +720,6 @@ export default {
   watch: {
     'form.enteredon'(val) {
       const diffTime = Math.abs(new Date() - new Date(val))
-      console.log(diffTime)
       this.form.periodofservice = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     },
     helpers() {

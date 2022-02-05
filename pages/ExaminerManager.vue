@@ -294,7 +294,6 @@ export default {
 
   methods: {
     printRep() {
-      console.log(this.$store)
       this.$store.commit('setReport', this.people)
       this.$router.push('/report')
     },

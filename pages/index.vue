@@ -1,7 +1,7 @@
 <template>
-  <v-sheet width="100%" height="100%" class="d-flex flex-column">
+  <v-sheet width="100%" height="100%" class="d-flex pa-5 flex-column">
     <v-btn
-      class="ma-2 font-weight-bold title"
+      class="font-weight-bold title"
       width="120px"
       text
       color="primary"
@@ -13,7 +13,7 @@
       height="200px"
       max-width="700px"
       width="100%"
-      class="d-flex justify-center align-center pa-5 align-self-center"
+      class="d-flex justify-center align-center align-self-center"
     >
       <v-text-field
         outlined
@@ -22,12 +22,20 @@
         full-width
         prepend-inner-icon="mdi-search"
         hide-details
+        v-model="id"
         class="me-3 display-1"
       ></v-text-field>
-      <v-btn class="headline" width="100px" height="56px" color="primary"
+      <v-btn
+        @click="getExaminerData()"
+        :loading="loading"
+        class="headline"
+        width="100px"
+        height="56px"
+        color="primary"
         >بحث</v-btn
       >
     </v-sheet>
+    <examiner-data></examiner-data>
     <v-spacer></v-spacer>
     <template>
       <div class="text-center">
@@ -38,17 +46,34 @@
             </v-card-title>
 
             <v-card-text class="pa-4">
-              <v-combobox outlined label="مركز التدريب"></v-combobox>
+              <v-combobox
+                outlined
+                :items="users"
+                item-text="Cat_Name"
+                item-value="Cat_Name"
+                :return-object="false"
+                label="مركز التدريب"
+                v-model="form.name"
+                :error="!!error"
+              ></v-combobox>
               <v-text-field
                 type="password"
                 outlined
+                v-model="form.password"
                 label="رقم الدخول"
+                :error-messages="error"
               ></v-text-field>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="primary" class="title" text @click="login()">
+              <v-btn
+                :loading="logining"
+                color="primary"
+                class="title"
+                text
+                @click="login()"
+              >
                 تسجيل الدخول
               </v-btn>
             </v-card-actions>
@@ -58,22 +83,61 @@
     </template></v-sheet
   >
 </template>
-  </v-sheet>
-</template>
 
 <script>
+import examinerData from '~/components/exam/examinerData.vue'
 export default {
   name: 'IndexPage',
+  components: { examinerData },
   layout: 'examLayout',
   data() {
     return {
       dialog: false,
+      loading: false,
+      logining: false,
+      id: '',
+      error: null,
+      form: {
+        name: '',
+        password: '',
+      },
     }
+  },
+  computed: {
+    users() {
+      return this.$store.getters['User/users']
+    },
+    user() {
+      return this.$store.getters['User/user']
+    },
   },
   methods: {
     login() {
-      this.$router.replace('/ExamsManager')
+      this.logining = true
+      this.error = null
+      this.$store
+        .dispatch('User/login', this.form)
+        .then(() => {
+          this.$router.replace('/ExamsManager')
+        })
+        .catch((rej) => {
+          this.error = rej.response.data
+        })
+        .finally(() => {
+          this.logining = false
+        })
     },
+    getExaminerData() {
+      if (this.id) {
+        this.loading = true
+        this.$store.dispatch('Examiner/getExaminer', this.id).finally(() => {
+          this.loading = false
+        })
+      }
+    },
+  },
+  created() {
+    this.$store.dispatch('User/getUsers')
   },
 }
 </script>

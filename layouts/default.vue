@@ -23,22 +23,46 @@
         </v-list-item>
       </v-list>
       <v-list nav>
-        <v-list-item
-          color="primary"
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          router
-          exact
-          exact-active-class="overIcon"
-        >
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
-          </v-list-item-content>
-        </v-list-item>
+        <template v-for="(item, i) in items">
+          <v-list-group
+            :key="item.title"
+            :prepend-icon="item.icon"
+            v-if="item.children"
+          >
+            <template v-slot:activator>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.title"></v-list-item-title>
+              </v-list-item-content>
+            </template>
+
+            <v-list-item
+              link
+              v-for="child in item.children"
+              :key="child.title"
+              :to="child.to"
+            >
+              <v-list-item-content>
+                <v-list-item-title v-text="child.title"></v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-group>
+          <v-list-item
+            color="primary"
+            v-else
+            :key="i + item.title"
+            :to="item.to"
+            router
+            exact
+            exact-active-class="overIcon"
+          >
+            <v-list-item-action>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title v-text="item.title" />
+            </v-list-item-content>
+          </v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
     <v-app-bar app flat color="white">
@@ -74,12 +98,15 @@
       <v-container>
         <Nuxt />
       </v-container>
+      <notification></notification>
     </v-main>
   </v-app>
 </template>
 
 <script>
+import Notification from '~/components/notifications/notification.vue'
 export default {
+  components: { Notification },
   name: 'examsManager',
   data() {
     return {
@@ -106,6 +133,16 @@ export default {
           icon: 'mdi-account-multiple-plus-outline',
           title: 'بدني و عملي',
           to: '/badany',
+        },
+        {
+          icon: 'mdi-account-multiple-plus-outline',
+          title: 'الممتحنين',
+          children: [
+            {
+              title: 'تسجيل ممتحن جديد',
+              to: '/Examiners/storeExaminer',
+            },
+          ],
         },
         {
           icon: 'mdi-account-multiple-plus-outline',

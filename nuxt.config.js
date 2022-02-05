@@ -18,7 +18,11 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ['~/plugins/helper.js'],
+  plugins: [
+    '~/plugins/helper.js',
+    '~/plugins/axios.js',
+    { src: '~/plugins/vue-timers', mode: 'client' },
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -96,5 +100,6 @@ export default {
     {
       path: '/api',
       handler: '~/api/index.js',
-    }  ]
+    },
+  ],
 }

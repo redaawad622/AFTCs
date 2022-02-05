@@ -1,23 +1,11 @@
 export const state = () => ({
-  report: [],
-  helpers: {},
+ 
 })
 export const getters = {
-  report(state) {
-    return state.report
-  },
-  helpers(state) {
-    return state.helpers
-  },
+
 }
 export const mutations = {
-  setReport(state, payload) {
-    state.report = payload
-  },
-  setHelpers(state, payload) {
-    state.helpers = payload
-    this.$setLocal('helpers', payload)
-  },
+ 
 }
 export const actions = {
   getHelpers({ commit }, payload = true) {

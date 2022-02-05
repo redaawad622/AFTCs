@@ -5,7 +5,7 @@ const multer = require('multer')
 const upload = multer({ dest: 'static/uploads' })
 
 const prisma = new PrismaClient()
-
+app.use(express.json())
 const SerialPort = require('serialport')
 const Readline = require('@serialport/parser-readline')
 
@@ -24,5 +24,8 @@ app.get('/badany', function () {
 
   res.json('fe')
 })
+
+require('./examRoutes.js')(app,prisma)
+require('./userRoutes')(app,prisma)
 
 module.exports = app
