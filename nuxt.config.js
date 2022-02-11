@@ -13,7 +13,6 @@ export default {
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
-
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
 
@@ -41,13 +40,23 @@ export default {
     '@nuxtjs/pwa',
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    ['cookie-universal-nuxt', { alias: 'cookiz' }],
   ],
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
+    proxy: true,
     baseURL:
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:3000'
         : 'http://localhost:3000',
+  },
+
+  proxy: {
+    '/api/': {
+      target: 'http://localhost:3000',
+      pathRewrite: { '^/api/': '' },
+      changeOrigin: true,
+    },
   },
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {
@@ -71,9 +80,8 @@ export default {
           primary: '#7048eb',
           accent: '#f1f1f4',
           secondary: '#DB5461',
-
-          info: colors.teal.lighten1,
-          warning: colors.amber.base,
+          info: colors.teal.base,
+          warning: colors.amber.darken2,
           error: '#ec547a',
           success: '#5bceae',
           primaryT: '#2f475f',
@@ -83,8 +91,8 @@ export default {
           primary: '#7048eb',
           accent: '#f1f1f4',
           secondary: '#DB5461',
-          info: colors.teal.lighten1,
-          warning: colors.amber.base,
+          info: colors.blue.base,
+          warning: colors.amber.darken2,
           error: '#ec547a',
           success: '#5bceae',
           primaryT: '#2f475f',
@@ -95,7 +103,21 @@ export default {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    extend(config, ctx) {
+      config.module.rules.push({
+        test: /\.(ogg|mp3|wav|mpe?g)$/i,
+        loader: 'file-loader',
+        options: {
+          name: '[path][name].[ext]',
+        },
+      })
+    },
+  },
+  server: {
+    port: 3000,
+    host: '0.0.0.0',
+  },
   serverMiddleware: [
     {
       path: '/api',

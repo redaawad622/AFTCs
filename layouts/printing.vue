@@ -1,21 +1,15 @@
 <template>
   <v-app>
-     <v-main>
-
-        <Nuxt />
-
+    <v-main>
+      <Nuxt />
     </v-main>
   </v-app>
 </template>
 
 <script>
 export default {
-  name:'printingLayout',
+  name: 'PrintingLayout',
   layout: 'empty',
-
 }
 </script>
 
-<style>
-
-</style>

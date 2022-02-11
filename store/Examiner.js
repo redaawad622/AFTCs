@@ -17,6 +17,11 @@ export const actions = {
       commit('setExaminer', res.data)
     })
   },
+  getExaminers(_, payload) {
+    return this.$axios(`/api/getExaminers`, {
+      params: payload,
+    })
+  },
   save(_, payload) {
     return this.$axios.post(`/api/save`, payload)
   },

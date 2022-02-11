@@ -20,6 +20,7 @@ module.exports = function (app, prisma) {
       if (e.clientVersion && e.code) res.status(422).json(e)
     }
   })
+
   app.post('/login', async (req, res) => {
     const { name, password } = req.body
     const user = await prisma.T_Categories.findUnique({
@@ -33,6 +34,8 @@ module.exports = function (app, prisma) {
     const checkPassword = bcrypt.compareSync(password, user.password)
     if (!checkPassword) res.status(401).json('خطأ في كلمة المرور')
 
-    res.json(user)
+    // const token = 'erfrefgerfg'
+    delete user.password
+    res.status(200).json(user)
   })
 }

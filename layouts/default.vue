@@ -86,7 +86,7 @@
       >
       <v-btn
         title="اضافة جديده"
-        to="/new"
+        to="/Examiners/storeExaminer"
         color="primary"
         class="elevation-0"
         small
@@ -106,8 +106,10 @@
 <script>
 import Notification from '~/components/notifications/notification.vue'
 export default {
+  name: 'DefaultLayout',
   components: { Notification },
-  name: 'examsManager',
+  middleware: 'auth',
+
   data() {
     return {
       clipped: false,
@@ -156,16 +158,10 @@ export default {
       title: 'Vuetify.js',
     }
   },
-  methods: {
-    getHelpers() {
-      this.loading = true
-      this.$store.dispatch('getHelpers', false).finally(() => {
-        this.loading = false
-      })
+  computed: {
+    user() {
+      return this.$store.getters['User/user']
     },
-  },
-  mounted() {
-    this.$store.dispatch('getHelpers')
   },
 }
 </script>

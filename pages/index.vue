@@ -16,72 +16,71 @@
       class="d-flex justify-center align-center align-self-center"
     >
       <v-text-field
+        v-model="id"
         outlined
         label="ابحث بالرقم القومي-الثلاثي-الباركود "
         placeholder="ابحث بالرقم القومي-الثلاثي-الباركود "
         full-width
         prepend-inner-icon="mdi-search"
         hide-details
-        v-model="id"
         class="me-3 display-1"
       ></v-text-field>
       <v-btn
-        @click="getExaminerData()"
         :loading="loading"
         class="headline"
         width="100px"
         height="56px"
         color="primary"
+        @click="getExaminerData()"
         >بحث</v-btn
       >
     </v-sheet>
     <examiner-data></examiner-data>
     <v-spacer></v-spacer>
-    <template>
-      <div class="text-center">
-        <v-dialog v-model="dialog" width="500">
-          <v-card>
-            <v-card-title class="text-h5 grey lighten-2">
-              تسجيل الدخول
-            </v-card-title>
 
-            <v-card-text class="pa-4">
-              <v-combobox
-                outlined
-                :items="users"
-                item-text="Cat_Name"
-                item-value="Cat_Name"
-                :return-object="false"
-                label="مركز التدريب"
-                v-model="form.name"
-                :error="!!error"
-              ></v-combobox>
-              <v-text-field
-                type="password"
-                outlined
-                v-model="form.password"
-                label="رقم الدخول"
-                :error-messages="error"
-              ></v-text-field>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                :loading="logining"
-                color="primary"
-                class="title"
-                text
-                @click="login()"
-              >
-                تسجيل الدخول
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </div>
-    </template></v-sheet
-  >
+    <div class="text-center">
+      <v-dialog v-model="dialog" width="500">
+        <v-card>
+          <v-card-title class="text-h5 grey lighten-2">
+            تسجيل الدخول
+          </v-card-title>
+
+          <v-card-text class="pa-4">
+            <v-combobox
+              v-model="form.name"
+              outlined
+              :items="users"
+              item-text="Cat_Name"
+              item-value="Cat_Name"
+              :return-object="false"
+              label="مركز التدريب"
+              :error="!!error"
+            ></v-combobox>
+            <v-text-field
+              v-model="form.password"
+              type="password"
+              outlined
+              label="رقم الدخول"
+              :error-messages="error"
+            ></v-text-field>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              :loading="logining"
+              color="primary"
+              class="title"
+              text
+              @click="login()"
+            >
+              تسجيل الدخول
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
+  </v-sheet>
 </template>
 
 <script>
@@ -90,6 +89,7 @@ export default {
   name: 'IndexPage',
   components: { examinerData },
   layout: 'examLayout',
+
   data() {
     return {
       dialog: false,
@@ -107,10 +107,19 @@ export default {
     users() {
       return this.$store.getters['User/users']
     },
+
     user() {
       return this.$store.getters['User/user']
     },
+    examiner() {
+      return this.$store.getters['Examiner/examiner']
+    },
   },
+
+  beforeMount() {
+    this.$store.dispatch('User/getUsers')
+  },
+
   methods: {
     login() {
       this.logining = true
@@ -130,14 +139,18 @@ export default {
     getExaminerData() {
       if (this.id) {
         this.loading = true
+        this.message = ''
         this.$store.dispatch('Examiner/getExaminer', this.id).finally(() => {
           this.loading = false
+          if (!this.examiner) {
+            this.$store.commit('Notifications/setNotification', {
+              text: 'الممتحن غير موجود',
+              color: 'error',
+            })
+          }
         })
       }
     },
-  },
-  created() {
-    this.$store.dispatch('User/getUsers')
   },
 }
 </script>

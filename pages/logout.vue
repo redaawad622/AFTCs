@@ -9,9 +9,8 @@ export default {
   name: 'LogoutPage',
   mounted() {
     // logout
-    setTimeout(() => {
-      this.$router.replace('/')
-    }, 1000)
+    this.$cookiz.remove('user')
+    this.$router.replace('/')
   },
 }
 </script>

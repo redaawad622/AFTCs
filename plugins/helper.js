@@ -9,7 +9,7 @@ function isURL(str) {
   return !!pattern.test(str)
 }
 
-const imgPath ='http://localhost:3000/uploads/'
+const imgPath = 'http://localhost:3000/uploads/'
 export default ({ app }, inject) => {
   inject('getUrl', function (url, id) {
     if (
@@ -54,6 +54,11 @@ export default ({ app }, inject) => {
       item = JSON.parse(item)
     }
     return item
+  })
+  inject('deleteLocal', function (name) {
+    localStorage.removeItem(name)
+    sessionStorage.removeItem(name)
+    return true
   })
   inject('shallowEqual', function (object1, object2) {
     const keys1 = Object.keys(object1)

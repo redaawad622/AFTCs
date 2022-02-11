@@ -29,16 +29,19 @@ model T_Categories {
 
 model T_Exams {
   Exm_Cat_ID                Int?
-  Exm_ID                    Int     @id @default(autoincrement())
+  Exm_ID                    Int           @id @default(autoincrement())
   Exm_Name                  String?
-  Exm_Display_Name          String?
-  Exm_Duration_In_Mins      Int?    @default(0)
-  Exm_Given_Questions_Count Int?    @default(-1)
-  Exm_Description           String?
-  Exm_Is_Custom             Boolean @default(false)
-  Exm_Is_Computerized       Boolean @default(false)
+  Exm_Display_Name          String?       @default("ss")
+  Exm_Duration_In_Mins      Int?          @default(0)
+  Exm_Given_Questions_Count Int?          @default(-1)
+  Exm_Description           String?       @default("ss")
+  Exm_Is_Custom             Boolean       @default(false)
+  Exm_Is_Computerized       Boolean       @default(false)
   Exm_mlhoz                 Int?
   Exm_mokser                Int?
+  category                  String?       @default("نفسي")
+  random                    String?       @default("عشوائي")
+  Questions                 T_Questions[]
 }
 
 model T_Questions {
@@ -51,15 +54,36 @@ model T_Questions {
   Qus_image     Bytes?
   Qus_Order_Cat Int?
   T_Answers     T_Answers[]
+  T_Exams       T_Exams?    @relation(fields: [Qus_Exm_ID], references: [Exm_ID])
 }
 
 model Examiners {
-  id            Int      @id @default(autoincrement())
-  national_id   String   @unique
-  triple_number String?  @unique
+  id            Int       @id @default(autoincrement())
+  national_id   String    @unique
+  triple_number String?   @unique
   name          String
   stage         String
-  barcode       String?  @unique
-  sold_id       String?  @unique
-  created_at    DateTime @default(now())
+  barcode       String?   @unique
+  sold_id       String?   @unique
+  created_at    DateTime  @default(now())
+  Answers       Answers[]
+
+}
+
+model Assign {
+  id         Int      @id @default(autoincrement())
+  exam_id    Int      @unique
+  created_at DateTime @default(now())
+}
+
+model Answers {
+  id          Int        @id @default(autoincrement())
+  exam_id     Int
+  question_id Int
+  answer_id   Int
+  examiner_id Int
+  created_at  DateTime   @default(now())
+  Examiners   Examiners? @relation(fields: [examiner_id], references: [id])
+
+  @@unique([examiner_id, question_id])
 }

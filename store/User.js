@@ -1,5 +1,6 @@
+
 export const state = () => ({
-  user: null,
+  user: process.server ? '' : JSON.parse(sessionStorage.getItem('user')),
   users: [],
 })
 export const getters = {
@@ -13,6 +14,8 @@ export const getters = {
 export const mutations = {
   setUser(state, payload) {
     state.user = payload
+    this.$cookiz.set('user',payload)
+    this.$setLocal('user',payload,true,false);
   },
   setUsers(state, payload) {
     state.users = payload
