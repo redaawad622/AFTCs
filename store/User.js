@@ -1,4 +1,3 @@
-
 export const state = () => ({
   user: process.server ? '' : JSON.parse(sessionStorage.getItem('user')),
   users: [],
@@ -14,8 +13,7 @@ export const getters = {
 export const mutations = {
   setUser(state, payload) {
     state.user = payload
-    this.$cookiz.set('user',payload)
-    this.$setLocal('user',payload,true,false);
+    this.$cookiz.set('user', payload)
   },
   setUsers(state, payload) {
     state.users = payload
@@ -30,7 +28,7 @@ export const actions = {
   save(_, payload) {
     return this.$axios.post(`/api/saveUser`, payload)
   },
-  getUsers({commit}, payload) {
+  getUsers({ commit }, payload) {
     return this.$axios(`/api/getAllUser`, payload).then((res) => {
       commit('setUsers', res.data)
     })

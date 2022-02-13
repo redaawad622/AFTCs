@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs'
+import MDBReader from 'mdb-reader'
 module.exports = function (app, prisma) {
   app.get('/getExaminer', async (req, res) => {
     const { id } = req.query
@@ -119,5 +121,29 @@ module.exports = function (app, prisma) {
     } catch (e) {
       if (e.clientVersion && e.code) res.status(422).json(e)
     }
+  })
+
+  app.get('/readExaminerFromMdb', async (req, res) => {
+    const buffer = readFileSync('./prisma/db.mdb')
+    const reader = new MDBReader(buffer)
+    const table = await reader.getTable('Examiners')
+    // table.getColumnNames() // ['id', 'name', 'color']
+    const data = await table.getData()
+    const exist = await prisma.Examiners.findMany()
+    data.filter(
+      (q) => exist.findIndex((a) => a.national_id === q.national_id) < 0
+    )
+    const examiners = []
+    await data.forEach(async (e) => {
+      const ex = await prisma.Examiners.upsert({
+        where: {
+          national_id: e.national_id,
+        },
+        update: {},
+        create: e,
+      })
+      examiners.push(ex)
+    })
+    res.json(examiners) // [{id: 5, name: 'Ashley', color: 'black'}, ...]
   })
 }

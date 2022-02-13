@@ -128,6 +128,12 @@ export const actions = {
   saveSetting(_, payload) {
     return this.$axios.post(`/api/saveSetting`, payload)
   },
+  addAsBattary(_, payload) {
+    return this.$axios.post(`/api/addAsBattary`, payload)
+  },
+  getAndAdd(_, payload) {
+    return this.$axios.get(`/api/getAndAdd`, { params: payload })
+  },
   saveAnswers({ state }, payload) {
     return this.$axios.post(`/api/saveAnswers`, {
       answers: JSON.stringify(state.answers),

@@ -1,3 +1,5 @@
+import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
+
 function isURL(str) {
   const pattern = new RegExp(
     '^(https?:\\/\\/)?' + // protocol

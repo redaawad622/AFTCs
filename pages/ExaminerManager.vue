@@ -34,6 +34,12 @@
             <v-btn title="طباعة" @click="printRep()" class="elevation-0 ms-2"
               ><v-icon>mdi-printer-outline</v-icon></v-btn
             >
+            <v-btn
+              title="طباعة"
+              @click="readExaminerFromMdb()"
+              class="elevation-0 ms-2"
+              ><v-icon>mdi-microsoft-access</v-icon></v-btn
+            >
           </div>
           <div>
             <v-scale-transition group>
@@ -75,6 +81,7 @@
                 </v-sheet>
                 <v-card-text>
                   <v-autocomplete
+                    v-model="filters.qualification"
                     append-icon="mdi-menu-swap"
                     outlined
                     dense
@@ -84,9 +91,9 @@
                     :items="helpers.qualification"
                     item-text="name"
                     item-value="value"
-                    v-model="filters.qualification"
                   ></v-autocomplete>
                   <v-autocomplete
+                    v-model="filters.examFinish"
                     append-icon="mdi-menu-swap"
                     outlined
                     dense
@@ -96,7 +103,6 @@
                     :items="helpers.examFinish"
                     item-text="name"
                     item-value="value"
-                    v-model="filters.examFinish"
                   ></v-autocomplete>
                 </v-card-text>
               </v-card>
@@ -283,6 +289,18 @@ export default {
     deleteItem(item) {
       this.editedIndex = this.examiners.indexOf(item)
       this.dialogDelete = true
+    },
+    readExaminerFromMdb() {
+      this.loading = true
+      this.$store
+        .dispatch(`Examiner/readExaminerFromMdb`)
+        .then((res) => {
+          this.examiners = res.data
+          this.allExaminers = this.examiners.length
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
 
     deleteItemConfirm() {

@@ -1,6 +1,6 @@
 
   <template>
-  <v-stepper class="ma-5" v-model="cursor" vertical>
+  <v-stepper v-model="cursor" class="ma-5" vertical>
     <v-stepper-step :complete="cursor > 1" step="1">
       المقدمه <small>التذكر السمعي</small></v-stepper-step
     >

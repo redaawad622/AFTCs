@@ -1,5 +1,10 @@
 <template>
   <div v-if="questions && questions.length > 0" @keyup.space="nextQ()">
+    <img
+      v-if="exam.Exm_ID === 3 && !hide"
+      class="customImageTa"
+      src="/tazakr.png"
+    />
     <v-sheet class="pa-5 d-flex justify-center align-center flex-column">
       <span class="qCount secondary--text">{{
         cursor + 1 + '/' + questions.length
@@ -20,7 +25,8 @@
         <v-img
           v-else
           contain
-          max-width="200px"
+          :width="exam.Exm_ID === 4 ? '500px' : '250px'"
+          :height="exam.Exm_ID === 4 ? '250px' : 'auto'"
           :src="toBase64(questions[cursor].Qus_image)"
         />
       </v-alert>
@@ -86,6 +92,7 @@ export default {
       cursor: 0,
       currentAns: '',
       initAnswer: [],
+      hide: false,
     }
   },
   computed: {
@@ -127,6 +134,9 @@ export default {
       if (this.questions.length < 1) {
         this.finished()
       }
+      if (this.exam.Exm_ID === 3) {
+        this.autoHide()
+      }
     },
   },
   created() {
@@ -135,6 +145,9 @@ export default {
     if (this.questions.length < 1) {
       this.finished()
     }
+    if (this.exam.Exm_ID === 3) {
+      this.autoHide()
+    }
   },
   methods: {
     toBase64(arr) {
@@ -142,6 +155,11 @@ export default {
         arr.data.reduce((data, byte) => data + String.fromCharCode(byte), '')
       )
       return `data:image/png;base64,${base64String}`
+    },
+    autoHide() {
+      setTimeout(() => {
+        this.hide = true
+      }, 10000)
     },
     nextQ() {
       if (this.cursor === this.questions.length - 1) {
@@ -235,5 +253,13 @@ export default {
   border-radius: 17px;
   font-weight: 500;
   width: 34px;
+}
+.customImageTa {
+  position: absolute;
+  z-index: 2;
+  top: 56px;
+  left: 0;
+  max-width: 100%;
+  height: calc(100% - 56px);
 }
 </style>

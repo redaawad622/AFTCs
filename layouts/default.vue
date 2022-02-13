@@ -10,7 +10,7 @@
       <v-list>
         <v-list-item :class="{ 'px-2': clipped }">
           <v-list-item-avatar>
-            <v-img src="/logo.webp"></v-img>
+            <v-img src="/logo.png"></v-img>
           </v-list-item-avatar>
         </v-list-item>
         <v-list-item link>
@@ -135,6 +135,11 @@ export default {
           icon: 'mdi-account-multiple-plus-outline',
           title: 'بدني و عملي',
           to: '/badany',
+        },
+        {
+          icon: 'mdi-account-multiple-plus-outline',
+          title: 'الاعدادات',
+          to: '/setting',
         },
         {
           icon: 'mdi-account-multiple-plus-outline',

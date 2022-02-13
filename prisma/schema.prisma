@@ -29,19 +29,20 @@ model T_Categories {
 
 model T_Exams {
   Exm_Cat_ID                Int?
-  Exm_ID                    Int           @id @default(autoincrement())
+  Exm_ID                    Int            @id @default(autoincrement())
   Exm_Name                  String?
-  Exm_Display_Name          String?       @default("ss")
-  Exm_Duration_In_Mins      Int?          @default(0)
-  Exm_Given_Questions_Count Int?          @default(-1)
-  Exm_Description           String?       @default("ss")
-  Exm_Is_Custom             Boolean       @default(false)
-  Exm_Is_Computerized       Boolean       @default(false)
+  Exm_Display_Name          String?        @default("ss")
+  Exm_Duration_In_Mins      Int?           @default(0)
+  Exm_Given_Questions_Count Int?           @default(-1)
+  Exm_Description           String?        @default("ss")
+  Exm_Is_Custom             Boolean        @default(false)
+  Exm_Is_Computerized       Boolean        @default(false)
   Exm_mlhoz                 Int?
   Exm_mokser                Int?
-  category                  String?       @default("نفسي")
-  random                    String?       @default("عشوائي")
+  category                  String?        @default("نفسي")
+  random                    String?        @default("عشوائي")
   Questions                 T_Questions[]
+  Battary_Exam              Battary_Exam[]
 }
 
 model T_Questions {
@@ -67,7 +68,23 @@ model Examiners {
   sold_id       String?   @unique
   created_at    DateTime  @default(now())
   Answers       Answers[]
+  battary_id    Int?
+}
 
+model Battries {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique
+  Battary_Exam Battary_Exam[]
+}
+
+model Battary_Exam {
+  battary    Battries @relation(fields: [battary_id], references: [id])
+  battary_id Int
+  exam       T_Exams  @relation(fields: [exam_id], references: [Exm_ID])
+  exam_id    Int
+  assignedAt DateTime @default(now())
+
+  @@id([battary_id, exam_id])
 }
 
 model Assign {

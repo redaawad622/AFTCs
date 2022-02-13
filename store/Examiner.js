@@ -25,4 +25,7 @@ export const actions = {
   save(_, payload) {
     return this.$axios.post(`/api/save`, payload)
   },
+  readExaminerFromMdb() {
+    return this.$axios.get(`/api/readExaminerFromMdb`)
+  },
 }

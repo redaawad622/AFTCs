@@ -12,9 +12,9 @@
         >
           <v-card-text>
             <v-text-field
+              v-model="search"
               outlined
               append-icon="mdi-search"
-              v-model="search"
             ></v-text-field>
             <v-divider class="mb-4"></v-divider>
             <div v-for="(group, k) in examGroup(filterExam)" :key="k">
@@ -28,11 +28,11 @@
                 >{{ k }}</v-alert
               >
               <v-chip
-                draggable
                 v-for="exam in group"
-                class="ma-1"
-                @click="addToExam(exam)"
                 :key="exam.Exm_ID"
+                class="ma-1"
+                draggable
+                @click="addToExam(exam)"
               >
                 {{ exam.Exm_Name }}
               </v-chip>
@@ -50,10 +50,82 @@
           outlined
         >
           <v-card-text>
-            <v-btn @click="examList = []" color="error">حذف الكل</v-btn>
-            <v-btn @click="examList = filterExam" color="success"
-              >اضافة الكل</v-btn
-            >
+            <div class="d-flex justify-space-between">
+              <v-btn @click="examList = []" color="error">حذف الكل</v-btn>
+              <v-btn @click="examList = filterExam" color="success"
+                >اضافة الكل</v-btn
+              >
+              <v-dialog v-model="dialog" width="500">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    color="red lighten-2"
+                    :disabled="examList.length < 1"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    اضافة كبطارية
+                  </v-btn>
+                </template>
+
+                <v-card>
+                  <v-card-title class="text-h5 grey lighten-2">
+                    اكتب اسم
+                  </v-card-title>
+
+                  <v-card-text class="pt-2">
+                    <v-text-field
+                      v-model="name"
+                      color="primary"
+                      outlined
+                    ></v-text-field>
+                  </v-card-text>
+
+                  <v-divider></v-divider>
+
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="primary"
+                      :loading="addLoading"
+                      text
+                      @click="addAsBattary()"
+                    >
+                      اضافة
+                    </v-btn>
+                    <v-btn color="error" text @click="dialog = false">
+                      الغاء
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+            </div>
+
+            <div class="d-flex my-3" v-if="battaries.length > 0">
+              <v-combobox
+                v-model="battary_id"
+                :items="battaries"
+                item-text="name"
+                item-value="id"
+                dense
+                outlined
+                label="البطاريات"
+                placeholder="البطاريات"
+                class="me-3"
+                hide-details
+              ></v-combobox>
+              <v-btn color="primary" @click="getAndAdd()" :loading="getLoading"
+                >اضافة البطارية الي الاختبارات</v-btn
+              >
+              <v-btn
+                color="primary"
+                @click="addAsBattary(true)"
+                class="ms-2"
+                :loading="editLoading"
+                >تعديل البطارية الحالية</v-btn
+              >
+            </div>
+
             <v-divider class="my-4"></v-divider>
             <div v-for="(group, k) in examGroup(examList)" :key="k">
               <v-alert
@@ -92,9 +164,16 @@ export default {
     return {
       loading: false,
       sLoading: false,
+      getLoading: false,
+      dialog: false,
+      addLoading: false,
+      editLoading: false,
       search: '',
       filterExam: [],
       examList: [],
+      battaries: [],
+      name: '',
+      battary_id: '',
     }
   },
   computed: {
@@ -125,6 +204,7 @@ export default {
           this.$store.commit('Exam/setExams', res.data)
           this.filterExam = this.exams
           this.examList = res.data.assExams
+          this.battaries = res.data.battaries
         })
         .finally(() => {
           this.loading = false
@@ -136,9 +216,58 @@ export default {
         this.sLoading = false
       })
     },
+    addAsBattary(edit = false) {
+      if (edit) {
+        if (!this.battary_id) {
+          return
+        }
+        this.editLoading = true
+      } else {
+        if (!this.name) {
+          return
+        }
+        this.addLoading = true
+      }
+
+      this.$store
+        .dispatch('Exam/addAsBattary', {
+          exams: this.examList,
+          name: edit ? this.battary_id.name : this.name,
+        })
+        .then(() => {
+          this.$store.commit('Notifications/setNotification', {
+            text: 'تم اضافة البطارية بنجاح',
+            color: 'success',
+          })
+        })
+        .finally(() => {
+          this.editLoading = false
+          this.addLoading = false
+        })
+    },
+
     addToExam(e) {
       const isEx = this.examList.findIndex((x) => x.Exm_ID === e.Exm_ID)
       if (isEx === -1) this.examList.push(e)
+    },
+    getAndAdd() {
+      this.getLoading = true
+      this.$store
+        .dispatch('Exam/getAndAdd', {
+          battaryId: this.battary_id.id,
+        })
+        .then((res) => {
+          res.data.forEach((e) => {
+            this.addToExam(e)
+          })
+          this.$store.commit('Notifications/setNotification', {
+            text: 'تم اضافة البطارية بنجاح',
+            color: 'success',
+          })
+        })
+        .finally(() => {
+          this.getLoading = false
+        })
     },
     removeFromExam(exam) {
       const index = this.examList.findIndex((x) => x.Exm_ID === exam.Exm_ID)

@@ -1,4 +1,5 @@
 import colors from 'vuetify/es5/util/colors'
+import ar from 'vuetify/lib/locale/ar'
 
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -17,11 +18,7 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [
-    '~/plugins/helper.js',
-    '~/plugins/axios.js',
-    { src: '~/plugins/vue-timers', mode: 'client' },
-  ],
+  plugins: ['~/plugins/helper.js', '~/plugins/axios.js'],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -67,9 +64,12 @@ export default {
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
+    icons: {
+      iconfont: 'mdi', // default - only for display purposes
+    },
     customVariables: ['~/assets/variables.scss'],
     rtl: true,
-    lang: { current: 'en' },
+    lang: { current: 'ar', locales: { ar } },
 
     theme: {
       dark: false,
