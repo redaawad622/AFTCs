@@ -1,6 +1,13 @@
 export const state = () => ({
   user: process.server ? '' : JSON.parse(sessionStorage.getItem('user')),
   users: [],
+  currentLogin: null,
+  permissions: {
+    developer: [0],
+    admin: [0, 3],
+    area: [0, 3, 1],
+    center: [0, 3, 2],
+  },
 })
 export const getters = {
   user(state) {
@@ -8,6 +15,12 @@ export const getters = {
   },
   users(state) {
     return state.users
+  },
+  currentLogin(state) {
+    return state.currentLogin
+  },
+  permissions(state) {
+    return state.permissions
   },
 }
 export const mutations = {
@@ -17,6 +30,9 @@ export const mutations = {
   },
   setUsers(state, payload) {
     state.users = payload
+  },
+  setCurrentLogin(state, payload) {
+    state.currentLogin = payload
   },
 }
 export const actions = {
@@ -32,5 +48,13 @@ export const actions = {
     return this.$axios(`/api/getAllUser`, payload).then((res) => {
       commit('setUsers', res.data)
     })
+  },
+  getCurrentLogin({ commit }) {
+    return this.$axios.post(`/api/getCurrentLogin`).then((res) => {
+      commit('setCurrentLogin', res.data)
+    })
+  },
+  reset(_, payload) {
+    return this.$axios.post(`/api/resetPassword`, payload)
   },
 }

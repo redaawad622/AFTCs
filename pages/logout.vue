@@ -9,8 +9,10 @@ export default {
   name: 'LogoutPage',
   mounted() {
     // logout
-    this.$cookiz.remove('user')
-    this.$router.replace('/')
+    this.$axios.post('/api/logout').then(() => {
+      this.$cookiz.remove('user')
+      this.$router.replace('/')
+    })
   },
 }
 </script>

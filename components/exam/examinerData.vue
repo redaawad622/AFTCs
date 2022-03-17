@@ -35,7 +35,6 @@
         >
       </v-card-actions>
     </v-card>
-
   </div>
 </template>
 
@@ -50,18 +49,24 @@ export default {
     examiner() {
       return this.$store.getters['Examiner/examiner']
     },
+     
   },
   methods: {
     getAssignExams() {
       this.loading = true
       this.$store
         .dispatch('Exam/getAssignExams', this.examiner.id)
-        .then(() => {
+        .then((res) => {
           this.$router.replace('/exam')
-          this.$store.commit('Exam/loadAnswers', this.examiner.national_id)
+          this.$store.commit('Exam/setAssignExams', res.data.battary)
+          if (res.data.Answers && res.data.Answers.length > 0) {
+            this.$store.commit('Exam/loadAnswersFrom', res.data.Answers)
+          } else {
+            this.$store.commit('Exam/loadAnswers', this.examiner.national_id)
+          }
         })
         .catch((rej) => {
-          if (rej.response.status === 404) {
+          if (rej.response && rej.response.status === 404) {
             this.$store.commit('Notifications/setNotification', {
               text: rej.response.data,
               color: 'warning',

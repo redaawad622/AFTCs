@@ -35,7 +35,15 @@
               ><v-icon>mdi-printer-outline</v-icon></v-btn
             >
             <v-btn
-              title="طباعة"
+              v-if="permissions.area.includes(user.type)"
+              title="رفع بيانات من oracle"
+              @click="tryConnection()"
+              class="elevation-0 ms-2"
+              ><v-icon>mdi-database-sync</v-icon></v-btn
+            >
+            <v-btn
+              v-if="permissions.admin.includes(user.type)"
+              title="سحب البيانات من ملف الاكسس"
               @click="readExaminerFromMdb()"
               class="elevation-0 ms-2"
               ><v-icon>mdi-microsoft-access</v-icon></v-btn
@@ -45,6 +53,13 @@
             <v-scale-transition group>
               <v-chip
                 v-for="(item, k) in filtersItems"
+                v-show="
+                  item !== 'من تم تسجيلهم'
+                    ? true
+                    : permissions.admin.includes(user.type)
+                    ? true
+                    : false
+                "
                 :key="k"
                 class="ma-2"
                 close
@@ -104,6 +119,48 @@
                     item-text="name"
                     item-value="value"
                   ></v-autocomplete>
+                  <v-autocomplete
+                    v-if="permissions.admin.includes(user.type)"
+                    v-model="filters.battaryId"
+                    append-icon="mdi-menu-swap"
+                    outlined
+                    dense
+                    placeholder="البطارية"
+                    label="البطارية"
+                    item-text="name"
+                    item-value="id"
+                    cache-items
+                    :items="battaryId"
+                  ></v-autocomplete>
+                  <v-autocomplete
+                    v-model="filters.stage"
+                    append-icon="mdi-menu-swap"
+                    outlined
+                    dense
+                    placeholder="المرحلة"
+                    label="المرحلة"
+                    item-value="stage"
+                    item-text="stage"
+                    cache-items
+                    :items="stage"
+                  ></v-autocomplete>
+                  <v-autocomplete
+                    v-model="filters.register"
+                    append-icon="mdi-menu-swap"
+                    outlined
+                    dense
+                    placeholder="المسجلين للامتحان"
+                    label="المسجلين للامتحان"
+                    item-value="value"
+                    item-text="name"
+                    cache-items
+                    :items="helpers.register"
+                  ></v-autocomplete>
+                  <v-checkbox
+                    v-if="permissions.admin.includes(user.type)"
+                    v-model="withResualt"
+                    label=" مع النتيجة"
+                  ></v-checkbox>
                 </v-card-text>
               </v-card>
             </v-menu>
@@ -128,6 +185,9 @@
             <v-btn icon @click="deleteItem(item)" color="error">
               <v-icon small> mdi-delete-outline </v-icon>
             </v-btn>
+          </template>
+          <template v-slot:[`item.Answers`]="{ item, header }">
+            {{ item.Answers[header.text] }}
           </template>
           <template v-slot:[`item.image`]="{ item }">
             <v-avatar class="ma-2" size="50" color="accent">
@@ -174,7 +234,12 @@ export default {
           { name: 'من انهوا', value: 1 },
           { name: 'من لم ينتهوا بعد', value: 0 },
         ],
+        register: [
+          { name: 'من تم تسجيلهم', value: 1 },
+          { name: 'من لم يتم تسجيلهم', value: 0 },
+        ],
       },
+
       examiners: [],
       expanded: [],
       allExaminers: 0,
@@ -182,10 +247,55 @@ export default {
       options: {},
       dialogDelete: false,
       search: '',
+      withResualt: 0,
       filters: {
         qualification: '',
         examFinish: '',
+        battaryId: '',
+        stage: '',
+        register: 1,
       },
+      defaultHeaders: [
+        {
+          text: 'الاسم',
+          value: 'name',
+          align: 'center',
+          hide: false,
+        },
+        {
+          text: 'الرقم القومي',
+          align: 'center',
+          value: 'national_id',
+          hide: false,
+        },
+
+        {
+          text: 'الرقم الثلاثي',
+          align: 'center',
+          value: 'triple_number',
+          hide: false,
+        },
+        {
+          text: 'الرقم العسكري',
+          align: 'center',
+          value: 'sold_id',
+          hide: false,
+        },
+        {
+          text: 'المرحلة',
+          align: 'center',
+          value: 'stage',
+          hide: false,
+        },
+
+        {
+          text: 'Actions',
+          value: 'actions',
+          sortable: false,
+          align: 'center',
+          hide: true,
+        },
+      ],
       headers: [
         {
           text: 'الاسم',
@@ -231,6 +341,18 @@ export default {
   },
 
   computed: {
+    user() {
+      return this.$store.getters['User/user']
+    },
+    permissions() {
+      return this.$store.getters['User/permissions']
+    },
+    battaryId() {
+      return this.$store.getters['Exam/battaries']
+    },
+    stage() {
+      return this.$store.getters['Exam/stage']
+    },
     filtersItems() {
       const res = Object.fromEntries(
         Object.entries(this.filters).filter(
@@ -238,9 +360,13 @@ export default {
         )
       )
       Object.keys(res).forEach((elm) => {
-        res[elm] = this.helpers[elm].find((x) => x.value === res[elm]).name
+        if (elm === 'battaryId') {
+          res[elm] = this.battaryId.find((x) => x.id === res[elm]).name
+        } else if (elm === 'stage') {
+          // nothing
+        } else
+          res[elm] = this.helpers[elm].find((x) => x.value === res[elm]).name
       })
-
       return res
     },
   },
@@ -271,6 +397,8 @@ export default {
     },
     async fetchExaminers(isSearch = false) {
       this.options.page = isSearch ? 1 : this.options.page
+      if (this.withResualt) this.options.withResualt = this.withResualt
+
       this.loading = true
       await this.$store
         .dispatch(`Examiner/getExaminers`, {
@@ -281,6 +409,19 @@ export default {
         .then((res) => {
           this.examiners = res.data.examiners
           this.allExaminers = res.data.allExaminers
+          this.headers = [...this.defaultHeaders]
+          if (this.examiners && this.examiners.length > 0) {
+            if (this.examiners[0].Answers) {
+              Object.keys(this.examiners[0].Answers).forEach((k) => {
+                this.headers.push({
+                  text: k,
+                  align: 'center',
+                  value: `Answers`,
+                  hide: false,
+                })
+              })
+            }
+          }
         })
         .finally(() => {
           this.loading = false
@@ -289,6 +430,9 @@ export default {
     deleteItem(item) {
       this.editedIndex = this.examiners.indexOf(item)
       this.dialogDelete = true
+    },
+    tryConnection() {
+      this.$axios('api/tryConnection')
     },
     readExaminerFromMdb() {
       this.loading = true
@@ -304,6 +448,9 @@ export default {
     },
 
     deleteItemConfirm() {
+      this.$store.dispatch('Examiner/deleteExaminer', {
+        id: this.examiners[this.editedIndex].id,
+      })
       this.examiners.splice(this.editedIndex, 1)
       this.closeDelete()
     },

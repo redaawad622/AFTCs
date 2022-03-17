@@ -168,6 +168,10 @@ export default {
       return this.$store.getters['User/user']
     },
   },
+  mounted() {
+    this.$store.dispatch('Exam/getHelpers')
+    this.$store.dispatch('Exam/getSerials')
+  },
 }
 </script>
 

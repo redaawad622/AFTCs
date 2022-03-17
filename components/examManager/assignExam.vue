@@ -171,7 +171,6 @@ export default {
       search: '',
       filterExam: [],
       examList: [],
-      battaries: [],
       name: '',
       battary_id: '',
     }
@@ -179,6 +178,9 @@ export default {
   computed: {
     exams() {
       return this.$store.getters['Exam/exams']
+    },
+    battaries() {
+      return this.$store.getters['Exam/battaries']
     },
   },
   watch: {
@@ -204,7 +206,6 @@ export default {
           this.$store.commit('Exam/setExams', res.data)
           this.filterExam = this.exams
           this.examList = res.data.assExams
-          this.battaries = res.data.battaries
         })
         .finally(() => {
           this.loading = false

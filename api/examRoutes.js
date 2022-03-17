@@ -10,7 +10,7 @@ module.exports = function (app, prisma) {
       },
     })
     // check if exist
-    if (examiner && examiner.Answers.length > 0) {
+    if (examiner && examiner.Answers.length > 190) {
       res
         .status(404)
         .json(
@@ -43,7 +43,7 @@ module.exports = function (app, prisma) {
         },
       })
       battary = battary.Battary_Exam.map((x) => x.exam)
-      res.json(battary)
+      res.json({ battary, Answers: examiner.Answers })
     }
     // step 2
     let exams = await prisma.Assign.findMany({
@@ -96,7 +96,7 @@ module.exports = function (app, prisma) {
               Qus_Is_Pic: true,
               Qus_Text: true,
               Qus_Pic_UNC: true,
-              Qus_audio: true,
+              Qus_audio: false,
               Qus_image: true,
               Qus_Order_Cat: true,
               T_Answers: {
@@ -149,8 +149,8 @@ module.exports = function (app, prisma) {
         },
       })
     }
-    const battaries = await prisma.Battries.findMany()
-    res.json({ exams, assExams, battaries })
+
+    res.json({ exams, assExams })
   })
   app.post('/saveSetting', async (req, res) => {
     const exams = req.body
@@ -241,5 +241,15 @@ module.exports = function (app, prisma) {
       data: { Exm_Description: 'ss' },
     })
     res.json('done')
+  })
+  app.get('/getExamHelpers', async (req, res) => {
+    const battaries = await prisma.Battries.findMany()
+    const stage = await prisma.Examiners.groupBy({
+      by: ['stage'],
+      select: {
+        stage: true,
+      },
+    })
+    res.json({ battaries, stage })
   })
 }

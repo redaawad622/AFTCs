@@ -10,6 +10,12 @@ function isURL(str) {
   ) // fragment locator
   return !!pattern.test(str)
 }
+function sendMessage(notifiy) {
+  return new Notification(notifiy.message, {
+    body: notifiy.body || '',
+    icon: '/logo.png',
+  })
+}
 
 const imgPath = 'http://localhost:3000/uploads/'
 export default ({ app }, inject) => {
@@ -77,6 +83,19 @@ export default ({ app }, inject) => {
   })
   inject('round', function (num) {
     return Math.round(num)
+  })
+  inject('desktopNotify', function (notifiy) {
+    if (!('Notification' in window)) {
+      console.log('Notification not support')
+    } else if (Notification.permission === 'granted') {
+      sendMessage(notifiy)
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          sendMessage(notifiy)
+        }
+      })
+    }
   })
   function objectToFormData(obj, form = null, namespace = null) {
     const fd = form || new FormData()

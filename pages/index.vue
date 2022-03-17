@@ -1,13 +1,18 @@
 <template>
   <v-sheet width="100%" height="100%" class="d-flex pa-5 flex-column">
-    <v-btn
-      class="font-weight-bold title"
-      width="120px"
-      text
-      color="primary"
-      @click="dialog = true"
-      >تسجيل الدخول</v-btn
-    >
+    <div class="d-flex justify-space-between align-center">
+      <v-btn
+        class="font-weight-bold title"
+        width="120px"
+        text
+        color="primary"
+        @click="dialog = true"
+        >تسجيل الدخول</v-btn
+      >
+      <div v-if="currentLogin">{{ currentLogin.Cat_Name }}</div>
+      <div>{{ new Date().toDateString() }}</div>
+    </div>
+
     <v-spacer></v-spacer>
     <v-sheet
       height="200px"
@@ -21,6 +26,7 @@
         label="ابحث بالرقم القومي-الثلاثي-الباركود "
         placeholder="ابحث بالرقم القومي-الثلاثي-الباركود "
         full-width
+        autofocus
         prepend-inner-icon="mdi-search"
         hide-details
         class="me-3 display-1"
@@ -45,7 +51,7 @@
             تسجيل الدخول
           </v-card-title>
 
-          <v-card-text class="pa-4">
+          <v-form class="pa-4">
             <v-combobox
               v-model="form.name"
               outlined
@@ -53,7 +59,7 @@
               item-text="Cat_Name"
               item-value="Cat_Name"
               :return-object="false"
-              label="مركز التدريب"
+              label="اسم الدخول"
               :error="!!error"
             ></v-combobox>
             <v-text-field
@@ -63,7 +69,7 @@
               label="رقم الدخول"
               :error-messages="error"
             ></v-text-field>
-          </v-card-text>
+          </v-form>
           <v-divider></v-divider>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -107,6 +113,9 @@ export default {
     users() {
       return this.$store.getters['User/users']
     },
+    currentLogin() {
+      return this.$store.getters['User/currentLogin']
+    },
 
     user() {
       return this.$store.getters['User/user']
@@ -119,6 +128,12 @@ export default {
   beforeMount() {
     this.$store.dispatch('User/getUsers')
   },
+  mounted() {
+    if (this.examiner) {
+      this.id = this.examiner.national_id || this.examiner.barcode
+      this.getExaminerData()
+    }
+  },
 
   methods: {
     login() {
@@ -127,6 +142,10 @@ export default {
       this.$store
         .dispatch('User/login', this.form)
         .then(() => {
+          this.$desktopNotify({
+            message: 'تم تسجيل الدخول بنجاح باسم ' + this.user.Cat_Name,
+            body: 'من فضلك ابقي مسجلا اثناء العمل',
+          })
           this.$router.replace('/ExamsManager')
         })
         .catch((rej) => {

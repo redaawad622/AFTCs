@@ -8,7 +8,7 @@
         <v-img src="/logo.webp"></v-img>
       </v-avatar>
 
-      <div contenteditable="true" class="headline pa-2">كشف اسماء</div>
+      <div contenteditable="true" class="headline pa-2" >كشف اسماء</div>
       <div>{{ $localeDate() }}</div>
       <div class="hideOnPrint align-center">
         <v-combobox
@@ -24,12 +24,44 @@
           color="primary"
           return-object
         ></v-combobox>
-        <v-btn class="primary" @click="print()" text>طباعة</v-btn>
+        <v-btn color="primary" @click="print()">طباعة</v-btn>
+        <v-dialog v-model="dialog" width="500">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
+              تصدير لملف اكسس
+            </v-btn>
+          </template>
+
+          <v-card>
+            <v-card-title class="text-h5 grey lighten-2">
+              تصدير الي ملف أكسس
+            </v-card-title>
+
+            <v-card-text class="pt-2">
+              <v-text-field
+                v-model="fileName"
+                color="primary"
+                label="اسم الملف"
+                outlined
+              ></v-text-field>
+            </v-card-text>
+
+            <v-divider></v-divider>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="primary" text @click="exportCsv()"> تصدير </v-btn>
+
+              <v-btn color="error" text @click="dialog = false"> الغاء </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
         <v-btn text :to="report.backTo"><v-icon>mdi-arrow-left</v-icon></v-btn>
       </div>
     </v-sheet>
 
-    <v-simple-table class="printTable">
+    <v-simple-table class="printTable" id="printTable">
       <template v-slot:default>
         <thead>
           <tr>
@@ -43,7 +75,12 @@
           <tr v-for="(item, k) in reportData" :key="k">
             <td>{{ ++k }}</td>
             <td v-for="column in filterColumns" :key="column.text + k">
-              {{ item[column.value] }}
+              <template v-if="column.value === 'Answers'">
+                {{ item.Answers[column.text] }}
+              </template>
+              <template v-else>
+                {{ item[column.value] }}
+              </template>
             </td>
           </tr>
         </tbody>
@@ -60,6 +97,8 @@ export default {
     return {
       show: '',
       filterColumns: [],
+      fileName: 'examiner',
+      dialog: false,
     }
   },
   computed: {
@@ -80,6 +119,26 @@ export default {
   methods: {
     print() {
       print()
+    },
+    exportCsv() {
+      const data = []
+      const rows = document.querySelectorAll('#printTable tr')
+      for (let i = 0; i < rows.length; i++) {
+        const row = []
+        const cols = rows[i].querySelectorAll('td, th')
+        for (let j = 0; j < cols.length; j++) {
+          row.push(cols[j].innerText)
+        }
+        data.push(row.join(','))
+      }
+      const csv = data.join('\n')
+      const elm = document.createElement('a')
+      elm.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv)
+      elm.target = '_blank'
+      elm.download = `${this.fileName}.csv`
+      elm.click()
+      this.dialog = false
+      // this.$store.dispatch('Examiner/Export')
     },
   },
 }

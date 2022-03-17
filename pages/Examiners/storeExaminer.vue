@@ -87,6 +87,18 @@
         label="الباركود"
         placeholder="الباركود"
       ></v-text-field>
+      <v-select
+        :items="battaries"
+        outlined
+        color="primary"
+        v-model="form.battary_id"
+        item-text="name"
+        item-value="id"
+        :return-object="false"
+        append-icon="mdi-star"
+        label="البطارية"
+        placeholder="البطارية"
+      ></v-select>
       <v-btn color="primary" @click="save()">حفظ</v-btn>
     </v-form>
   </v-card>
@@ -107,6 +119,7 @@ export default {
         stage: '',
         barcode: '',
         sold_id: '',
+        battary_id: '',
       },
       f_num: '',
       sec_num: '',
@@ -119,6 +132,9 @@ export default {
       const year = new Date().getFullYear()
 
       return [year + '1', year + '2', year + '3', year + '4']
+    },
+    battaries() {
+      return this.$store.getters['Exam/battaries']
     },
   },
   methods: {
@@ -144,7 +160,6 @@ export default {
             }
             this.$store.commit('Notifications/setNotification', {
               text: 'خطأ في الحفظ',
-              status: rej.status,
               color: 'error',
             })
           })

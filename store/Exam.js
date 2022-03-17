@@ -8,6 +8,9 @@ export const state = () => ({
   audio: null,
   mute: false,
   play: false,
+  battaries: [],
+  stage: [],
+  serials: [],
 })
 export const getters = {
   exams(state) {
@@ -37,8 +40,22 @@ export const getters = {
   play(state) {
     return state.play
   },
+  battaries(state) {
+    return state.battaries
+  },
+  stage(state) {
+    return state.stage
+  },
+  serials(state) {
+    return state.serials
+  },
+
 }
 export const mutations = {
+  setHelpers(state, payload) {
+    state.battaries = payload.battaries
+    state.stage = payload.stage
+  },
   setExams(state, payload) {
     state.exams = payload.exams
   },
@@ -55,6 +72,10 @@ export const mutations = {
     state.answers = this.$getLocal(`answer${payload}`) || []
     state.customExam = this.$getLocal(`customExam${payload}`) || []
   },
+  loadAnswersFrom(state, payload) {
+    state.answers = payload
+  },
+
   reset(state, payload) {
     state.answers = this.$setLocal(`answer${payload}`, [])
     state.examsData = []
@@ -95,6 +116,9 @@ export const mutations = {
   setAudio(state, payload) {
     state.audio = payload
   },
+  setSerials(state, payload) {
+    state.serials = payload
+  },
   setMute(state, payload) {
     if (state.audio) {
       payload ? state.audio.pause() : state.audio.play()
@@ -113,8 +137,6 @@ export const actions = {
   getAssignExams({ commit }, payload) {
     return this.$axios(`/api/getAssignExams`, {
       params: { examinerId: payload },
-    }).then((res) => {
-      commit('setAssignExams', res.data)
     })
   },
   getExamsData(_, payload) {
@@ -134,10 +156,21 @@ export const actions = {
   getAndAdd(_, payload) {
     return this.$axios.get(`/api/getAndAdd`, { params: payload })
   },
+  getHelpers({ commit }) {
+    return this.$axios.get(`/api/getExamHelpers`).then((res) => {
+      commit('setHelpers', res.data)
+    })
+  },
+  getSerials({ commit }) {
+    return this.$axios.get(`/api/getSerials`).then((res) => {
+      commit('setSerials', res.data)
+    })
+  },
   saveAnswers({ state }, payload) {
     return this.$axios.post(`/api/saveAnswers`, {
       answers: JSON.stringify(state.answers),
       examinerId: payload,
     })
   },
+
 }

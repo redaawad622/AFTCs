@@ -28,4 +28,10 @@ export const actions = {
   readExaminerFromMdb() {
     return this.$axios.get(`/api/readExaminerFromMdb`)
   },
+  Export() {
+    return this.$axios.get(`/api/writeExaminerToMdb`)
+  },
+  deleteExaminer(_, payload) {
+    return this.$axios.post(`/api/deleteExaminer`, payload)
+  },
 }

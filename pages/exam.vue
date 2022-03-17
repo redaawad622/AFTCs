@@ -154,7 +154,7 @@ export default {
         this.done = true
         this.$store.dispatch('Exam/saveAnswers', this.examiner.id).then(() => {
           this.$store.commit('Exam/reset', this.examiner.national_id)
-          this.$store.commit('Examiner/setExaminer', null)
+          // this.$store.commit('Examiner/setExaminer', null)
           this.$router.replace('/')
         })
         this.interval = setInterval(() => {

@@ -47,6 +47,10 @@ module.exports = function (app, prisma) {
       page,
       sortBy,
       sortDesc,
+      battaryId,
+      stage,
+      withResualt,
+      register,
     } = req.query
     const option = {
       where: {},
@@ -77,9 +81,18 @@ module.exports = function (app, prisma) {
         },
       ]
     }
-    // if (qualification) {
-    //   option.where.qualification = { equals: Number(qualification) }
-    // }
+    if (register) {
+      option.where.register = { equals: Boolean(register) }
+    }
+    if (qualification) {
+      option.where.qualification_code = { equals: Number(qualification) }
+    }
+    if (battaryId) {
+      option.where.battary_id = { equals: Number(battaryId) }
+    }
+    if (stage) {
+      option.where.stage = { equals: stage }
+    }
     if (examFinish) {
       if (Number(examFinish)) {
         option.where.Answers = {
@@ -104,7 +117,45 @@ module.exports = function (app, prisma) {
         option.orderBy[sortBy[0]] = dir ? 'desc' : 'asc'
       }
     }
-    const examiners = await prisma.Examiners.findMany(option)
+    if (withResualt) {
+      option.include = {
+        Answers: {
+          select: {
+            id: true,
+            exam_id: true,
+            question_id: true,
+            answer_id: true,
+            examiner_id: true,
+            answer: {
+              select: {
+                Ans_Value: true,
+              },
+            },
+          },
+        },
+      }
+    }
+
+    let examiners = await prisma.Examiners.findMany(option)
+
+    if (examiners && examiners.length > 0) {
+      if (examiners[0].Answers) {
+        examiners = examiners.map((examiner) => {
+          const exm = Object.assign({}, examiner, {
+            Answers: examiner.Answers.reduce((r, a) => {
+              r[a.exam_id] = [...(r[a.exam_id] || []), a]
+              return r
+            }, {}),
+          })
+          Object.keys(exm.Answers).forEach((k) => {
+            exm.Answers[k] = exm.Answers[k].reduce((a, b) => {
+              return a + b.answer.Ans_Value
+            }, 0)
+          })
+          return exm
+        })
+      }
+    }
     const allExaminers = await prisma.Examiners.count()
     res.json({ examiners, allExaminers })
   })
@@ -124,6 +175,38 @@ module.exports = function (app, prisma) {
   })
 
   app.get('/readExaminerFromMdb', async (req, res) => {
+    const buffer = readFileSync('./prisma/db.mdb')
+    const reader = new MDBReader(buffer)
+    const table = await reader.getTable('Examiners')
+    // table.getColumnNames() // ['id', 'name', 'color']
+    const data = await table.getData()
+    const exist = await prisma.Examiners.findMany()
+    data.filter(
+      (q) => exist.findIndex((a) => a.national_id === q.national_id) < 0
+    )
+    const examiners = []
+    await data.forEach(async (e) => {
+      const ex = await prisma.Examiners.upsert({
+        where: {
+          national_id: e.national_id,
+        },
+        update: {},
+        create: e,
+      })
+      examiners.push(ex)
+    })
+    res.json(examiners) // [{id: 5, name: 'Ashley', color: 'black'}, ...]
+  })
+  app.post('/deleteExaminer', async (req, res) => {
+    const { id } = req.body
+    await prisma.Examiners.delete({
+      where: {
+        id,
+      },
+    })
+    res.json('done')
+  })
+  app.post('/writeExaminerToMdb', async (req, res) => {
     const buffer = readFileSync('./prisma/db.mdb')
     const reader = new MDBReader(buffer)
     const table = await reader.getTable('Examiners')

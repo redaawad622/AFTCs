@@ -14,6 +14,9 @@ export default {
   components: { notification },
   layout: 'empty',
   middleware: 'guest',
+  mounted(){
+    this.$store.dispatch('User/getCurrentLogin')
+  }
 }
 </script>
 

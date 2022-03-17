@@ -25,7 +25,7 @@
         <v-img
           v-else
           contain
-          :width="exam.Exm_ID === 4 ? '500px' : '250px'"
+          :width="exam.Exm_ID === 4 ? '500px' : '180px'"
           :height="exam.Exm_ID === 4 ? '250px' : 'auto'"
           :src="toBase64(questions[cursor].Qus_image)"
         />
