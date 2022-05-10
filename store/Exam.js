@@ -18,6 +18,7 @@ export const getters = {
   exams(state) {
     return state.exams
   },
+
   assignExams(state) {
     return state.assignExams
   },
@@ -67,6 +68,14 @@ export const mutations = {
   },
   setExams(state, payload) {
     state.exams = payload.exams
+  },
+  updateExams(state, exam) {
+    const index = state.exams.findIndex((elm) => elm.Exm_ID === exam.Exm_ID)
+    if (index === -1) {
+      state.exams.push(exam)
+    } else {
+      exam.delete ? state.exams.splice(index, 1) : (state.exams[index] = exam)
+    }
   },
   setAssignExams(state, payload) {
     state.assignExams = payload
@@ -152,6 +161,9 @@ export const actions = {
     return this.$axios(`/api/getExamsData`, {
       params: { examId: JSON.stringify(payload) },
     })
+  },
+  softDeleteExam(_, payload) {
+    return this.$axios.post(`/api/softDeleteExam`, payload)
   },
   getExams() {
     return this.$axios(`/api/getExams`)

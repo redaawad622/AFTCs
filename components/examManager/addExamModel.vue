@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="value" persistent max-width="600px">
-    <v-card>
+    <v-card :loading="loading">
       <v-card-title>
         <span class="text-h5">
           {{
@@ -44,10 +44,17 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="red darken-1" text @click="$emit('input', false)">
+        <v-btn
+          color="red darken-1"
+          text
+          @click="$emit('input', false)"
+          :disabled="loading"
+        >
           الغاء
         </v-btn>
-        <v-btn color="primary" text @click="saveExam()"> حفظ </v-btn>
+        <v-btn color="primary" text @click="saveExam()" :loading="loading">
+          حفظ
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -58,6 +65,7 @@ export default {
   props: ['value', 'exam', 'formType'],
   data() {
     return {
+      loading: false,
       form: {
         Exm_Name: '',
         category: '',
@@ -88,12 +96,22 @@ export default {
       }
     },
   },
+
   methods: {
     saveExam() {
-      this.$store.dispatch('Exam/saveOrEditExam', {
-        formData: this.form,
-        id: this.formType === 'edit' ? this.exam.id : 0,
-      })
+      this.loading = true
+      this.$store
+        .dispatch('Exam/saveOrEditExam', {
+          formData: this.form,
+          id: this.formType === 'edit' ? this.exam.Exm_ID : 0,
+        })
+        .then((res) => {
+          this.$emit('update', res.data)
+        })
+        .finally(() => {
+          this.loading = false
+          this.$emit('input', false)
+        })
     },
   },
 }

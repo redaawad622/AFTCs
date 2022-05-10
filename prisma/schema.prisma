@@ -42,6 +42,7 @@ model T_Exams {
   Exm_Is_Computerized       Boolean        @default(false)
   Exm_mlhoz                 Int?
   Exm_mokser                Int?
+  show                      Boolean        @default(true)
   category                  String?        @default("نفسي")
   random                    String?        @default("عشوائي")
   Questions                 T_Questions[]

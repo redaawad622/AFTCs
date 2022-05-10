@@ -29,6 +29,9 @@
                 <v-list-item @click="editExamQ()" link>
                   <v-list-item-title>تعديل أسئلة الاختبار</v-list-item-title>
                 </v-list-item>
+                <v-list-item @click="softDeleteExam()" link>
+                  <v-list-item-title>حذف الاختبار</v-list-item-title>
+                </v-list-item>
               </v-list>
             </v-menu>
             <v-text-field
@@ -179,6 +182,7 @@
       v-model="openAddModel"
       :exam="activeExam"
       :form-type="formType"
+      @update="addOrUpdateExam"
     ></add-exam-model>
   </v-sheet>
 </template>
@@ -225,6 +229,18 @@ export default {
     this.getExams()
   },
   methods: {
+    addOrUpdateExam(exam) {
+      this.$store.commit('Exam/updateExams', exam)
+    },
+    softDeleteExam() {
+      const exam = { ...this.activeExam }
+      this.$store
+        .dispatch('Exam/softDeleteExam', { id: exam.Exm_ID })
+        .then(() => {
+          exam.delete = true
+          this.$store.commit('Exam/updateExams', exam)
+        })
+    },
     editExam(type) {
       this.formType = type
       this.openAddModel = true

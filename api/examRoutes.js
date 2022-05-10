@@ -123,6 +123,9 @@ module.exports = function (app, prisma) {
   })
   app.get('/getExams', async (req, res) => {
     const exams = await prisma.T_Exams.findMany({
+      where: {
+        show: true,
+      },
       select: {
         Exm_ID: true,
         Exm_Name: true,
@@ -245,14 +248,30 @@ module.exports = function (app, prisma) {
   app.post('/saveOrEditExam', async (req, res) => {
     const data = req.body
     try {
-      const examiner = await prisma.T_Exams.upsert({
+      const exam = await prisma.T_Exams.upsert({
         where: {
-          national_id: Number(data.id),
+          Exm_ID: Number(data.id),
         },
         create: { ...data.formData },
         update: { ...data.formData },
       })
-      res.json(examiner)
+      res.json(exam)
+    } catch (e) {
+      if (e.clientVersion && e.code) res.status(422).json(e)
+    }
+  })
+  app.post('/softDeleteExam', async (req, res) => {
+    const data = req.body
+    try {
+      const exam = await prisma.T_Exams.update({
+        where: {
+          Exm_ID: Number(data.id),
+        },
+        data: {
+          show: false,
+        },
+      })
+      res.json(exam)
     } catch (e) {
       if (e.clientVersion && e.code) res.status(422).json(e)
     }
