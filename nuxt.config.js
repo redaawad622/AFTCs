@@ -14,6 +14,7 @@ export default {
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
+
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
 
@@ -38,7 +39,29 @@ export default {
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
     ['cookie-universal-nuxt', { alias: 'cookiz' }],
+    'nuxt-socket-io',
   ],
+  io: {
+    sockets: [
+      // Required
+      {
+        // At least one entry is required
+        name: 'home',
+        url: 'http://localhost:3000',
+
+        vuex: {
+          /* see section below */
+        },
+        namespaces: {
+          /* see section below */
+        },
+      },
+      { name: 'guests', default: true, url: 'http://localhost:3000' },
+      { name: 'car', url: 'http://somedomain2:3000' },
+      { name: 'tv', url: 'http://somedomain3:3000' },
+      { name: 'test', url: 'http://localhost:4000' },
+    ],
+  },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     proxy: true,
@@ -68,6 +91,8 @@ export default {
       iconfont: 'mdi', // default - only for display purposes
     },
     customVariables: ['~/assets/variables.scss'],
+    treeShake: true,
+
     rtl: true,
     lang: { current: 'ar', locales: { ar } },
 

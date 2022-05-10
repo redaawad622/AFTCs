@@ -10,12 +10,12 @@
     >
       <v-card-title>حذف جميع البيانات</v-card-title>
       <v-card-text>
-        <v-select
+        <v-combobox
           v-model="table"
           :items="tables"
           outlined
           label="اسم الجدول"
-        ></v-select>
+        ></v-combobox>
         <v-text-field
           v-model="password"
           type="password"

@@ -11,6 +11,8 @@ export const state = () => ({
   battaries: [],
   stage: [],
   serials: [],
+  categories: [],
+  order: [],
 })
 export const getters = {
   exams(state) {
@@ -49,12 +51,19 @@ export const getters = {
   serials(state) {
     return state.serials
   },
-
+  categories(state) {
+    return state.categories
+  },
+  order(state) {
+    return state.order
+  },
 }
 export const mutations = {
   setHelpers(state, payload) {
     state.battaries = payload.battaries
     state.stage = payload.stage
+    state.categories = payload.categories
+    state.order = payload.order
   },
   setExams(state, payload) {
     state.exams = payload.exams
@@ -172,5 +181,7 @@ export const actions = {
       examinerId: payload,
     })
   },
-
+  saveOrEditExam(_, payload) {
+    return this.$axios.post(`/api/saveOrEditExam`, payload)
+  },
 }

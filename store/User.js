@@ -7,6 +7,8 @@ export const state = () => ({
     admin: [0, 3],
     area: [0, 3, 1],
     center: [0, 3, 2],
+    manager: [0, 3, 4],
+    follow: [0, 3, 4, 5],
   },
 })
 export const getters = {

@@ -115,4 +115,12 @@ module.exports = function (app, prisma) {
     await prisma[table].deleteMany({})
     res.status(200).json('done')
   })
+  app.post('/setAudio', async (req, res) => {
+    await prisma.T_Answers.updateMany({
+      data: {
+        Ans_audio: null,
+      },
+    })
+    res.status(200).json()
+  })
 }

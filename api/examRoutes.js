@@ -242,6 +242,21 @@ module.exports = function (app, prisma) {
     })
     res.json('done')
   })
+  app.post('/saveOrEditExam', async (req, res) => {
+    const data = req.body
+    try {
+      const examiner = await prisma.T_Exams.upsert({
+        where: {
+          national_id: Number(data.id),
+        },
+        create: { ...data.formData },
+        update: { ...data.formData },
+      })
+      res.json(examiner)
+    } catch (e) {
+      if (e.clientVersion && e.code) res.status(422).json(e)
+    }
+  })
   app.get('/getExamHelpers', async (req, res) => {
     const battaries = await prisma.Battries.findMany()
     const stage = await prisma.Examiners.groupBy({
@@ -250,6 +265,26 @@ module.exports = function (app, prisma) {
         stage: true,
       },
     })
-    res.json({ battaries, stage })
+    const categories = await prisma.T_Exams.groupBy({
+      by: ['category'],
+      select: {
+        category: true,
+      },
+    })
+    const order = await prisma.T_Exams.groupBy({
+      by: ['random'],
+      select: {
+        random: true,
+      },
+    })
+    res.json({
+      battaries,
+      stage,
+      categories: mapBy(categories, 'category'),
+      order: mapBy(order, 'random'),
+    })
   })
+}
+function mapBy(arr, item) {
+  return Array.isArray(arr) ? arr.map((elm) => elm[item]) : arr
 }

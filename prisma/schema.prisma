@@ -111,3 +111,14 @@ model Answers {
   answer      T_Answers  @relation(fields: [answer_id], references: [Ans_ID])
 
 }
+
+model reception {
+  id         Int      @id @default(autoincrement())
+  degree     String
+  name       String
+  details    String?
+  case       Int      @default(2)
+  new        Int      @default(1)
+  update     Int      @default(0)
+  created_at DateTime @default(now())
+}

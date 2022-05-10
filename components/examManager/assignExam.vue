@@ -7,10 +7,30 @@
           style="overflow: auto"
           min-height="500px"
           :loading="loading"
-          hover
           outlined
         >
           <v-card-text>
+            <v-menu
+              v-model="showMenuList"
+              :position-x="x"
+              :position-y="y"
+              absolute
+              offset-y
+            >
+              <v-list>
+                <v-list-item @click="editExam('add')" link>
+                  <v-list-item-title>اضافة اختبار جديد</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="editExam('edit')" link>
+                  <v-list-item-title v-if="activeExam"
+                    >تعديل اختبار ({{ activeExam.Exm_Name }})</v-list-item-title
+                  >
+                </v-list-item>
+                <v-list-item @click="editExamQ()" link>
+                  <v-list-item-title>تعديل أسئلة الاختبار</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
             <v-text-field
               v-model="search"
               outlined
@@ -33,6 +53,7 @@
                 class="ma-1"
                 draggable
                 @click="addToExam(exam)"
+                @contextmenu.prevent="showMenu(exam, $event)"
               >
                 {{ exam.Exm_Name }}
               </v-chip>
@@ -46,7 +67,6 @@
           style="overflow: auto"
           min-height="500px"
           :loading="loading"
-          hover
           outlined
         >
           <v-card-text>
@@ -155,14 +175,25 @@
     <v-btn class="my-5" @click="saveSetting" :loading="sLoading" color="primary"
       >حفظ الاعدادات</v-btn
     >
+    <add-exam-model
+      v-model="openAddModel"
+      :exam="activeExam"
+      :form-type="formType"
+    ></add-exam-model>
   </v-sheet>
 </template>
 
 <script>
+import addExamModel from './addExamModel.vue'
 export default {
+  components: { addExamModel },
   data() {
     return {
+      showMenuList: false,
+      x: 0,
+      y: 0,
       loading: false,
+      openAddModel: false,
       sLoading: false,
       getLoading: false,
       dialog: false,
@@ -173,6 +204,8 @@ export default {
       examList: [],
       name: '',
       battary_id: '',
+      activeExam: null,
+      formType: 'add',
     }
   },
   computed: {
@@ -192,6 +225,19 @@ export default {
     this.getExams()
   },
   methods: {
+    editExam(type) {
+      this.formType = type
+      this.openAddModel = true
+    },
+    showMenu(item, $event) {
+      this.activeExam = item
+      this.showMenuList = false
+      this.x = $event.clientX
+      this.y = $event.clientY
+      this.$nextTick(() => {
+        this.showMenuList = true
+      })
+    },
     examGroup(arr) {
       return arr.reduce((r, a) => {
         r[a.category] = [...(r[a.category] || []), a]
@@ -280,5 +326,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>

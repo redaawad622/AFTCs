@@ -25,11 +25,15 @@
       <v-list nav>
         <template v-for="(item, i) in items">
           <v-list-group
+            v-show="item.permission"
             :key="item.title"
-            :prepend-icon="item.icon"
             v-if="item.children"
           >
             <template v-slot:activator>
+              <v-list-item-action>
+                <v-img v-if="item.img" :src="`/icon/${item.img}`"></v-img>
+                <v-icon v-else>{{ item.icon }}</v-icon>
+              </v-list-item-action>
               <v-list-item-content>
                 <v-list-item-title v-text="item.title"></v-list-item-title>
               </v-list-item-content>
@@ -46,28 +50,34 @@
               </v-list-item-content>
             </v-list-item>
           </v-list-group>
-          <v-list-item
-            color="primary"
-            v-else
-            :key="i + item.title"
-            :to="item.to"
-            router
-            exact
-            exact-active-class="overIcon"
-          >
-            <v-list-item-action>
-              <v-icon>{{ item.icon }}</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title v-text="item.title" />
-            </v-list-item-content>
-          </v-list-item>
+          <template v-else>
+            <v-list-item
+              v-if="item.permission"
+              :key="i + item.title"
+              :to="item.to"
+              router
+              exact
+              exact-active-class="overIcon"
+              transition="scale-transition"
+              color="primary"
+            >
+              <v-list-item-action>
+                <v-img v-if="item.img" :src="`/icon/${item.img}`"></v-img>
+                <v-icon v-else>{{ item.icon }}</v-icon>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.title" />
+              </v-list-item-content>
+            </v-list-item>
+          </template>
         </template>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar app flat color="white">
+    <v-app-bar app flat color="white" class="nav">
       <v-app-bar-nav-icon @click="clipped = !clipped"></v-app-bar-nav-icon>
-      <v-app-bar-title class="font-weight-black">ضباط الصف</v-app-bar-title>
+      <v-app-bar-title class="font-weight-black" style="width: 200px"
+        >ِAFTCs</v-app-bar-title
+      >
       <v-spacer />
 
       <v-avatar class="me-2" size="30" color="accent">
@@ -115,48 +125,7 @@ export default {
       clipped: false,
       drawer: true,
       loading: false,
-      items: [
-        {
-          icon: 'mdi-account-group-outline',
-          title: 'مدير الاختبارات',
-          to: '/examsManager',
-        },
-        {
-          icon: 'mdi-account-multiple-plus-outline',
-          title: 'مدير المختبرين',
-          to: '/ExaminerManager',
-        },
-        {
-          icon: 'mdi-account-multiple-plus-outline',
-          title: 'التحديثات',
-          to: '/new',
-        },
-        {
-          icon: 'mdi-account-multiple-plus-outline',
-          title: 'بدني و عملي',
-          to: '/badany',
-        },
-        {
-          icon: 'mdi-account-multiple-plus-outline',
-          title: 'الاعدادات',
-          to: '/setting',
-        },
-        {
-          icon: 'mdi-account-multiple-plus-outline',
-          title: 'الممتحنين',
-          children: [
-            {
-              title: 'تسجيل ممتحن جديد',
-              to: '/Examiners/storeExaminer',
-            },
-          ],
-        },
-        {
-          icon: 'mdi-account-multiple-plus-outline',
-          title: 'تسجيل الخروج',
-          to: '/logout',
-        },
-      ],
+      items: [],
       miniVariant: false,
       right: true,
       rightDrawer: false,
@@ -167,10 +136,119 @@ export default {
     user() {
       return this.$store.getters['User/user']
     },
+    permissions() {
+      return this.$store.getters['User/permissions']
+    },
   },
-  mounted() {
+  created() {
     this.$store.dispatch('Exam/getHelpers')
     this.$store.dispatch('Exam/getSerials')
+    const el = this
+    this.items = [
+      {
+        icon: 'mdi-account-group-outline',
+        img: 'exam.png',
+        title: 'مدير الاختبارات',
+        to: '/examsManager',
+        permission: (function () {
+          return el.checkPermission('admin')
+        })(),
+      },
+      {
+        icon: 'mdi-account-multiple-plus-outline',
+        img: 'group.png',
+        title: 'مدير المختبرين',
+        to: '/ExaminerManager',
+        permission: (function () {
+          return el.checkPermission([
+            ...el.permissions.center,
+            ...el.permissions.area,
+          ])
+        })(),
+      },
+      {
+        icon: 'mdi-update',
+        img: 'update.png',
+        title: 'التحديثات',
+        to: '/new',
+        permission: (function () {
+          return el.checkPermission([
+            ...el.permissions.center,
+            ...el.permissions.area,
+          ])
+        })(),
+      },
+      {
+        icon: 'mdi-tablet-cellphone',
+        img: 'scale.png',
+        title: 'بدني و عملي',
+        to: '/badany',
+        permission: (function () {
+          return el.checkPermission([
+            ...el.permissions.center,
+            ...el.permissions.area,
+          ])
+        })(),
+      },
+
+      {
+        icon: 'mdi-account-multiple-plus-outline',
+        img: 'add-user.png',
+        permission: (function () {
+          return el.checkPermission('center')
+        })(),
+        title: 'الممتحنين',
+        children: [
+          {
+            title: 'تسجيل ممتحن جديد',
+            to: '/Examiners/storeExaminer',
+          },
+        ],
+      },
+      {
+        icon: 'mdi-account-multiple-plus-outline',
+        img: 'settings.png',
+        title: 'الاعدادات',
+        to: '/setting',
+        permission: (function () {
+          return el.checkPermission('admin')
+        })(),
+      },
+      {
+        icon: 'mdi-account-multiple-plus-outline',
+        img: 'settings.png',
+        title: 'المتابعة',
+        to: '/follow',
+        permission: (function () {
+          return el.checkPermission('follow')
+        })(),
+      },
+      {
+        icon: 'mdi-account-multiple-plus-outline',
+        img: 'logout.png',
+        title: 'تسجيل الخروج',
+        to: '/logout',
+        permission: (function () {
+          return el.checkPermission(undefined)
+        })(),
+      },
+    ].filter((elm) => elm.permission)
+    if (this.$route.path !== this.items[0].to)
+      this.$router.replace(this.items[0].to)
+  },
+  methods: {
+    checkPermission(per) {
+      if (!per) {
+        return true
+      }
+
+      // eslint-disable-next-line eqeqeq
+      if (typeof per == 'string') {
+        return this.permissions[per].includes(this.user.type)
+      } else {
+        return per.includes(this.user.type)
+      }
+    },
   },
 }
 </script>
@@ -178,5 +256,8 @@ export default {
 <style>
 .v-navigation-drawer__border {
   display: none !important;
+}
+.nav .v-app-bar-title__content {
+  width: auto !important;
 }
 </style>

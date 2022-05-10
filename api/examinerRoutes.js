@@ -165,8 +165,12 @@ module.exports = function (app, prisma) {
       (k) => (data[k] == null || data[k] === '') && delete data[k]
     )
     try {
-      const examiner = await prisma.Examiners.create({
-        data: { ...data },
+      const examiner = await prisma.Examiners.upsert({
+        where: {
+          national_id: data.national_id,
+        },
+        create: { ...data },
+        update: { ...data },
       })
       res.json(examiner)
     } catch (e) {
@@ -179,23 +183,24 @@ module.exports = function (app, prisma) {
     const reader = new MDBReader(buffer)
     const table = await reader.getTable('Examiners')
     // table.getColumnNames() // ['id', 'name', 'color']
-    const data = await table.getData()
+    let data = await table.getData()
     const exist = await prisma.Examiners.findMany()
-    data.filter(
+    data = data.filter(
       (q) => exist.findIndex((a) => a.national_id === q.national_id) < 0
     )
-    const examiners = []
-    await data.forEach(async (e) => {
-      const ex = await prisma.Examiners.upsert({
-        where: {
-          national_id: e.national_id,
-        },
-        update: {},
-        create: e,
-      })
-      examiners.push(ex)
-    })
-    res.json(examiners) // [{id: 5, name: 'Ashley', color: 'black'}, ...]
+    const values = data
+      .map(
+        (value) =>
+          `('${value.national_id}', '${value.name}', '${value.stage}', ${
+            value.mohafza_code || null
+          }, ${value.qualification_code || null})`
+      )
+      .join(',\n\t')
+
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO \`Examiners\` (national_id, name,stage,mohafza_code,qualification_code) VALUES \n\t${values};`
+    )
+    res.json(data)
   })
   app.post('/deleteExaminer', async (req, res) => {
     const { id } = req.body

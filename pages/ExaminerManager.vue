@@ -31,23 +31,46 @@
               >
             </v-badge>
 
-            <v-btn title="طباعة" @click="printRep()" class="elevation-0 ms-2"
-              ><v-icon>mdi-printer-outline</v-icon></v-btn
-            >
+            <v-btn
+              color="white"
+              title="طباعة"
+              @click="printRep()"
+              class="elevation-0 ms-2"
+              ><v-img
+                width="24px"
+                height="24px"
+                contain
+                src="/icon/printer.png"
+              ></v-img
+            ></v-btn>
             <v-btn
               v-if="permissions.area.includes(user.type)"
+              color="white"
               title="رفع بيانات من oracle"
               @click="tryConnection()"
               class="elevation-0 ms-2"
-              ><v-icon>mdi-database-sync</v-icon></v-btn
             >
+              <v-img
+                width="24px"
+                height="24px"
+                contain
+                src="/icon/database.png"
+              ></v-img>
+            </v-btn>
             <v-btn
               v-if="permissions.admin.includes(user.type)"
               title="سحب البيانات من ملف الاكسس"
               @click="readExaminerFromMdb()"
               class="elevation-0 ms-2"
-              ><v-icon>mdi-microsoft-access</v-icon></v-btn
+              color="white"
             >
+              <v-img
+                width="24px"
+                height="24px"
+                contain
+                src="/icon/microsoft-access.png"
+              ></v-img>
+            </v-btn>
           </div>
           <div>
             <v-scale-transition group>
@@ -79,9 +102,10 @@
                   class="elevation-0 ma-2"
                   v-bind="attrs"
                   v-on="on"
+                  color="white"
                   title="تصفية النتائج"
                 >
-                  <v-icon>mdi-plus</v-icon>
+                  <v-img src="/icon/filter.png"></v-img>
                 </v-btn>
               </template>
 
@@ -180,10 +204,10 @@
         >
           <template v-slot:[`item.actions`]="{ item }">
             <v-btn color="success" :to="`/${item.id}`" icon>
-              <v-icon small> mdi-pencil </v-icon>
+              <v-img contain  width="24px" height="24px" src="/icon/edit.png"></v-img>
             </v-btn>
             <v-btn icon @click="deleteItem(item)" color="error">
-              <v-icon small> mdi-delete-outline </v-icon>
+              <v-img width="24px"  contain height="24px" src="/icon/trash.png"></v-img>
             </v-btn>
           </template>
           <template v-slot:[`item.Answers`]="{ item, header }">
@@ -395,6 +419,7 @@ export default {
       })
       this.$router.push('/report')
     },
+
     async fetchExaminers(isSearch = false) {
       this.options.page = isSearch ? 1 : this.options.page
       if (this.withResualt) this.options.withResualt = this.withResualt

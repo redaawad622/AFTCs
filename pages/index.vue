@@ -15,6 +15,7 @@
 
     <v-spacer></v-spacer>
     <v-sheet
+      v-if="!dialog"
       height="200px"
       max-width="700px"
       width="100%"
@@ -45,10 +46,14 @@
     <v-spacer></v-spacer>
 
     <div class="text-center">
-      <v-dialog v-model="dialog" width="500">
+      <v-dialog v-model="dialog" width="500" hide-overlay>
         <v-card>
-          <v-card-title class="text-h5 grey lighten-2">
-            تسجيل الدخول
+          <v-card-title class="text-h5 grey lighten-2 d-flex">
+            <span> تسجيل الدخول </span>
+            <v-spacer></v-spacer>
+            <v-btn icon @click="dialog = false"
+              ><v-icon>mdi-close</v-icon></v-btn
+            >
           </v-card-title>
 
           <v-form class="pa-4">
@@ -98,7 +103,7 @@ export default {
 
   data() {
     return {
-      dialog: false,
+      dialog: true,
       loading: false,
       logining: false,
       id: '',
@@ -123,6 +128,9 @@ export default {
     examiner() {
       return this.$store.getters['Examiner/examiner']
     },
+    permissions() {
+      return this.$store.getters['User/permissions']
+    },
   },
 
   beforeMount() {
@@ -146,7 +154,7 @@ export default {
             message: 'تم تسجيل الدخول بنجاح باسم ' + this.user.Cat_Name,
             body: 'من فضلك ابقي مسجلا اثناء العمل',
           })
-          this.$router.replace('/ExamsManager')
+          this.$router.replace('/ExaminerManager')
         })
         .catch((rej) => {
           this.error = rej.response.data
@@ -174,5 +182,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>
