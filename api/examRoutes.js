@@ -303,6 +303,42 @@ module.exports = function (app, prisma) {
       order: mapBy(order, 'random'),
     })
   })
+  app.get('/editableExam', async (req, res) => {
+    const { id } = req.query
+
+    const exam = await prisma.T_Exams.findUnique({
+      where: {
+        Exm_ID: Number(id),
+      },
+      include: {
+        Questions: {
+          include: {
+            T_Answers: true,
+          },
+        },
+      },
+    })
+    return res.json(exam)
+  })
+  app.post('/saveNewQues', async (req, res) => {
+    const newQ = req.body
+    const q = await prisma.T_Questions.create({
+      data: {
+        Qus_Text: newQ.Qus_Text,
+        Qus_Exm_ID: Number(newQ.Qus_Exm_ID),
+      },
+    })
+    newQ.T_Answers.forEach(async (ans) => {
+      await prisma.T_Answers.create({
+        data: {
+          Ans_Text: ans.Ans_Text,
+          Ans_Value: parseFloat(ans.Ans_Value),
+          Ans_Qus_ID: +q.Qus_ID,
+        },
+      })
+    })
+    return res.json(q)
+  })
 }
 function mapBy(arr, item) {
   return Array.isArray(arr) ? arr.map((elm) => elm[item]) : arr

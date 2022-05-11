@@ -13,6 +13,7 @@ export const state = () => ({
   serials: [],
   categories: [],
   order: [],
+  editableExam: null,
 })
 export const getters = {
   exams(state) {
@@ -58,6 +59,9 @@ export const getters = {
   order(state) {
     return state.order
   },
+  editableExam(state) {
+    return state.editableExam
+  },
 }
 export const mutations = {
   setHelpers(state, payload) {
@@ -69,6 +73,7 @@ export const mutations = {
   setExams(state, payload) {
     state.exams = payload.exams
   },
+
   updateExams(state, exam) {
     const index = state.exams.findIndex((elm) => elm.Exm_ID === exam.Exm_ID)
     if (index === -1) {
@@ -82,6 +87,9 @@ export const mutations = {
   },
   setExamsData(state, payload) {
     state.examsData = payload
+  },
+  setEditableExam(state, payload) {
+    state.editableExam = payload
   },
   setCurrentExamTime(state, payload) {
     state.currentExamTime = payload
@@ -195,5 +203,14 @@ export const actions = {
   },
   saveOrEditExam(_, payload) {
     return this.$axios.post(`/api/saveOrEditExam`, payload)
+  },
+  getEditableExam({ commit }, payload) {
+    this.$axios(`/api/editableExam`, { params: payload }).then((res) => {
+      commit('setEditableExam', res.data)
+    })
+  },
+  saveNewQues(_, payload) {
+    console.log(payload)
+    return this.$axios.post(`/api/saveNewQues`, payload)
   },
 }

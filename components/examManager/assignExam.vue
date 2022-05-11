@@ -229,6 +229,11 @@ export default {
     this.getExams()
   },
   methods: {
+    editExamQ() {
+      if (this.activeExam) {
+        this.$router.push('/examsManager/' + this.activeExam.Exm_ID)
+      }
+    },
     addOrUpdateExam(exam) {
       this.$store.commit('Exam/updateExams', exam)
     },
