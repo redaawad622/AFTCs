@@ -68,26 +68,28 @@ module.exports = function (app, prisma) {
 
           console.log('close connection success')
           // prisma code to insert
-          const exist = await prisma.Examiners.findMany()
-          res.json('done')
-          data = data.rows.filter(
-            (q) => exist.findIndex((a) => a.national_id === q[2]) < 0
+
+          data = data.rows
+          console.log('data', data.length)
+          const queryToRun = data.map((value) =>
+            prisma.$executeRawUnsafe(
+              ` INSERT INTO \`Examiners\` (national_id,triple_number,name,stage,mohafza_code,qualification_code)
+                  select '${value[2]}','${value[0] || null}', '${value[1]}', '${
+                value[3]
+              }', ${value[4] || null}, ${value[5] || null}
+                  where NOT EXISTS (SELECT 1 FROM Examiners WHERE national_id = '${
+                    value[2]
+                  }')
+                 `
+            )
           )
 
-          const values = data
-            .map(
-              (value) =>
-                `('${value[2]}','${value[0] || null}', '${value[1]}', '${
-                  value[3]
-                }', ${value[4] || null}, ${value[5] || null})`
-            )
-            .join(',\n\t')
-          if (values && values.length > 0) {
-            await prisma.$executeRawUnsafe(
-              `INSERT INTO \`Examiners\` (national_id,triple_number,name,stage,mohafza_code,qualification_code) VALUES \n\t${values}`
-            )
+          if (queryToRun && queryToRun.length > 0) {
+            console.log('start', queryToRun.length)
+            await prisma.$transaction(queryToRun)
+            console.log('end')
           }
-          res.status(200).json(data.length)
+          res.status(200).json(queryToRun)
         } catch (err) {
           res.status(422).json({
             type: 'db error',
@@ -120,32 +122,31 @@ module.exports = function (app, prisma) {
           // const query=`SELECT g.SH_NAME, e.MOSALSAL, e.C_MAR1, e.MILAD, e.MARHLA, e.MOHAFZA_C, e.BARCODE_NO
           // FROM     TAG.ESTKBAL_D e, TAG.GOND g
           // WHERE    e.MOSALSAL = g.MOSALSAL AND e.MILAD = g.MILAD AND e.MILAD = g.MILAD AND e.C_MAR1 = g.C_MAR1`
-          let exist = await prisma.Examiners.findMany({
-            select: {
-              national_id: true,
-            },
-          })
-          exist = exist.map((a) => a.national_id)
+          // let exist = await prisma.Examiners.findMany({
+          //   select: {
+          //     national_id: true,
+          //   },
+          // })
+          // exist = exist.map((a) => a.national_id)
 
           const query = `select * from ent.v_mrakez_tadreeb`
           const data = await connection.execute(query)
-          let nationals = data.rows.map((x) => x[2])
-          nationals=nationals.filter((n) => !exist.includes(n))
+          // let nationals = data.rows.map((x) => x[2])
+          //  nationals = nationals.filter((n) => !exist.includes(n))
           await connection.close()
-          res.json(nationals)
 
           console.log('close connection success')
           // prisma code to insert
 
-          const response = data.rows.concat(exist)
-          response.sort()
+          // const response = data.rows.concat(exist)
+          // response.sort()
 
           const values = data
             .map(
               (value) =>
-                `('${value[2]}','${value[0] || null}', '${value[1]}', '${
-                  value[3]
-                }', ${value[4] || null}, ${value[5] || null})`
+                `('${value[2]}','${value[0] ? value[0].trim() : null}', '${
+                  value[1]
+                }', '${value[3]}', ${value[4] || null}, ${value[5] || null})`
             )
             .join(',\n\t')
           if (values && values.length > 0) {

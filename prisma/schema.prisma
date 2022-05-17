@@ -77,6 +77,15 @@ model Examiners {
   update_at          DateTime?
   Answers            Answers[]
   battary_id         Int?
+  //unit details
+  UNIT_NAME          String?
+  GEHA_NAME          String?
+  TAMARKZ_NAME       String?
+  UNIT_ARMY_NAME     String?
+  ARMY_TAGNEED_NAME  String?
+  isNoticed          Boolean   @default(false)
+  nextFollowDate     DateTime?
+  numFollowUps       Int       @default(0)
 }
 
 model Battries {

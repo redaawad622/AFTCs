@@ -28,6 +28,13 @@ export const actions = {
   readExaminerFromMdb() {
     return this.$axios.get(`/api/readExaminerFromMdb`)
   },
+  readUnitsFromMdb() {
+    return this.$axios.post(
+      `/api/readUnitsFromMdb`,
+      {},
+      { timeout: 1000 * 60 * 10 }
+    )
+  },
   Export() {
     return this.$axios.get(`/api/writeExaminerToMdb`)
   },

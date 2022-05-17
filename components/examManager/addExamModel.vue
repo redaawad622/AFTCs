@@ -63,6 +63,7 @@
 <script>
 export default {
   props: ['value', 'exam', 'formType'],
+
   data() {
     return {
       loading: false,

@@ -6,7 +6,7 @@
     :color="notification.color"
   >
     <v-icon large class="me-2">{{ icon }}</v-icon>
-    <span class="font-weight-bold">{{ notification.text }}</span>
+    <span class="font-weight-bold pa-1">{{ notification.text }}</span>
     <template v-slot:action="{ attrs }">
       <v-btn
         color="#fff"
@@ -27,7 +27,7 @@ export default {
 
   data: () => ({
     snackbar: true,
-    timeout: 2000,
+    timeout: 200000,
     icons: {
       error: 'mdi-alert-circle-outline ',
       warning: 'mdi-alert-outline ',

@@ -17,7 +17,7 @@ export default {
   methods: {
     getStageSold() {
       this.loading = true
-      this.$axios('/api/getStageSoldNew').finally(() => {
+      this.$axios('/api/getStageSold').finally(() => {
         this.loading = false
       })
     },

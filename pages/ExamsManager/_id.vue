@@ -1,6 +1,9 @@
 <template>
   <v-card v-if="exam">
-    <v-card-title>تعديل اسئلة اختبار ( {{ exam.Exm_Name }} )</v-card-title>
+    <v-card-title class="d-flex justify-space-between"
+      ><div>تعديل اسئلة اختبار ( {{ exam.Exm_Name }} )</div>
+      <div>عدد الاسئلة : {{ exam.Questions.length }}</div></v-card-title
+    >
     <v-card-text>
       <v-expansion-panels
         v-if="exam.Questions"
@@ -12,6 +15,7 @@
           <v-expansion-panel-header>
             <div class="d-flex justify-space-between">
               <div>
+                {{ i + 1 }} -
                 <template
                   v-if="!item.Qus_image && typeof item.Qus_Text == 'string'"
                 >
@@ -52,7 +56,7 @@
                   </v-list-item-title>
                   <v-list-item-subtitle
                     ><v-text-field
-                      v-model="ans.Ans_Value"
+                      v-model.number="ans.Ans_Value"
                       solo-inverted
                       flat
                       label="درجة الاجابة"
@@ -70,7 +74,10 @@
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
-      <div class="py-3">
+      <div class="py-5">
+        <v-divider></v-divider>
+        <v-divider></v-divider>
+        <v-card-title class="justify-center">اضافة أسئلة جديده</v-card-title>
         <v-text-field
           v-model="newQ.Qus_Text"
           outlined
@@ -89,7 +96,7 @@
             label="الاجابة"
           ></v-text-field>
           <v-text-field
-            v-model="item.Ans_Value"
+            v-model.number="item.Ans_Value"
             solo-inverted
             flat
             label="درجة الاجابة"

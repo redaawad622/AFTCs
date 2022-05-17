@@ -51,6 +51,7 @@ module.exports = function (app, prisma) {
       stage,
       withResualt,
       register,
+      deleteItems,
     } = req.query
     const option = {
       where: {},
@@ -156,7 +157,14 @@ module.exports = function (app, prisma) {
         })
       }
     }
-    const allExaminers = await prisma.Examiners.count()
+    delete option.skip
+    delete option.take
+    delete option.orderBy
+    delete option.include
+    if (deleteItems) {
+      await prisma.Examiners.deleteMany(option)
+    }
+    const allExaminers = await prisma.Examiners.count(option)
     res.json({ examiners, allExaminers })
   })
   app.post('/save', async (req, res) => {
@@ -201,6 +209,43 @@ module.exports = function (app, prisma) {
       `INSERT INTO \`Examiners\` (national_id, name,stage,mohafza_code,qualification_code) VALUES \n\t${values};`
     )
     res.json(data)
+  })
+  app.post('/readUnitsFromMdb', async (req, res) => {
+    console.log('start')
+    try {
+      const buffer = readFileSync('./prisma/TNZ_GEHA_CODE.mdb')
+      const reader = new MDBReader(buffer)
+      const table = await reader.getTable('TNZ_GEHA_CODE')
+      // table.getColumnNames() // ['id', 'name', 'color']
+      console.log('fetching')
+      let data = await table.getData()
+      console.log('map data....')
+
+      data = data.map((v) => {
+        return prisma.$executeRawUnsafe(
+          `UPDATE Examiners SET UNIT_NAME ='${v.UNIT_NAME}',GEHA_NAME ='${
+            v.GEHA_NAME
+          }',TAMARKZ_NAME ='${v.TAMARKZ_NAME}',UNIT_ARMY_NAME ='${
+            v.UNIT_ARMY_NAME
+          }',ARMY_TAGNEED_NAME ='${v.ARMY_TAGNEED_NAME}',sold_id ='${
+            v.MIL_NO || null
+          }' WHERE triple_number = '${v.RAKMSOLASY}'`
+        )
+      })
+      console.log('start update ', data.length)
+      const whatDone = await prisma.$transaction(data)
+      console.log('done')
+      res.json(
+        `عدد ما تم تحديثه (${
+          whatDone.filter((e) => e === 1).length
+        }) عدد الاخطاء و ما لم يتم تحديثه (${
+          whatDone.filter((e) => e === 0).length
+        })`
+      )
+    } catch (error) {
+      console.log(error)
+      return res.status(422).json(error)
+    }
   })
   app.post('/deleteExaminer', async (req, res) => {
     const { id } = req.body

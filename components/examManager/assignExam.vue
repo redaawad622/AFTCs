@@ -189,6 +189,7 @@
 
 <script>
 import addExamModel from './addExamModel.vue'
+
 export default {
   components: { addExamModel },
   data() {
@@ -219,6 +220,7 @@ export default {
     battaries() {
       return this.$store.getters['Exam/battaries']
     },
+   
   },
   watch: {
     search(val) {
@@ -347,4 +349,3 @@ export default {
 }
 </script>
 
-<style></style>

@@ -34,8 +34,8 @@
             <v-btn
               color="white"
               title="طباعة"
-              @click="printRep()"
               class="elevation-0 ms-2"
+              @click="printRep()"
               ><v-img
                 width="24px"
                 height="24px"
@@ -47,8 +47,8 @@
               v-if="permissions.area.includes(user.type)"
               color="white"
               title="رفع بيانات من oracle"
-              @click="tryConnection()"
               class="elevation-0 ms-2"
+              @click="tryConnection()"
             >
               <v-img
                 width="24px"
@@ -59,10 +59,10 @@
             </v-btn>
             <v-btn
               v-if="permissions.admin.includes(user.type)"
-              title="سحب البيانات من ملف الاكسس"
-              @click="readExaminerFromMdb()"
+              title="سحب بيانات المختبرين من ملف الاكسس"
               class="elevation-0 ms-2"
               color="white"
+              @click="readExaminerFromMdb()"
             >
               <v-img
                 width="24px"
@@ -71,6 +71,26 @@
                 src="/icon/microsoft-access.png"
               ></v-img>
             </v-btn>
+            <v-btn
+              v-if="permissions.admin.includes(user.type)"
+              title="سحب بيانات مناطق التمركز من ملف الاكسس"
+              class="elevation-0 ms-2"
+              color="white"
+              :loading="readUnitsLoading"
+              @click="readUnitsFromMdb()"
+            >
+              <v-img
+                width="24px"
+                height="24px"
+                contain
+                src="/icon/microsoft-access.png"
+              ></v-img>
+            </v-btn>
+            <v-checkbox
+              label="مسح البحث"
+              v-if="permissions.developer.includes(user.type)"
+              v-model="deleteItems"
+            ></v-checkbox>
           </div>
           <div>
             <v-scale-transition group>
@@ -100,10 +120,10 @@
                   width="36px"
                   min-width="36px"
                   class="elevation-0 ma-2"
-                  v-bind="attrs"
-                  v-on="on"
                   color="white"
                   title="تصفية النتائج"
+                  v-bind="attrs"
+                  v-on="on"
                 >
                   <v-img src="/icon/filter.png"></v-img>
                 </v-btn>
@@ -190,7 +210,14 @@
             </v-menu>
           </div>
         </div>
-
+        <v-select
+          v-model="headers"
+          return-object
+          outlined
+          chips
+          multiple
+          :items="defaultHeaders"
+        ></v-select>
         <v-data-table
           :headers="headers"
           :items="examiners"
@@ -204,10 +231,20 @@
         >
           <template v-slot:[`item.actions`]="{ item }">
             <v-btn color="success" :to="`/${item.id}`" icon>
-              <v-img contain  width="24px" height="24px" src="/icon/edit.png"></v-img>
+              <v-img
+                contain
+                width="24px"
+                height="24px"
+                src="/icon/edit.png"
+              ></v-img>
             </v-btn>
             <v-btn icon @click="deleteItem(item)" color="error">
-              <v-img width="24px"  contain height="24px" src="/icon/trash.png"></v-img>
+              <v-img
+                width="24px"
+                contain
+                height="24px"
+                src="/icon/trash.png"
+              ></v-img>
             </v-btn>
           </template>
           <template v-slot:[`item.Answers`]="{ item, header }">
@@ -263,13 +300,14 @@ export default {
           { name: 'من لم يتم تسجيلهم', value: 0 },
         ],
       },
-
+      deleteItems: false,
       examiners: [],
       expanded: [],
       allExaminers: 0,
       loading: true,
       options: {},
       dialogDelete: false,
+      readUnitsLoading: false,
       search: '',
       withResualt: 0,
       filters: {
@@ -311,6 +349,48 @@ export default {
           value: 'stage',
           hide: false,
         },
+        {
+          text: 'الوحده',
+          align: 'center',
+          value: 'UNIT_NAME',
+          hide: false,
+        },
+        {
+          text: 'الجهة',
+          align: 'center',
+          value: 'GEHA_NAME',
+          hide: false,
+        },
+        {
+          text: 'منطقة التمركز',
+          align: 'center',
+          value: 'TAMARKZ_NAME',
+          hide: false,
+        },
+        {
+          text: 'تباعية الوحدة داخل الجيش',
+          align: 'center',
+          value: 'UNIT_ARMY_NAME',
+          hide: false,
+        },
+        {
+          text: 'ملحوظ',
+          align: 'center',
+          value: 'isNoticed',
+          hide: false,
+        },
+        {
+          text: 'تازيخ المتابعه القادم',
+          align: 'center',
+          value: 'nextFollowDate',
+          hide: false,
+        },
+        {
+          text: 'عدد مرات المتابعه',
+          align: 'center',
+          value: 'numFollowUps',
+          hide: false,
+        },
 
         {
           text: 'Actions',
@@ -350,6 +430,12 @@ export default {
           text: 'المرحلة',
           align: 'center',
           value: 'stage',
+          hide: false,
+        },
+        {
+          text: 'الوحده',
+          align: 'center',
+          value: 'UNIT_NAME',
           hide: false,
         },
 
@@ -425,6 +511,11 @@ export default {
       if (this.withResualt) this.options.withResualt = this.withResualt
 
       this.loading = true
+      if (this.deleteItems) {
+        this.options.deleteItems = this.deleteItems
+      } else {
+        delete this.options.deleteItems
+      }
       await this.$store
         .dispatch(`Examiner/getExaminers`, {
           search: this.search,
@@ -434,7 +525,7 @@ export default {
         .then((res) => {
           this.examiners = res.data.examiners
           this.allExaminers = res.data.allExaminers
-          this.headers = [...this.defaultHeaders]
+          this.headers = [...this.headers]
           if (this.examiners && this.examiners.length > 0) {
             if (this.examiners[0].Answers) {
               Object.keys(this.examiners[0].Answers).forEach((k) => {
@@ -469,6 +560,26 @@ export default {
         })
         .finally(() => {
           this.loading = false
+        })
+    },
+    readUnitsFromMdb() {
+      this.readUnitsLoading = true
+      this.$store
+        .dispatch(`Examiner/readUnitsFromMdb`)
+        .then((res) => {
+          this.$store.commit('Notifications/setNotification', {
+            text: res.data,
+            color: 'success',
+          })
+        })
+        .catch((rej) => {
+          this.$store.commit('Notifications/setNotification', {
+            text:"حدث خطأ. من فضلك تأكد من اسم ملف ال mdb هو (TNZ_GEHA_CODE.mdb) و اسماء الاعمده في الملف هي (UNIT_NAME,TAMARKZ_NAME,ARMY_TAGNEED_NAME,MIL_NO,GEHA_NAME,RAKMSOLASY)",
+            color: 'error',
+          })
+        })
+        .finally((a) => {
+          this.readUnitsLoading = false
         })
     },
 
