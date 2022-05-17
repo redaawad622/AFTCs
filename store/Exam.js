@@ -210,7 +210,7 @@ export const actions = {
     })
   },
   saveNewQues(_, payload) {
-    console.log(payload)
+   
     return this.$axios.post(`/api/saveNewQues`, payload)
   },
 }

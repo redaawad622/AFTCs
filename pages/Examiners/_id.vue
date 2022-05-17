@@ -127,11 +127,9 @@ export default {
       serverErr: [],
     }
   },
-  fetch(){
-    if(this.$route.params.id && this.$route.params.id !=='new'){
-      this.$store.dispatch('Examiner/getEx').then((res)=>{
-        // continue from here to get examiner to update it
-      })
+  fetch() {
+    if (this.$route.params.id && this.$route.params.id !== 'new') {
+      this.$store.dispatch('Examiner/getExaminer', this.$route.params.id)
     }
   },
   computed: {
@@ -143,6 +141,29 @@ export default {
     battaries() {
       return this.$store.getters['Exam/battaries']
     },
+    examiner() {
+      return this.$store.getters['Examiner/examiner']
+    },
+  },
+  watch: {
+    examiner(val) {
+      if (val) {
+        Object.keys(this.form).forEach((item) => {
+          if (item === 'triple_number') {
+            if (val[item]) {
+              const tri = val[item].split('/')
+              this.f_num = tri[0]
+              this.sec_num = tri[1]
+              this.th_num = tri[2]
+            }
+          } else this.form[item] = val[item]
+        })
+      }
+    },
+  },
+  mounted() {
+    const year = new Date().getFullYear()
+    this.form.stage = year + '1'
   },
   methods: {
     save() {
@@ -180,10 +201,6 @@ export default {
         })
       }
     },
-  },
-  mounted() {
-    const year = new Date().getFullYear()
-    this.form.stage = year + '1'
   },
 }
 </script>

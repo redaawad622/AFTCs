@@ -19,7 +19,7 @@ module.exports = function (app, prisma) {
           } ) اتم الاختبار من قبل بتاريخ ${examiner.Answers[0].created_at.toLocaleDateString()}`
         )
     }
-    // step 1
+    // step 1 get by assign battary
     if (examiner.battary_id) {
       let battary = await prisma.Battries.findUnique({
         where: {
@@ -45,14 +45,14 @@ module.exports = function (app, prisma) {
       battary = battary.Battary_Exam.map((x) => x.exam)
       res.json({ battary, Answers: examiner.Answers })
     }
-    // step 2
+    // step 2 get public assign exam
     let exams = await prisma.Assign.findMany({
       select: {
         exam_id: true,
       },
     })
     if (!exams || exams.length < 1) {
-      // fetch default
+      // fetch default for current login user
     }
 
     if (exams && exams.length > 0) {
@@ -70,7 +70,7 @@ module.exports = function (app, prisma) {
           random: true,
         },
       })
-      res.json(allExam)
+      res.json({ battary: allExam, Answers: examiner.Answers })
     } else {
       res.status(404).json('لا يوجد امتحانات متوفره')
     }
@@ -131,6 +131,7 @@ module.exports = function (app, prisma) {
         Exm_Name: true,
         category: true,
         random: true,
+        Exm_Duration_In_Mins: true,
       },
     })
     let assExams = await prisma.Assign.findMany({
@@ -247,6 +248,10 @@ module.exports = function (app, prisma) {
   })
   app.post('/saveOrEditExam', async (req, res) => {
     const data = req.body
+    data.formData.Exm_Duration_In_Mins = Number(
+      data.formData.Exm_Duration_In_Mins
+    )
+    console.log(data)
     try {
       const exam = await prisma.T_Exams.upsert({
         where: {

@@ -230,7 +230,7 @@
           :single-expand="true"
         >
           <template v-slot:[`item.actions`]="{ item }">
-            <v-btn color="success" :to="`/${item.id}`" icon>
+            <v-btn color="success" :to="`/Examiners/${item.national_id}`" icon>
               <v-img
                 contain
                 width="24px"
@@ -276,6 +276,7 @@
         </v-dialog>
       </div>
     </v-col>
+    <v-btn @click="audio.play()"></v-btn>
   </v-row>
 </template>
 
@@ -284,6 +285,7 @@ export default {
   name: 'ExaminerManager',
   data() {
     return {
+      audio: null,
       helpers: {
         qualification: [
           { name: 'عليا', value: 2 },
@@ -574,7 +576,7 @@ export default {
         })
         .catch((rej) => {
           this.$store.commit('Notifications/setNotification', {
-            text:"حدث خطأ. من فضلك تأكد من اسم ملف ال mdb هو (TNZ_GEHA_CODE.mdb) و اسماء الاعمده في الملف هي (UNIT_NAME,TAMARKZ_NAME,ARMY_TAGNEED_NAME,MIL_NO,GEHA_NAME,RAKMSOLASY)",
+            text: 'حدث خطأ. من فضلك تأكد من اسم ملف ال mdb هو (TNZ_GEHA_CODE.mdb) و اسماء الاعمده في الملف هي (UNIT_NAME,TAMARKZ_NAME,ARMY_TAGNEED_NAME,MIL_NO,GEHA_NAME,RAKMSOLASY)',
             color: 'error',
           })
         })
@@ -593,6 +595,9 @@ export default {
     closeDelete() {
       this.dialogDelete = false
     },
+  },
+  mounted() {
+    this.audio = new Audio(`${this.$audioPath}4357/4357.mp3`)
   },
 }
 </script>

@@ -39,6 +39,15 @@
                 color="primary"
               ></v-select>
             </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="مدة الاختبار"
+                outlined
+                color="primary"
+                type="number"
+                v-model="form.Exm_Duration_In_Mins"
+              ></v-text-field>
+            </v-col>
           </v-row>
         </v-container>
       </v-card-text>
@@ -71,6 +80,7 @@ export default {
         Exm_Name: '',
         category: '',
         random: '',
+        Exm_Duration_In_Mins: '',
       },
     }
   },
@@ -85,7 +95,10 @@ export default {
   watch: {
     value(val) {
       if (val && this.exam) {
-        if (this.formType === 'edit') this.form.Exm_Name = this.exam.Exm_Name
+        if (this.formType === 'edit') {
+          this.form.Exm_Name = this.exam.Exm_Name
+          this.form.Exm_Duration_In_Mins = this.exam.Exm_Duration_In_Mins
+        }
         this.form.category = this.exam.category
         this.form.random = this.exam.random
       } else {
@@ -93,6 +106,7 @@ export default {
           Exm_Name: '',
           category: '',
           random: '',
+          Exm_Duration_In_Mins: '',
         }
       }
     },

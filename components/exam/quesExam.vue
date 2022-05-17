@@ -198,21 +198,21 @@ export default {
       if (this.audio) {
         this.play = false
       }
-      const buffer = this.questions[this.cursor].Qus_audio
-      if (buffer) {
-        const blob = new Blob([new Uint8Array(buffer.data)], {
-          type: 'audio/wav',
-        })
-        this.audio = new Audio(window.URL.createObjectURL(blob))
+      const ques = this.questions[this.cursor]
+
+      this.audio = new Audio(
+        `${this.$audioPath + ques.Qus_ID}/${ques.Qus_ID}.mp3`
+      )
+
+      this.audio.addEventListener('canplaythrough', () => {
+        /* the audio is now playable; play it if permissions allow */
         if (!this.mute) {
           this.play = true
           this.audio.addEventListener('ended', () => {
             this.play = false
           })
         }
-      } else {
-        this.audio = null
-      }
+      })
     },
     prevQ() {
       if (this.cursor > 0) {

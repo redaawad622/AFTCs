@@ -103,7 +103,7 @@ export default {
 
   data() {
     return {
-      dialog: true,
+      dialog: false,
       loading: false,
       logining: false,
       id: '',
