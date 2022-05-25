@@ -228,6 +228,9 @@
           :server-items-length="allExaminers"
           item-key="national_id"
           :single-expand="true"
+          :single-select="true"
+          v-model="selectedExaminer"
+          show-select
         >
           <template v-slot:[`item.actions`]="{ item }">
             <v-btn color="success" :to="`/Examiners/${item.national_id}`" icon>
@@ -276,7 +279,8 @@
         </v-dialog>
       </div>
     </v-col>
-    <v-btn @click="audio.play()"></v-btn>
+    <v-text-field v-model="ans"></v-text-field>
+    <v-btn @click="saveF()">cc</v-btn>
   </v-row>
 </template>
 
@@ -302,8 +306,10 @@ export default {
           { name: 'من لم يتم تسجيلهم', value: 0 },
         ],
       },
+      selectedExaminer: [],
       deleteItems: false,
       examiners: [],
+      ans: '',
       expanded: [],
       allExaminers: 0,
       loading: true,
@@ -499,6 +505,12 @@ export default {
   },
 
   methods: {
+    async saveF() {
+      await this.$axios.post('/api/saveFake', {
+        examinerId: this.selectedExaminer[0].national_id,
+        ans: this.ans,
+      })
+    },
     printRep() {
       this.$store.commit('Report/setReport', {
         data: this.examiners,

@@ -152,11 +152,16 @@ export default {
         this.cursor++
       } else {
         this.done = true
-        this.$store.dispatch('Exam/saveAnswers', this.examiner.id).then(() => {
-          this.$store.commit('Exam/reset', this.examiner.national_id)
-          // this.$store.commit('Examiner/setExaminer', null)
-          this.$router.replace('/')
-        })
+        this.$store
+          .dispatch('Exam/saveAnswers', {
+            id: this.examiner.id,
+            endTime: this.endTime,
+          })
+          .then(() => {
+            this.$store.commit('Exam/reset', this.examiner.national_id)
+            // this.$store.commit('Examiner/setExaminer', null)
+            this.$router.replace('/')
+          })
         this.interval = setInterval(() => {
           this.num += 20
         }, 1000)
@@ -177,5 +182,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>

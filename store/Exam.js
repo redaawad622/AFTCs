@@ -198,7 +198,8 @@ export const actions = {
   saveAnswers({ state }, payload) {
     return this.$axios.post(`/api/saveAnswers`, {
       answers: JSON.stringify(state.answers),
-      examinerId: payload,
+      examinerId: payload.id,
+      endTime: payload.endTime,
     })
   },
   saveOrEditExam(_, payload) {
@@ -210,7 +211,6 @@ export const actions = {
     })
   },
   saveNewQues(_, payload) {
-   
     return this.$axios.post(`/api/saveNewQues`, payload)
   },
 }

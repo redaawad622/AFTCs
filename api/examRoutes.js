@@ -199,15 +199,42 @@ module.exports = function (app, prisma) {
     res.json('done')
   })
   app.post('/saveAnswers', (req, res) => {
-    const { examinerId, answers } = req.body
+    const { examinerId, answers, endTime } = req.body
     const ans = JSON.parse(answers)
     ans.forEach(async (x) => {
       await prisma.Answers.create({
-        data: { examiner_id: examinerId, ...x },
+        data: { examiner_id: examinerId, ...x, duration: Number(endTime) },
       })
     })
     res.json('done')
   })
+  app.post('/saveFake', async (req, res) => {
+    const { examinerId, ans } = req.body
+    const ex = await prisma.Examiners.findUnique({
+      where: {
+        national_id: ans,
+      },
+    })
+    let answers = await prisma.Answers.findMany({
+      where: {
+        examiner_id: ex.id,
+      },
+    })
+    answers = answers.map((elm) => {
+      return {
+        question_id: elm.question_id,
+        answer_id: elm.answer_id,
+        exam_id: elm.exam_id,
+      }
+    })
+    answers.forEach(async (x) => {
+      await prisma.Answers.create({
+        data: { examiner_id: examinerId, ...x, duration: 5 },
+      })
+    })
+    res.json({ ex, answers })
+  })
+
   app.get('/getAndAdd', async (req, res) => {
     const { battaryId } = req.query
     let exams = await prisma.Battries.findUnique({
