@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export const state = () => ({
   assignExams: [],
   examsData: [],
@@ -98,8 +99,15 @@ export const mutations = {
     state.answers = this.$getLocal(`answer${payload}`) || []
     state.customExam = this.$getLocal(`customExam${payload}`) || []
   },
-  loadAnswersFrom(state, payload) {
-    state.answers = payload
+  loadAnswersFrom(state, { answers, national_id }) {
+    const localBackup = this.$getLocal(`answer${national_id}`) || []
+    state.customExam = this.$getLocal(`customExam${national_id}`) || []
+    const examiner_ids = answers.map((elm) => elm.examiner_id)
+    const filteredLocalBackup = localBackup.filter(function (obj) {
+      return !examiner_ids.includes(obj.examiner_id)
+    })
+    state.answers = [...answers, ...filteredLocalBackup]
+    
   },
 
   reset(state, payload) {

@@ -62,7 +62,7 @@ export default {
       this.kepReading = false
       if (this.reader) this.reader.cancel()
       await this.startRead()
-      console.log(this.vv)
+
       this.vv = ''
     },
     async connectPort() {
@@ -141,7 +141,7 @@ export default {
       if (this.val !== '') {
         const data = this.val.split('max Weight =')
         this.rightHand = +data[data.length - 1]
-       // if (this.reader != null) this.reader.cancel()
+        // if (this.reader != null) this.reader.cancel()
         // eslint-disable-next-line no-undef
         const textEncoder = new TextEncoderStream()
         textEncoder.readable.pipeTo(this.port.writable)
@@ -158,5 +158,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>

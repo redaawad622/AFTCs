@@ -49,10 +49,26 @@ export default {
     examiner() {
       return this.$store.getters['Examiner/examiner']
     },
-     
+    currentLogin() {
+      return this.$store.getters['User/currentLogin']
+    },
   },
   methods: {
     getAssignExams() {
+      if (!this.currentLogin) {
+        this.$store.commit('Notifications/setNotification', {
+          text: 'يجب تسجيل دخول من الجهاز الرئيسي اولا',
+          color: 'error',
+        })
+        return null
+      }
+      if (!this.examiner.register) {
+        this.$store.commit('Notifications/setNotification', {
+          text: 'يجب تأكيد تسجيل هذا الممتحن اولا',
+          color: 'error',
+        })
+        return null
+      }
       this.loading = true
       this.$store
         .dispatch('Exam/getAssignExams', this.examiner.id)
@@ -60,7 +76,10 @@ export default {
           this.$router.replace('/exam')
           this.$store.commit('Exam/setAssignExams', res.data.battary)
           if (res.data.Answers && res.data.Answers.length > 0) {
-            this.$store.commit('Exam/loadAnswersFrom', res.data.Answers)
+            this.$store.commit('Exam/loadAnswersFrom', {
+              answers: res.data.Answers,
+              national_id: this.examiner.national_id,
+            })
           } else {
             this.$store.commit('Exam/loadAnswers', this.examiner.national_id)
           }
@@ -81,5 +100,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>

@@ -31,12 +31,17 @@
               @done="nextExam()"
             ></component>
           </div>
-          <div v-else-if="random[1] === 'جهاز'" class="font-weight-bold">
+          <div
+            v-else-if="random[1] === 'جهاز'"
+            class="font-weight-bold text-center display-1 mt-8"
+          >
             الاختبار يتم علي جهاز مخصص
-            {{ nextExam() }}
+            {{ callNext(exams[cursor]) }}
           </div>
         </div>
-        <div v-else>لا يوجد امتحانات</div>
+        <div v-else class="font-weight-bold text-center display-1 mt-8">
+          لا يوجد امتحانات
+        </div>
       </template>
     </v-fade-transition>
   </v-sheet>
@@ -44,9 +49,11 @@
 
 <script>
 import Screen2 from '../customScreens/screen2.vue'
+import Screen28 from '../customScreens/screen28.vue'
+import Screen29 from '../customScreens/screen29.vue'
 import quesExam from './quesExam.vue'
 export default {
-  components: { quesExam, Screen2 },
+  components: { quesExam, Screen2, Screen28, Screen29 },
   props: {
     group: {
       type: Array,
@@ -78,10 +85,15 @@ export default {
       },
     },
   },
+
   created() {
     this.getGroup(this.group)
   },
   methods: {
+    callNext(exam) {
+      alert(`  الاختبار يتم علي جهاز مخصص (${exam.Exm_Name}) `)
+      this.nextExam()
+    },
     nextExam() {
       if (this.cursor < this.exams.length - 1) {
         this.cursor++
@@ -130,6 +142,10 @@ export default {
         .dispatch('Exam/getExamsData', ids)
         .then((res) => {
           this.exams = this.resolveExam(res.data || [])
+          this.loading = false
+        })
+        .catch(() => {
+          this.loading = false
         })
         .finally(() => {
           this.loading = false
@@ -139,5 +155,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>

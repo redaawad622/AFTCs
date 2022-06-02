@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs'
 import MDBReader from 'mdb-reader'
-module.exports = function (app, prisma) {
+module.exports = function (app, prisma, types) {
   app.get('/getExaminer', async (req, res) => {
     const { id } = req.query
     const examiner = await prisma.Examiners.findFirst({
@@ -77,6 +77,16 @@ module.exports = function (app, prisma) {
         },
         {
           barcode: {
+            contains: search,
+          },
+        },
+        {
+          sold_id: {
+            contains: search,
+          },
+        },
+        {
+          triple_number: {
             contains: search,
           },
         },
@@ -169,9 +179,13 @@ module.exports = function (app, prisma) {
   })
   app.post('/save', async (req, res) => {
     const data = req.body
+    const id = req.headers.id
     Object.keys(data).forEach(
       (k) => (data[k] == null || data[k] === '') && delete data[k]
     )
+    if (data.sold_id) {
+      data.register = true
+    }
     try {
       const examiner = await prisma.Examiners.upsert({
         where: {
@@ -179,6 +193,16 @@ module.exports = function (app, prisma) {
         },
         create: { ...data },
         update: { ...data },
+      })
+      await prisma.Log.create({
+        data: {
+          user_id: Number(id),
+          operation_type: 'insertOrUpdate',
+          description:
+            ' تسجيل او تحديث بيانات ممتحن يحمل رقم قومي ' +
+            examiner.national_id,
+          type: types[4],
+        },
       })
       res.json(examiner)
     } catch (e) {

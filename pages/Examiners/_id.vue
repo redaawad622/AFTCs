@@ -1,19 +1,27 @@
 <template>
   <v-card class="pa-6">
     <v-form ref="form" v-model="valid" lazy-validation>
-      <v-text-field
-        outlined
-        color="primary"
-        v-model="form.national_id"
-        label="الرقم القومي"
-        placeholder="الرقم القومي"
-        :rules="national_ru"
-        :counter="14"
-        :error-messages="serverErr['national_id']"
-        append-icon="mdi-star"
-        hide-spin-buttons
-        type="number"
-      ></v-text-field>
+      <div class="d-flex">
+        <v-text-field
+          outlined
+          color="primary"
+          v-model="form.national_id"
+          label="الرقم القومي"
+          placeholder="الرقم القومي"
+          :rules="national_ru"
+          :counter="14"
+          :error-messages="serverErr['national_id']"
+          append-icon="mdi-star"
+          hide-spin-buttons
+          type="number"
+        ></v-text-field>
+        <v-btn
+          class="primary mr-3"
+          style="height: 55px; width: 80px"
+          @click="searchByNationalId"
+          >بحث</v-btn
+        >
+      </div>
       <v-sheet class="d-flex">
         <v-text-field
           v-model="th_num"
@@ -166,6 +174,11 @@ export default {
     this.form.stage = year + '1'
   },
   methods: {
+    searchByNationalId() {
+      if (this.form.national_id) {
+        this.$store.dispatch('Examiner/getExaminer', this.form.national_id)
+      }
+    },
     save() {
       this.serverErr = []
       if (this.$refs.form.validate()) {

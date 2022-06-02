@@ -1,4 +1,4 @@
-export default function ({ $axios }) {
+export default function ({ $axios, app, store }) {
   $axios.interceptors.response.use(
     function (response) {
       // Any status code that lie within the range of 2xx cause this function to trigger
@@ -18,6 +18,21 @@ export default function ({ $axios }) {
         }
         return Promise.reject(res)
       }
+      return Promise.reject(error)
+    }
+  )
+  $axios.interceptors.request.use(
+    function (config) {
+      // Do something before request is sent
+
+      const user = app.$cookiz.get('user') || store.getters['User/currentLogin']
+      if (user) {
+        config.headers.id = user.Cat_ID
+      }
+      return config
+    },
+    function (error) {
+      // Do something with request error
       return Promise.reject(error)
     }
   )

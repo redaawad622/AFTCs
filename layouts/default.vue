@@ -216,11 +216,20 @@ export default {
       },
       {
         icon: 'mdi-account-multiple-plus-outline',
-        img: 'settings.png',
+        img: 'rec.png',
         title: 'المتابعة',
         to: '/follow',
         permission: (function () {
           return el.checkPermission('follow')
+        })(),
+      },
+      {
+        icon: 'mdi-log',
+        img: 'log.png',
+        title: 'السجل',
+        to: '/log',
+        permission: (function () {
+          return el.checkPermission('admin')
         })(),
       },
       {

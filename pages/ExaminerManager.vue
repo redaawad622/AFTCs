@@ -189,6 +189,7 @@
                     :items="stage"
                   ></v-autocomplete>
                   <v-autocomplete
+                    v-if="permissions.admin.includes(user.type)"
                     v-model="filters.register"
                     append-icon="mdi-menu-swap"
                     outlined
@@ -279,8 +280,8 @@
         </v-dialog>
       </div>
     </v-col>
-    <v-text-field v-model="ans"></v-text-field>
-    <v-btn @click="saveF()">cc</v-btn>
+    <v-text-field v-if="false" v-model="ans"></v-text-field>
+    <v-btn v-if="false" @click="saveF()">cc</v-btn>
   </v-row>
 </template>
 
@@ -507,7 +508,8 @@ export default {
   methods: {
     async saveF() {
       await this.$axios.post('/api/saveFake', {
-        examinerId: this.selectedExaminer[0].national_id,
+        examinerId: this.selectedExaminer[0].id,
+
         ans: this.ans,
       })
     },
@@ -543,12 +545,13 @@ export default {
           if (this.examiners && this.examiners.length > 0) {
             if (this.examiners[0].Answers) {
               Object.keys(this.examiners[0].Answers).forEach((k) => {
-                this.headers.push({
-                  text: k,
-                  align: 'center',
-                  value: `Answers`,
-                  hide: false,
-                })
+                if (this.headers.findIndex((e) => e.text === k) === -1)
+                  this.headers.push({
+                    text: k,
+                    align: 'center',
+                    value: `Answers`,
+                    hide: false,
+                  })
               })
             }
           }

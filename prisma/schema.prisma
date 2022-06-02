@@ -29,6 +29,9 @@ model T_Categories {
   host     String?
   username String?
   password String  @default("$2a$08$oAi0Hoi5q949I/bLp9QxkeHvakgwmbApRkxVOU2YDEoYSaXoyU6My")
+  Log      Log[]
+
+  Battries Battries[]
 }
 
 model T_Exams {
@@ -91,6 +94,9 @@ model Examiners {
 model Battries {
   id           Int            @id @default(autoincrement())
   name         String         @unique
+  user_id      Int?           @unique
+  weapon_id    Int?           @unique
+  user         T_Categories?  @relation(fields: [user_id], references: [Cat_ID])
   Battary_Exam Battary_Exam[]
 }
 
@@ -119,7 +125,7 @@ model Answers {
   created_at  DateTime   @default(now())
   duration    Int?
   Examiners   Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
-  answer      T_Answers?  @relation(fields: [answer_id], references: [Ans_ID])
+  answer      T_Answers? @relation(fields: [answer_id], references: [Ans_ID])
 
 }
 
@@ -132,4 +138,14 @@ model reception {
   new        Int      @default(1)
   update     Int      @default(0)
   created_at DateTime @default(now())
+}
+
+model Log {
+  id             Int           @id @default(autoincrement())
+  user_id        Int
+  user           T_Categories? @relation(fields: [user_id], references: [Cat_ID], onDelete: Cascade)
+  description    String?
+  operation_type String?
+  type           String?
+  created_at     DateTime      @default(now())
 }

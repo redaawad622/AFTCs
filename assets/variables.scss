@@ -2,9 +2,17 @@
 //
 // The variables you want to modify
 // $font-size-root: 20px;
+@font-face {
+  font-family: 'Tajawal';
 
+  src: url('/fonts/Tajawal-Black.ttf') format('truetype'),
+    url('/fonts/Tajawal-Medium.ttf') format('truetype'),
+    url('/fonts/Tajawal-Regular.ttf') format('truetype');
+}
 .width-100 {
   width: 100%;
 }
 
-
+.v-application {
+  font-family: 'Tajawal', sans-serif;
+}

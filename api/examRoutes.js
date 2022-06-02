@@ -19,6 +19,7 @@ module.exports = function (app, prisma) {
           } ) اتم الاختبار من قبل بتاريخ ${examiner.Answers[0].created_at.toLocaleDateString()}`
         )
     }
+
     // step 1 get by assign battary
     if (examiner.battary_id) {
       let battary = await prisma.Battries.findUnique({
@@ -51,10 +52,6 @@ module.exports = function (app, prisma) {
         exam_id: true,
       },
     })
-    if (!exams || exams.length < 1) {
-      // fetch default for current login user
-    }
-
     if (exams && exams.length > 0) {
       exams = exams.map((x) => x.exam_id)
       const allExam = await prisma.T_Exams.findMany({
@@ -72,7 +69,75 @@ module.exports = function (app, prisma) {
       })
       res.json({ battary: allExam, Answers: examiner.Answers })
     } else {
-      res.status(404).json('لا يوجد امتحانات متوفره')
+      const userId = req.headers.id
+      console.log(userId)
+      if (userId) {
+        console.log(userId)
+        // fetch default for current login user
+        let battary = await prisma.Battries.findUnique({
+          where: {
+            user_id: Number(userId),
+          },
+          include: {
+            Battary_Exam: {
+              include: {
+                exam: {
+                  select: {
+                    Exm_ID: true,
+                    Exm_Name: true,
+                    Exm_Display_Name: false,
+                    Exm_Duration_In_Mins: true,
+                    category: true,
+                    random: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+        if (battary) {
+          battary = battary.Battary_Exam.map((x) => x.exam)
+
+          res.json({ battary, Answers: examiner.Answers })
+        } else {
+          // fetch default for current weapon
+          let weaponId = examiner.sold_id
+
+          if (weaponId && weaponId.length === 13) {
+            weaponId = weaponId[6] + weaponId[7]
+            let battary = await prisma.Battries.findUnique({
+              where: {
+                weapon_id: Number(weaponId),
+              },
+              include: {
+                Battary_Exam: {
+                  include: {
+                    exam: {
+                      select: {
+                        Exm_ID: true,
+                        Exm_Name: true,
+                        Exm_Display_Name: false,
+                        Exm_Duration_In_Mins: true,
+                        category: true,
+                        random: true,
+                      },
+                    },
+                  },
+                },
+              },
+            })
+            if (battary) {
+              battary = battary.Battary_Exam.map((x) => x.exam)
+
+              res.json({ battary, Answers: examiner.Answers })
+            } else {
+              res.status(404).json('لا يوجد امتحانات متوفره')
+            }
+          } else {
+            res.status(404).json('لا يوجد امتحانات متوفره')
+          }
+        }
+      }
     }
   })
   app.get('/getExamsData', async (req, res) => {
@@ -215,18 +280,17 @@ module.exports = function (app, prisma) {
         national_id: ans,
       },
     })
-    let answers = await prisma.Answers.findMany({
+    const answers = await prisma.Answers.findMany({
       where: {
         examiner_id: ex.id,
       },
+      select: {
+        exam_id: true,
+        question_id: true,
+        answer_id: true,
+      },
     })
-    answers = answers.map((elm) => {
-      return {
-        question_id: elm.question_id,
-        answer_id: elm.answer_id,
-        exam_id: elm.exam_id,
-      }
-    })
+
     answers.forEach(async (x) => {
       await prisma.Answers.create({
         data: { examiner_id: examinerId, ...x, duration: 5 },
