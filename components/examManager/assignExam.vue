@@ -220,7 +220,6 @@ export default {
     battaries() {
       return this.$store.getters['Exam/battaries']
     },
-   
   },
   watch: {
     search(val) {
@@ -348,4 +347,3 @@ export default {
   },
 }
 </script>
-

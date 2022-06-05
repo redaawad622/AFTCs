@@ -107,7 +107,6 @@ export const mutations = {
       return !examiner_ids.includes(obj.examiner_id)
     })
     state.answers = [...answers, ...filteredLocalBackup]
-    
   },
 
   reset(state, payload) {

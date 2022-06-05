@@ -1,11 +1,14 @@
-const express = require('express')
 const { createServer } = require('http')
-
+const express = require('express')
 const { PrismaClient } = require('@prisma/client')
+// const gulp = require('gulp');
+// const jsdoc = require('gulp-jsdoc3')
 
 const app = express()
 const httpServer = createServer(app)
-
+// gulp.task('doc', function (cb) {
+//   gulp.src(['README.md', './store/*.js'], { read: false }).pipe(jsdoc(cb))
+// })
 // const multer = require('multer')
 // const upload = multer({ dest: 'static/uploads' })
 const { Server } = require('socket.io')
@@ -36,6 +39,7 @@ require('./userRoutes')(app, prisma, types)
 require('./badanyRoutes')(app, prisma, types)
 require('./oracleRoutes')(app, prisma, types)
 require('./followRoutes')(app, prisma, io, types)
+require('./logRoute')(app, prisma, types)
 require('./fake')(app, prisma, types)
 httpServer.listen(3000)
 module.exports = app

@@ -12,10 +12,10 @@
         >
         <div class="d-flex justify-center">
           <audio
+            ref="intro"
             autoplay
             src="/audio/word_intro.mp3"
             controls
-            ref="intro"
           ></audio>
         </div>
       </v-card>

@@ -151,6 +151,7 @@
                     item-text="name"
                     item-value="value"
                   ></v-autocomplete>
+
                   <v-autocomplete
                     v-model="filters.examFinish"
                     append-icon="mdi-menu-swap"
@@ -220,6 +221,7 @@
           :items="defaultHeaders"
         ></v-select>
         <v-data-table
+          v-model="selectedExaminer"
           :headers="headers"
           :items="examiners"
           fixed-header
@@ -230,7 +232,6 @@
           item-key="national_id"
           :single-expand="true"
           :single-select="true"
-          v-model="selectedExaminer"
           show-select
         >
           <template v-slot:[`item.actions`]="{ item }">

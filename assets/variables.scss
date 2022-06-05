@@ -16,3 +16,12 @@
 .v-application {
   font-family: 'Tajawal', sans-serif;
 }
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'],
+[role='button'] {
+  cursor: pointer;
+  color: initial !important;
+}

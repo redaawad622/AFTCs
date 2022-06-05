@@ -278,6 +278,14 @@ module.exports = function (app, prisma, types) {
         id,
       },
     })
+    await prisma.Log.create({
+      data: {
+        user_id: Number(id),
+        operation_type: 'delete',
+        description: ' مسح بيانات ممتحن يحمل رقم قومي ' + id,
+        type: types[4],
+      },
+    })
     res.json('done')
   })
   app.post('/writeExaminerToMdb', async (req, res) => {
@@ -301,6 +309,7 @@ module.exports = function (app, prisma, types) {
       })
       examiners.push(ex)
     })
+
     res.json(examiners) // [{id: 5, name: 'Ashley', color: 'black'}, ...]
   })
 }
