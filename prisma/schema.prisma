@@ -12,10 +12,8 @@ model T_Answers {
   Ans_ID      Int         @id @default(autoincrement())
   Ans_Is_Pic  Boolean     @default(false)
   Ans_Text    String?
-  Ans_Pic_UNC String?
   Ans_Value   Float?
   Ans_audio   Bytes?
-  Ans_image   Bytes?
   Ans_Cat     String?
   T_Questions T_Questions @relation(fields: [Ans_Qus_ID], references: [Qus_ID], onDelete: Cascade, onUpdate: NoAction)
   Answers     Answers[]
@@ -59,7 +57,6 @@ model T_Questions {
   Qus_Text      String?
   Qus_Pic_UNC   String?
   Qus_audio     Bytes?
-  Qus_image     Bytes?
   Qus_Order_Cat Int?
   T_Answers     T_Answers[]
   T_Exams       T_Exams?    @relation(fields: [Qus_Exm_ID], references: [Exm_ID])

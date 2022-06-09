@@ -32,7 +32,9 @@ const types = [
 ]
 
 const prisma = new PrismaClient()
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ limit: '50mb' }))
+
 require('./examinerRoutes.js')(app, prisma, types)
 require('./examRoutes.js')(app, prisma, types)
 require('./userRoutes')(app, prisma, types)

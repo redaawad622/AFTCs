@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 module.exports = function (app, prisma) {
   app.get('/fetchLog', async (req, res) => {
     // Fetch logs data from prisma
@@ -61,23 +63,38 @@ module.exports = function (app, prisma) {
     res.json({ logs, allLogs })
   })
 
-  // app.get('/filterImages', async (req, res) => {
-  //   // Fetch logs data from prisma
-  //   const answers = await prisma.T_Answers.findMany({
-  //     where: {
-  //       Ans_Is_Pic: true,
-  //     },
-  //   })
-  //   res.json(answers)
-  // })
-  // app.get('/filterQuestionImages', async (req, res) => {
-  //   // Fetch logs data from prisma
-  //   const questionImages = await prisma.T_Questions.findMany({
-  //     where: {
-  //       Qus_Is_Pic: true,
-  //       Qus_Exm_ID: req.body,
-  //     },
-  //   })
-  //   res.json(questionImages)
-  // })
+  app.get('/filterQuestionImages', async (_, res) => {
+    const questionImages = await prisma.T_Questions.findMany({
+      include: {
+        T_Answers: true,
+      },
+    })
+    res.json(questionImages)
+  })
+
+  app.post('/setImg', async (req, res) => {
+    const { image, questionId, ansId } = req.body
+    const dir = 'D:/AFTCs/AFTCs/static/images/' + questionId
+    if (!fs.existsSync(dir)) {
+      await fs.mkdirSync(dir, { recursive: true })
+
+      if (!fs.existsSync(dir + '/Answers')) {
+        await fs.mkdirSync(dir + '/Answers', { recursive: true })
+      }
+    } else {
+      // eslint-disable-next-line no-lonely-if
+      if (!fs.existsSync(dir + '/Answers')) {
+        await fs.mkdirSync(dir + '/Answers', { recursive: true })
+      }
+    }
+    await fs.writeFile(
+      `${dir}/Answers/${ansId}.png`,
+      image,
+      'base64',
+      (err) => {
+        console.log(err)
+      }
+    )
+    return res.json('done')
+  })
 }

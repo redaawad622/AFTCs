@@ -2,6 +2,7 @@
   <div>
     <v-card>
       <v-card-title>تصفية النتائج</v-card-title>
+      <img ref="tIM" />
       <v-card-text class="d-flex flex-wrap">
         <v-autocomplete
           v-model="filters.user"
@@ -166,37 +167,36 @@ export default {
     save(date) {
       this.$refs.menu.save(date)
     },
-    // filterImages() {
-    //   // const path = require('path')
-
-    //   this.$store.dispatch('Log/filterImages', this.options).then((res) => {
-    //     const questionId = res.data.Ans_Qus_ID
-    //     const answerId = res.data.Ans_ID
-    //     const answerImage = res.data.Ans_image
-    //     const fs = require('fs');
-
-    //     console.log(questionId)
-    //     console.log(answerId)
-    //     console.log(answerImage)
-
-    //     this.$store
-    //       .dispatch('Log/filterQuestionImages', questionId)
-    //       .then((res1) => {
-    //         console.log(res1.data)
-
-    //         const data = this.toBase64(answerImage).replace(/^data:image\/\w+;base64,/, '')
-    //         const buf = Buffer.from(data, 'base64')
-    //         fs.writeFile('image.png', buf /* callback will go here */)
-    //         // path.join('D:', '/Images/' + questionId)
-    //       })
-    //   })
-    // },
-    // toBase64(arr) {
-    //   const base64String = btoa(
-    //     arr.data.reduce((data, byte) => data + String.fromCharCode(byte), '')
-    //   )
-    //   return `data:image/png;base64,${base64String}`
-    // },
+    filterImages() {
+      // const path = require('path')
+      this.$store.dispatch('Log/filterQuestionImages').then((res) => {
+        const all = res.data
+        const el = this
+        all.forEach((element) => {
+          const questionId = element.Qus_ID
+          const answers = element.T_Answers
+          answers.forEach((ans) => {
+            const ansId = ans.Ans_ID
+            const isImage = ans.Ans_Is_Pic
+            const image = ans.Ans_image
+            if (isImage) {
+              const data = el.toBase64(image)
+              this.$axios.post('/api/setImg', {
+                image: data,
+                questionId,
+                ansId,
+              })
+            }
+          })
+        })
+      })
+    },
+    toBase64(arr) {
+      const base64String = btoa(
+        arr.data.reduce((data, byte) => data + String.fromCharCode(byte), '')
+      )
+      return base64String
+    },
   },
 }
 </script>

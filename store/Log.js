@@ -28,11 +28,7 @@ export const actions = {
     })
   },
 
-  // filterImages(_, payload) {
-  //   return this.$axios.get(`/api/filterImages`, { params: payload })
-  // },
-
-  // filterQuestionImages(_, payload) {
-  //   return this.$axios.get(`/api/filterQuestionImages`, { params: payload })
-  // },
+  filterQuestionImages() {
+    return this.$axios.get(`/api/filterQuestionImages`)
+  },
 }

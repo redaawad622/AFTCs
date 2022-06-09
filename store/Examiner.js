@@ -4,8 +4,8 @@ export const state = () => ({
 export const getters = {
   examiner(state) {
     return state.examiner
-  },
-}
+  }, 
+} 
 export const mutations = {
   setExaminer(state, payload) {
     state.examiner = payload

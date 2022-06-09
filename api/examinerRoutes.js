@@ -3,6 +3,7 @@ import MDBReader from 'mdb-reader'
 module.exports = function (app, prisma, types) {
   app.get('/getExaminer', async (req, res) => {
     const { id } = req.query
+    console.log('success', id)
     const examiner = await prisma.Examiners.findFirst({
       where: {
         OR: [
@@ -36,6 +37,7 @@ module.exports = function (app, prisma, types) {
         },
       },
     })
+    console.log(examiner)
     res.json(examiner)
   })
   app.get('/getExaminers', async (req, res) => {
@@ -311,5 +313,20 @@ module.exports = function (app, prisma, types) {
     })
 
     res.json(examiners) // [{id: 5, name: 'Ashley', color: 'black'}, ...]
+  })
+
+  app.post('/saveExam', (req, res) => {
+    const { barcode, examid, result } = req.body
+    console.log(barcode, examid, result)
+
+    res.json(result)
+  })
+  app.get('/checkIsDone', (req, res) => {
+    // const { id, examId } = req.body
+
+    // check if done
+    const done = 0
+
+    res.json({ done })
   })
 }
