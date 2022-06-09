@@ -3,7 +3,6 @@ import MDBReader from 'mdb-reader'
 module.exports = function (app, prisma, types) {
   app.get('/getExaminer', async (req, res) => {
     const { id } = req.query
-    console.log('success', id)
     const examiner = await prisma.Examiners.findFirst({
       where: {
         OR: [

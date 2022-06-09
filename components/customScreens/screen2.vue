@@ -46,7 +46,7 @@
       <v-card class="mb-12" flat>
         <v-chip-group v-model="chosenWords" column multiple>
           <v-chip
-            v-for="word in words"
+            v-for="word in randomWord"
             :key="word"
             class="customChip"
             filter
@@ -109,6 +109,9 @@ export default {
     examiner() {
       return this.$store.getters['Examiner/examiner']
     },
+    randomWord() {
+      return this.words
+    },
   },
   watch: {
     chosenWords(val) {
@@ -130,6 +133,8 @@ export default {
       this.cursor = 2
     },
     save() {
+      // calculate the res
+
       this.$store.commit('Exam/addToCustomExam', {
         userId: this.examiner.national_id,
         ans: {
