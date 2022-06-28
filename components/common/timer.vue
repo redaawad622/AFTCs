@@ -54,6 +54,9 @@ export default {
       }
     },
   },
+  destroyed() {
+    this.stop()
+  },
   methods: {
     // formats time function
     formatTime(time) {
@@ -70,6 +73,10 @@ export default {
       }
     },
     start() {
+      if (this.pomodoroInstance) {
+        clearInterval(this.pomodoroInstance)
+      }
+
       this.pomodoroInstance = setInterval(() => {
         this.totalSeconds -= 1
         if (this.totalSeconds < 15) {
@@ -101,5 +108,3 @@ export default {
   },
 }
 </script>
-<style scoped>
-</style>

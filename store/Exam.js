@@ -99,22 +99,38 @@ export const mutations = {
     state.answers = this.$getLocal(`answer${payload}`) || []
     state.customExam = this.$getLocal(`customExam${payload}`) || []
   },
-  loadAnswersFrom(state, { answers, national_id }) {
+  loadAnswersFrom(state, { answers, national_id, customExam }) {
     const localBackup = this.$getLocal(`answer${national_id}`) || []
-    state.customExam = this.$getLocal(`customExam${national_id}`) || []
-    const examiner_ids = answers.map((elm) => elm.examiner_id)
-    const filteredLocalBackup = localBackup.filter(function (obj) {
-      return !examiner_ids.includes(obj.examiner_id)
-    })
-    state.answers = [...answers, ...filteredLocalBackup]
+    const localCustomExam = this.$getLocal(`customExam${national_id}`) || []
+    if (customExam && customExam.length > 0) {
+      const examiner_ids_c = customExam.map((elm) => elm.examiner_id)
+      const filteredLocalBackup_c = localCustomExam.filter(function (obj) {
+        return !examiner_ids_c.includes(obj.examiner_id)
+      })
+      state.customExam = [...customExam, ...filteredLocalBackup_c]
+    } else {
+      state.customExam = localCustomExam
+    }
+
+    if (answers && answers.length > 0) {
+      const examiner_ids = answers.map((elm) => elm.examiner_id)
+      const filteredLocalBackup = localBackup.filter(function (obj) {
+        return !examiner_ids.includes(obj.examiner_id)
+      })
+      state.answers = [...answers, ...filteredLocalBackup]
+    } else {
+      state.answers = localBackup
+    }
   },
 
   reset(state, payload) {
-    state.answers = this.$setLocal(`answer${payload}`, [])
+    this.$setLocal(`answer${payload}`, [])
+    this.$setLocal(`customExam${payload}`, [])
     state.examsData = []
     state.exams = []
     state.currentExamTime = 0
     state.answers = []
+    state.customExam = []
     state.audio = null
     state.mute = false
     state.play = false
@@ -203,11 +219,17 @@ export const actions = {
     })
   },
   saveAnswers({ state }, payload) {
-    return this.$axios.post(`/api/saveAnswers`, {
-      answers: JSON.stringify(state.answers),
-      examinerId: payload.id,
-      endTime: payload.endTime,
+    let count = 0
+    state.answers.forEach((element) => {
+      if (Object.prototype.hasOwnProperty.call(element, 'id')) count++
     })
+    if (count !== state.answers.length || state.customExam.length > 0)
+      return this.$axios.post(`/api/saveAnswers`, {
+        answers: JSON.stringify(state.answers),
+        customExam: JSON.stringify(state.customExam),
+        examinerId: payload.id,
+        endTime: payload.endTime,
+      })
   },
   saveOrEditExam(_, payload) {
     return this.$axios.post(`/api/saveOrEditExam`, payload)

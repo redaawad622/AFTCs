@@ -59,4 +59,10 @@ export const actions = {
   reset(_, payload) {
     return this.$axios.post(`/api/resetPassword`, payload)
   },
+  changePageZooming(_, payload) {
+    return this.$axios.post(`/api/changePageZooming`, payload)
+  },
+  openProg(_, payload) {
+    return this.$axios.post(`/api/openFile`, { url: payload })
+  },
 }

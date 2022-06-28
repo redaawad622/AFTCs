@@ -27,10 +27,7 @@
         >
       </v-card-text>
     </v-card>
-    <v-card
-     
-      outlined
-    >
+    <v-card outlined>
       <v-card-title>تسجيل رقم دخول جديد</v-card-title>
 
       <v-card-text>
@@ -52,6 +49,27 @@
         >
       </v-card-text>
     </v-card>
+    <v-card outlined class="my-4">
+      <v-card-title>تغير حجم الصفحه</v-card-title>
+
+      <v-card-text>
+        <v-slider
+          v-model="slider"
+          thumb-label="always"
+          min="50"
+          max="150"
+        ></v-slider>
+        <v-btn
+          :loading="zoomLoading"
+          color="primary"
+          @click="changePageZooming()"
+          >حفظ</v-btn
+        >
+        <v-btn color="secondary" class="mx-4" @click="slider = 100"
+          >اعادة التعين</v-btn
+        >
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
@@ -64,6 +82,8 @@ export default {
     password: '',
     loading: false,
     resetLoading: false,
+    zoomLoading: false,
+    slider: 100,
     reset: {
       newPassword: '',
       oldPassword: '',
@@ -77,7 +97,14 @@ export default {
       return this.$store.getters['User/permissions']
     },
   },
-
+  watch: {
+    slider() {
+      document.getElementsByTagName('html')[0].style.zoom = this.slider + '%'
+    },
+  },
+  mounted() {
+    this.slider = this.user.zoom
+  },
   methods: {
     deleteTable() {
       if (this.table) {
@@ -127,6 +154,28 @@ export default {
         })
         .finally(() => {
           this.resetLoading = false
+        })
+    },
+    changePageZooming() {
+      this.zoomLoading = true
+      this.$store
+        .dispatch('User/changePageZooming', { zoom: this.slider })
+        .then((res) => {
+          this.$store.commit('Notifications/setNotification', {
+            text: 'تم الحفظ بنجاح',
+            color: 'success',
+          })
+          this.$store.commit('User/setUser', res.data)
+        })
+        .catch((rej) => {
+          const error = rej.response.data
+          this.$store.commit('Notifications/setNotification', {
+            text: error,
+            color: 'error',
+          })
+        })
+        .finally(() => {
+          this.zoomLoading = false
         })
     },
   },

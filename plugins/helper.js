@@ -20,6 +20,7 @@ function sendMessage(notifiy) {
 const imgPath = 'http://localhost:3000/uploads/'
 export default ({ app }, inject) => {
   inject('audioPath', '/questions/')
+  inject('imagesPath', '/images/')
   inject('getUrl', function (url, id) {
     if (
       typeof url === 'object' &&

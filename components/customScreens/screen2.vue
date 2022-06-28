@@ -19,7 +19,7 @@
           ></audio>
         </div>
       </v-card>
-      <v-btn color="primary" @click="stopAudioAndNext()"> التالي </v-btn>
+      <v-btn color="primary" @click="stopAudioAndNext()"> سماع الكلمات </v-btn>
     </v-stepper-content>
 
     <v-stepper-step :complete="cursor > 2" step="2">
@@ -33,7 +33,11 @@
           سيبدأالامتحان</v-card-text
         >
         <div class="d-flex justify-center">
-          <audio src="/audio/words.mp3" controls @ended="cursor = 3"></audio>
+          <audio
+            src="/audio/words.mp3"
+            ref="wordAudio"
+            @ended="cursor = 3"
+          ></audio>
         </div>
       </v-card>
     </v-stepper-content>
@@ -44,9 +48,9 @@
 
     <v-stepper-content step="3">
       <v-card class="mb-12" flat>
-        <v-chip-group v-model="chosenWords" column multiple>
+        <v-chip-group v-model="chosenWords" column multiple :max="10">
           <v-chip
-            v-for="word in randomWord"
+            v-for="word in words"
             :key="word"
             class="customChip"
             filter
@@ -89,28 +93,47 @@ export default {
         'سيارة',
       ],
       words: [
+        'جدول',
         'مانجو',
-        'باخرة',
+        'سرقة',
         'كمسري',
-        'شباك',
+        'معنوية',
+        'صيدلية',
+        'مكتب',
         'مسلسل',
-        'جمل',
-        'انتقام',
+        'عصفورة',
+        'شباك',
+        'نافذة',
+        'كمثري',
+        'باخرة',
         'بدلة',
-        'سالب',
+        'انتقام',
+        'بسلة',
+        'النص',
+        'جمل',
+        'قتل',
+        'اكتئاب',
+        'تليفزيون',
+        'قاموس',
         'سيارة',
+        'سالب',
+        'مجرم',
+        'سندات',
+        'صانع',
+        'دب',
+        'طائر',
+        'سم',
+        'ضباب',
       ],
     }
   },
+
   computed: {
     customExam() {
       return this.$store.getters['Exam/customExam']
     },
     examiner() {
       return this.$store.getters['Examiner/examiner']
-    },
-    randomWord() {
-      return this.words
     },
   },
   watch: {
@@ -121,6 +144,8 @@ export default {
     },
   },
   created() {
+    this.$store.commit('Exam/setCurrentExamTime', 10)
+    this.words.sort(() => Math.random() - 0.5)
     // eslint-disable-next-line eqeqeq
     if (!this.exam || this.exam.Exm_ID != 2 || this.isExist()) {
       this.$emit('done')
@@ -131,18 +156,29 @@ export default {
     stopAudioAndNext() {
       this.$refs.intro.pause()
       this.cursor = 2
+      this.$store.commit(
+        'Exam/setCurrentExamTime',
+        this.exam.Exm_Duration_In_Mins
+      )
+      this.$refs.wordAudio.play()
+    },
+    getArraysIntersection(a1, a2) {
+      return a2.filter((n) => a1.includes(this.words[n]))
     },
     save() {
       // calculate the res
-
+      const res = this.getArraysIntersection(
+        this.correctWords,
+        this.chosenWords
+      )
       this.$store.commit('Exam/addToCustomExam', {
         userId: this.examiner.national_id,
         ans: {
           exam_id: this.exam.Exm_ID,
-          results: this.results,
+          value: res.length,
         },
       })
-      this.results = 0
+      this.chosenWords = []
       this.$emit('done')
     },
     isExist() {

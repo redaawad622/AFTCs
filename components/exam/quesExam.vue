@@ -12,12 +12,12 @@
       <v-alert
         color="#89714b"
         text
-        class="font-weight-bold title text-center py-12 d-flex justify-center"
+        class="font-weight-bold display-1 text-center py-12 d-flex justify-center"
         min-width="100%"
       >
         <template
           v-if="
-            !questions[cursor].Qus_image &&
+            !questions[cursor].Qus_Is_Pic &&
             typeof questions[cursor].Qus_Text == 'string'
           "
           >{{ questions[cursor].Qus_Text }}</template
@@ -27,7 +27,7 @@
           contain
           :width="exam.Exm_ID === 4 ? '500px' : '180px'"
           :height="exam.Exm_ID === 4 ? '250px' : 'auto'"
-          :src="toBase64(questions[cursor].Qus_image)"
+          :src="getImage('question', questions[cursor])"
         />
       </v-alert>
       <span class="quesIcon white"
@@ -38,24 +38,30 @@
         <v-chip-group
           v-if="questions[cursor].T_Answers.length > 0"
           v-model="currentAns"
-          color="primary"
           column
         >
           <v-chip
             v-for="(ans, k) in questions[cursor].T_Answers"
             :key="'ans' + k + ans.Ans_ID"
             filter
-            class="title"
+            class="headline mx-5 px-2 py-1"
             :x-large="ans.Ans_Is_Pic"
-            :outlined="ans.Ans_Is_Pic"
+            :outlined="true"
             :label="ans.Ans_Is_Pic"
             style="height: auto"
+            large
+            @click="playAnsAudio(ans.Ans_ID)"
           >
             <template
               v-if="!ans.Ans_Is_Pic && typeof ans.Ans_Text == 'string'"
               >{{ ans.Ans_Text }}</template
             >
-            <v-img v-else contain :src="toBase64(ans.Ans_image)" />
+            <v-img v-else contain :src="getImage('ans', ans)" />
+            <v-btn v-if="!ans.Ans_Is_Pic" class="mx-2" icon
+              ><v-icon v-if="currentPlay == ans.Ans_ID && ansPlay"
+                >mdi-pause</v-icon
+              ><v-icon v-else>mdi-play</v-icon></v-btn
+            >
           </v-chip>
         </v-chip-group>
       </div>
@@ -65,15 +71,21 @@
       style="position: fixed; bottom: 0"
       class="d-flex justify-space-between px-5 py-10"
     >
-      <v-btn v-show="cursor > 0" color="secondary" @click="prevQ()"
-        >السابق</v-btn
-      >
+      <v-btn
+        v-show="cursor > 0"
+        color="secondary"
+        x-large
+        class="font-weight-bold px-10"
+        @click="prevQ()"
+        ><v-icon left size="25">mdi-arrow-right</v-icon> السابق
+      </v-btn>
       <v-btn
         :disabled="currentAns || currentAns === 0 ? false : true"
-        class="ms-auto"
+        class="ms-auto font-weight-bold px-10"
         color="primary"
+        x-large
         @click="nextQ()"
-        >التالي</v-btn
+        >التالي <v-icon right size="25">mdi-arrow-left</v-icon></v-btn
       >
     </v-sheet>
   </div>
@@ -93,6 +105,10 @@ export default {
       currentAns: '',
       initAnswer: [],
       hide: false,
+      customTime: null,
+      ansAudio: null,
+      ansPlay: false,
+      currentPlay: null,
     }
   },
   computed: {
@@ -138,9 +154,13 @@ export default {
         this.autoHide()
       }
     },
+    play(val) {
+      if (val) this.stopAns()
+    },
   },
   created() {
     this.setTiming()
+
     this.initAnswer = [...this.answers]
     if (this.questions.length < 1) {
       this.finished()
@@ -150,6 +170,20 @@ export default {
     }
   },
   methods: {
+    stopAns() {
+      if (this.ansAudio) {
+        this.ansAudio.pause()
+        this.ansPlay = false
+        this.currentPlay = false
+      }
+    },
+    getImage(type, q) {
+      if (type === 'question') {
+        return `${this.$imagesPath + q.Qus_ID}/${q.Qus_ID}.png`
+      } else {
+        return `${this.$imagesPath + q.Ans_Qus_ID}/Answers/${q.Ans_ID}.png`
+      }
+    },
     toBase64(arr) {
       const base64String = btoa(
         arr.data.reduce((data, byte) => data + String.fromCharCode(byte), '')
@@ -157,11 +191,14 @@ export default {
       return `data:image/png;base64,${base64String}`
     },
     autoHide() {
-      setTimeout(() => {
+      this.customTime = setTimeout(() => {
         this.hide = true
+        clearTimeout(this.customTime)
       }, 10000)
     },
     nextQ() {
+      this.stopAns()
+      this.play = false
       if (this.cursor === this.questions.length - 1) {
         if (this.currentAns || this.currentAns === 0) {
           this.$store.commit('Exam/addToAnswers', {
@@ -228,6 +265,36 @@ export default {
         this.exam.Exm_Duration_In_Mins
       )
     },
+    playAnsAudio(id) {
+      this.play = false
+      if (this.ansAudio) this.ansAudio.pause()
+
+      if (this.currentPlay === id && this.ansPlay) {
+        this.ansPlay = false
+        this.currentPlay = null
+        return
+      }
+      this.currentPlay = id
+      if (this.ansAudio) {
+        this.ansPlay = false
+      }
+      const ques = this.questions[this.cursor]
+      this.ansAudio = new Audio(
+        `${this.$audioPath + ques.Qus_ID}/Answers/${id}.mp3`
+      )
+
+      this.ansAudio.addEventListener('canplaythrough', () => {
+        /* the audio is now playable; play it if permissions allow */
+        if (!this.mute) {
+          this.ansAudio.play()
+          this.ansPlay = true
+          this.ansAudio.addEventListener('ended', () => {
+            this.ansPlay = false
+            this.currentPlay = null
+          })
+        }
+      })
+    },
   },
 }
 </script>
@@ -261,5 +328,11 @@ export default {
   left: 0;
   max-width: 100%;
   height: calc(100% - 56px);
+}
+.v-chip-group .v-chip.v-chip--active.v-chip--outlined,
+.v-chip-group .v-chip.v-chip--active {
+  background-color: var(--v-secondary-darken3) !important;
+  font-weight: bold;
+  padding: 0 30px;
 }
 </style>

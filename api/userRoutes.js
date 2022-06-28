@@ -1,3 +1,4 @@
+import { execFile } from 'child_process'
 const bcrypt = require('bcryptjs')
 
 module.exports = function (app, prisma) {
@@ -13,6 +14,7 @@ module.exports = function (app, prisma) {
     })
     res.json(users)
   })
+
   app.post('/saveUser', async (req, res) => {
     const { name, password } = req.body
     try {
@@ -54,6 +56,7 @@ module.exports = function (app, prisma) {
     })
     res.status(200).json(user)
   })
+
   app.post('/resetPassword', async (req, res) => {
     const { oldPassword, newPassword, name } = req.body
     if (!oldPassword || !newPassword) {
@@ -68,6 +71,7 @@ module.exports = function (app, prisma) {
       res.status(404).json('المستخدم غير موجود')
     }
     const checkPassword = bcrypt.compareSync(oldPassword, user.password)
+
     if (!checkPassword) res.status(401).json(' خطأ في كلمة المرور القديمه')
 
     delete user.password
@@ -120,6 +124,31 @@ module.exports = function (app, prisma) {
       data: {
         Ans_audio: null,
       },
+    })
+    res.status(200).json()
+  })
+  app.post('/changePageZooming', async (req, res) => {
+    const userId = req.headers.id
+    const user = await prisma.T_Categories.update({
+      where: {
+        Cat_ID: Number(userId),
+      },
+      data: {
+        zoom: Number(req.body.zoom),
+      },
+    })
+    res.status(200).json(user)
+  })
+  app.post('/openFile', (req, res) => {
+    const { url } = req.body
+
+    const child = execFile(url, function (error, stdout, stderr) {
+      if (error) {
+        res.status(404).json()
+      }
+    })
+    child.on('exit', function (code) {
+      console.log(code)
     })
     res.status(200).json()
   })

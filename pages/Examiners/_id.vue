@@ -3,13 +3,14 @@
     <v-form ref="form" v-model="valid" lazy-validation>
       <div class="d-flex">
         <v-text-field
+          v-model="form.national_id"
           outlined
           color="primary"
-          v-model="form.national_id"
           label="الرقم القومي"
           placeholder="الرقم القومي"
           :rules="national_ru"
           :counter="14"
+          maxlength="14"
           :error-messages="serverErr['national_id']"
           append-icon="mdi-star"
           hide-spin-buttons
@@ -61,45 +62,48 @@
       </v-sheet>
 
       <v-text-field
+        v-model="form.sold_id"
         outlined
         color="primary"
-        v-model="form.sold_id"
         label="الرقم العسكري"
         placeholder="الرقم العسكري"
         :error-messages="serverErr['sold_id']"
+        :rules="sold_ru"
+        :counter="13"
+        maxlength="13"
       ></v-text-field>
       <v-text-field
+        v-model="form.name"
         outlined
         append-icon="mdi-star"
         color="primary"
-        v-model="form.name"
         label="الاسم"
         :rules="required"
         :error-messages="serverErr['name']"
         placeholder="الاسم"
       ></v-text-field>
       <v-select
+        v-model="form.stage"
         :items="currentYerars"
         outlined
         color="primary"
-        v-model="form.stage"
         append-icon="mdi-star"
         label="المرحلة"
         placeholder="المرحلة"
       ></v-select>
       <v-text-field
+        v-model="form.barcode"
         outlined
         color="primary"
-        v-model="form.barcode"
         :error-messages="serverErr['barcode']"
         label="الباركود"
         placeholder="الباركود"
       ></v-text-field>
       <v-select
+        v-model="form.battary_id"
         :items="battaries"
         outlined
         color="primary"
-        v-model="form.battary_id"
         item-text="name"
         item-value="id"
         :return-object="false"
@@ -171,7 +175,17 @@ export default {
   },
   mounted() {
     const year = new Date().getFullYear()
-    this.form.stage = year + '1'
+    const month = new Date().getMonth() + 1
+
+    if ([1, 2, 3].includes(month)) {
+      this.form.stage = year + '1'
+    } else if ([4, 5, 6].includes(month)) {
+      this.form.stage = year + '2'
+    } else if ([7, 8, 9].includes(month)) {
+      this.form.stage = year + '3'
+    } else if ([10, 11, 12].includes(month)) {
+      this.form.stage = year + '4'
+    }
   },
   methods: {
     searchByNationalId() {
@@ -179,6 +193,7 @@ export default {
         this.$store.dispatch('Examiner/getExaminer', this.form.national_id)
       }
     },
+
     save() {
       this.serverErr = []
       if (this.$refs.form.validate()) {
@@ -194,6 +209,19 @@ export default {
               text: 'تم الحفظ بنجاح',
               color: 'success',
             })
+
+            this.form = {
+              national_id: '',
+              triple_number: '',
+              name: '',
+              stage: '',
+              barcode: '',
+              sold_id: '',
+              battary_id: '',
+            }
+            this.f_num = ''
+            this.sec_num = ''
+            this.th_num = ''
           })
           .catch((rej) => {
             if (rej instanceof Array) {

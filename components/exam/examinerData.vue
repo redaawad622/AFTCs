@@ -75,14 +75,11 @@ export default {
         .then((res) => {
           this.$router.replace('/exam')
           this.$store.commit('Exam/setAssignExams', res.data.battary)
-          if (res.data.Answers && res.data.Answers.length > 0) {
-            this.$store.commit('Exam/loadAnswersFrom', {
-              answers: res.data.Answers,
-              national_id: this.examiner.national_id,
-            })
-          } else {
-            this.$store.commit('Exam/loadAnswers', this.examiner.national_id)
-          }
+          this.$store.commit('Exam/loadAnswersFrom', {
+            answers: res.data.Answers,
+            national_id: this.examiner.national_id,
+            customExam: res.data.customExam,
+          })
         })
         .catch((rej) => {
           if (rej.response && rej.response.status === 404) {

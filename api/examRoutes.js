@@ -7,18 +7,10 @@ module.exports = function (app, prisma) {
       },
       include: {
         Answers: true,
+        CustomExam: true,
       },
     })
     // check if exist
-    if (examiner && examiner.Answers.length > 190) {
-      res
-        .status(404)
-        .json(
-          `( ${
-            examiner.name
-          } ) اتم الاختبار من قبل بتاريخ ${examiner.Answers[0].created_at.toLocaleDateString()}`
-        )
-    }
 
     // step 1 get by assign battary
     if (examiner.battary_id) {
@@ -44,7 +36,11 @@ module.exports = function (app, prisma) {
         },
       })
       battary = battary.Battary_Exam.map((x) => x.exam)
-      res.json({ battary, Answers: examiner.Answers })
+      res.json({
+        battary,
+        Answers: examiner.Answers,
+        customExam: examiner.CustomExam,
+      })
     }
     // step 2 get public assign exam
     let exams = await prisma.Assign.findMany({
@@ -67,12 +63,14 @@ module.exports = function (app, prisma) {
           random: true,
         },
       })
-      res.json({ battary: allExam, Answers: examiner.Answers })
+      res.json({
+        battary: allExam,
+        Answers: examiner.Answers,
+        customExam: examiner.CustomExam,
+      })
     } else {
       const userId = req.headers.id
-      console.log(userId)
       if (userId) {
-        console.log(userId)
         // fetch default for current login user
         let battary = await prisma.Battries.findUnique({
           where: {
@@ -98,7 +96,11 @@ module.exports = function (app, prisma) {
         if (battary) {
           battary = battary.Battary_Exam.map((x) => x.exam)
 
-          res.json({ battary, Answers: examiner.Answers })
+          res.json({
+            battary,
+            Answers: examiner.Answers,
+            customExam: examiner.CustomExam,
+          })
         } else {
           // fetch default for current weapon
           let weaponId = examiner.sold_id
@@ -129,7 +131,11 @@ module.exports = function (app, prisma) {
             if (battary) {
               battary = battary.Battary_Exam.map((x) => x.exam)
 
-              res.json({ battary, Answers: examiner.Answers })
+              res.json({
+                battary,
+                Answers: examiner.Answers,
+                customExam: examiner.CustomExam,
+              })
             } else {
               res.status(404).json('لا يوجد امتحانات متوفره')
             }
@@ -162,7 +168,6 @@ module.exports = function (app, prisma) {
               Qus_Text: true,
               Qus_Pic_UNC: true,
               Qus_audio: false,
-              Qus_image: true,
               Qus_Order_Cat: true,
               T_Answers: {
                 select: {
@@ -170,10 +175,8 @@ module.exports = function (app, prisma) {
                   Ans_ID: true,
                   Ans_Is_Pic: true,
                   Ans_Text: true,
-                  Ans_Pic_UNC: false,
                   Ans_Value: false,
                   Ans_audio: false,
-                  Ans_image: true,
                   Ans_Cat: true,
                 },
               },
@@ -264,8 +267,27 @@ module.exports = function (app, prisma) {
     res.json('done')
   })
   app.post('/saveAnswers', (req, res) => {
-    const { examinerId, answers, endTime } = req.body
+    const { examinerId, answers, endTime, customExam } = req.body
     const ans = JSON.parse(answers)
+    if (customExam) {
+      const customEx = JSON.parse(customExam)
+      customEx.forEach(async (elm) => {
+        await prisma.CustomExam.upsert({
+          where: {
+            examiner_id_exam_id: {
+              examiner_id: examinerId,
+              exam_id: Number(elm.exam_id),
+            },
+          },
+          create: {
+            examiner_id: examinerId,
+            value: Number(elm.value),
+            exam_id: Number(elm.exam_id),
+          },
+          update: {},
+        })
+      })
+    }
     ans.forEach(async (x) => {
       await prisma.Answers.create({
         data: { examiner_id: examinerId, ...x, duration: Number(endTime) },
@@ -342,7 +364,6 @@ module.exports = function (app, prisma) {
     data.formData.Exm_Duration_In_Mins = Number(
       data.formData.Exm_Duration_In_Mins
     )
-    console.log(data)
     try {
       const exam = await prisma.T_Exams.upsert({
         where: {

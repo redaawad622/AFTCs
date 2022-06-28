@@ -87,9 +87,9 @@
               ></v-img>
             </v-btn>
             <v-checkbox
-              label="مسح البحث"
               v-if="permissions.developer.includes(user.type)"
               v-model="deleteItems"
+              label="مسح البحث"
             ></v-checkbox>
           </div>
           <div>
@@ -115,7 +115,7 @@
               </v-chip>
             </v-scale-transition>
             <v-menu :close-on-content-click="false" :nudge-bottom="40">
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-btn
                   width="36px"
                   min-width="36px"
@@ -134,7 +134,7 @@
                   <v-list-item-title class="font-weight-black">
                     تصفية النتائج</v-list-item-title
                   >
-                  <v-btn color="primary" @click="fetchExaminers(true)" text
+                  <v-btn color="primary" text @click="fetchExaminers(true)"
                     >تطبيق</v-btn
                   >
                 </v-sheet>
@@ -213,6 +213,7 @@
           </div>
         </div>
         <v-select
+          v-if="permissions.admin.includes(user.type)"
           v-model="headers"
           return-object
           outlined
@@ -234,7 +235,7 @@
           :single-select="true"
           show-select
         >
-          <template v-slot:[`item.actions`]="{ item }">
+          <template #[`item.actions`]="{ item }">
             <v-btn color="success" :to="`/Examiners/${item.national_id}`" icon>
               <v-img
                 contain
@@ -243,7 +244,7 @@
                 src="/icon/edit.png"
               ></v-img>
             </v-btn>
-            <v-btn icon @click="deleteItem(item)" color="error">
+            <v-btn icon color="error" @click="deleteItem(item)">
               <v-img
                 width="24px"
                 contain
@@ -252,15 +253,15 @@
               ></v-img>
             </v-btn>
           </template>
-          <template v-slot:[`item.Answers`]="{ item, header }">
+          <template #[`item.Answers`]="{ item, header }">
             {{ item.Answers[header.text] }}
           </template>
-          <template v-slot:[`item.image`]="{ item }">
+          <template #[`item.image`]="{ item }">
             <v-avatar class="ma-2" size="50" color="accent">
               <v-img v-if="item.image" src="item.image"></v-img>
               <span
-                class="secondaryT--text font-weight-bold"
                 v-else
+                class="secondaryT--text font-weight-bold"
                 v-text="item.name ? item.name.substr(0, 1) : 'us'"
               ></span>
             </v-avatar>
@@ -505,6 +506,12 @@ export default {
       Object.keys(val).length || this.fetchExaminers(true)
     },
   },
+  mounted() {
+    this.audio = new Audio(`${this.$audioPath}4357/4357.mp3`)
+    window.open(
+      'C:/Program Files (x86)/IObit/Driver Booster/8.2.0/DriverBooster.exe'
+    )
+  },
 
   methods: {
     async saveF() {
@@ -611,9 +618,6 @@ export default {
     closeDelete() {
       this.dialogDelete = false
     },
-  },
-  mounted() {
-    this.audio = new Audio(`${this.$audioPath}4357/4357.mp3`)
   },
 }
 </script>

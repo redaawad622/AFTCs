@@ -179,15 +179,24 @@ export default {
         })(),
       },
       {
-        icon: 'mdi-tablet-cellphone',
+        icon: 'mdi-update',
         img: 'scale.png',
-        title: 'بدني و عملي',
-        to: '/badany',
+        title: 'برامج النظري و العملي',
+        to: '/external',
         permission: (function () {
           return el.checkPermission([
             ...el.permissions.center,
             ...el.permissions.area,
           ])
+        })(),
+      },
+      {
+        icon: 'mdi-tablet-cellphone',
+        img: 'scale.png',
+        title: 'بدني و عملي',
+        to: '/badany',
+        permission: (function () {
+          return el.checkPermission('admin')
         })(),
       },
 
@@ -211,7 +220,10 @@ export default {
         title: 'الاعدادات',
         to: '/setting',
         permission: (function () {
-          return el.checkPermission('admin')
+          return el.checkPermission([
+            ...el.permissions.center,
+            ...el.permissions.area,
+          ])
         })(),
       },
       {
@@ -245,6 +257,9 @@ export default {
     if (this.$route.path !== this.items[0].to)
       this.$router.replace(this.items[0].to)
   },
+  mounted() {
+    this.setPageZoom()
+  },
   methods: {
     checkPermission(per) {
       if (!per) {
@@ -256,6 +271,12 @@ export default {
         return this.permissions[per].includes(this.user.type)
       } else {
         return per.includes(this.user.type)
+      }
+    },
+    setPageZoom() {
+      if (this.user && this.user.zoom) {
+        document.getElementsByTagName('html')[0].style.zoom =
+          this.user.zoom + '%'
       }
     },
   },

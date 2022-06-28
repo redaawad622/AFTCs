@@ -36,7 +36,6 @@ module.exports = function (app, prisma, types) {
         },
       },
     })
-    console.log(examiner)
     res.json(examiner)
   })
   app.get('/getExaminers', async (req, res) => {
@@ -63,6 +62,7 @@ module.exports = function (app, prisma, types) {
       option.skip = (page - 1) * Number(itemsPerPage) || 0
       option.take = Number(itemsPerPage) || 50
     }
+    option.where.isDeleted = { equals: Boolean(false) }
 
     if (search) {
       option.where.OR = [
@@ -274,9 +274,12 @@ module.exports = function (app, prisma, types) {
   })
   app.post('/deleteExaminer', async (req, res) => {
     const { id } = req.body
-    await prisma.Examiners.delete({
+    await prisma.Examiners.update({
       where: {
         id,
+      },
+      data: {
+        isDeleted: true,
       },
     })
     await prisma.Log.create({

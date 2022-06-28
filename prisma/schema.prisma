@@ -28,6 +28,7 @@ model T_Categories {
   type     Int     @default(2)
   host     String?
   username String?
+  zoom     Int     @default(100)
   password String  @default("$2a$08$oAi0Hoi5q949I/bLp9QxkeHvakgwmbApRkxVOU2YDEoYSaXoyU6My")
   Log      Log[]
 
@@ -65,29 +66,31 @@ model T_Questions {
 }
 
 model Examiners {
-  id                 Int       @id @default(autoincrement())
-  national_id        String    @unique
-  triple_number      String?   @unique
+  id                 Int          @id @default(autoincrement())
+  national_id        String       @unique
+  triple_number      String?      @unique
   name               String
   stage              String
-  barcode            String?   @unique
-  sold_id            String?   @unique
+  barcode            String?      @unique
+  sold_id            String?      @unique
   mohafza_code       Int?
   qualification_code Int?
-  register           Boolean   @default(false)
-  created_at         DateTime  @default(now())
+  register           Boolean      @default(false)
+  created_at         DateTime     @default(now())
   update_at          DateTime?
   Answers            Answers[]
   battary_id         Int?
+  isDeleted          Boolean      @default(false)
   //unit details
   UNIT_NAME          String?
   GEHA_NAME          String?
   TAMARKZ_NAME       String?
   UNIT_ARMY_NAME     String?
   ARMY_TAGNEED_NAME  String?
-  isNoticed          Boolean   @default(false)
+  isNoticed          Boolean      @default(false)
   nextFollowDate     DateTime?
-  numFollowUps       Int       @default(0)
+  numFollowUps       Int          @default(0)
+  CustomExam         CustomExam[]
 }
 
 model Battries {
@@ -147,4 +150,15 @@ model Log {
   operation_type String?
   type           String?
   created_at     DateTime      @default(now())
+}
+
+model CustomExam {
+  id          Int        @id @default(autoincrement())
+  examiner_id Int
+  exam_id     Int
+  value       Int
+  Examiners   Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
+  created_at  DateTime   @default(now())
+
+  @@unique([examiner_id, exam_id])
 }

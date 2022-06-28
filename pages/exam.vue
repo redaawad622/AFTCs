@@ -9,10 +9,10 @@
         <v-list-item-content v-if="examiner">
           <v-list-item-title
             class="font-weight-bold"
-            v-html="examiner.name"
+            v-text="examiner.name"
           ></v-list-item-title>
           <v-list-item-subtitle
-            v-html="examiner.barcode || examiner.national_id"
+            v-text="examiner.barcode || examiner.national_id"
           ></v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
@@ -38,7 +38,7 @@
         <timer :seconds="endTime" @finish="nextGroup()"></timer>
       </v-sheet>
     </v-app-bar>
-    <v-sheet class="pt-16" v-if="!this.done">
+    <v-sheet v-if="!done" class="pt-16">
       <exam-group
         v-if="groups.length > 0"
         :group="groups[cursor]"
@@ -66,6 +66,28 @@
           </v-progress-circular>
         </v-sheet>
       </v-container>
+      <v-dialog v-model="openDialog" persistent max-width="290">
+        <template #activator="{ on, attrs }">
+          <v-btn color="primary" dark v-bind="attrs" v-on="on">
+            حفظ و اعادة التوجيه
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title class="text-h5">
+            تم حفظ الاختبار و جاري اعادة التوجيه الي الصفحة الرئيسية
+          </v-card-title>
+          <v-card-text class="text-center font-weight-bold title">{{
+            timer
+          }}</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="timer = 1">
+              اعادة التوجيه الآن
+            </v-btn>
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-sheet>
   </div>
 </template>
@@ -82,9 +104,12 @@ export default {
       groupExams: {},
       cursor: 0,
       done: false,
+      openDialog: false,
       num: 0,
       interval: {},
+      interval2: {},
       endTime: 0,
+      timer: 10,
     }
   },
 
@@ -135,6 +160,9 @@ export default {
         this.endTime = this.currentExamTime * 60
       }
     },
+    timer(val) {
+      if (val < 1) this.$router.replace('/')
+    },
   },
   created() {
     if (!this.examiner) {
@@ -145,13 +173,21 @@ export default {
   },
   beforeDestroy() {
     clearInterval(this.interval)
+    clearInterval(this.interval2)
   },
+
   methods: {
     nextGroup() {
+      console.log(this.groups.length, this.cursor)
       if (this.cursor < this.groups.length - 1) {
         this.cursor++
       } else {
+        console.log(this.groups.length, this.cursor)
+
         this.done = true
+        this.interval = setInterval(() => {
+          if (this.num < 100) this.num += 20
+        }, 500)
         this.$store
           .dispatch('Exam/saveAnswers', {
             id: this.examiner.id,
@@ -160,11 +196,11 @@ export default {
           .then(() => {
             this.$store.commit('Exam/reset', this.examiner.national_id)
             // this.$store.commit('Examiner/setExaminer', null)
-            this.$router.replace('/')
+            this.openDialog = true
+            this.interval2 = setInterval(() => {
+              this.timer--
+            }, 1000)
           })
-        this.interval = setInterval(() => {
-          this.num += 20
-        }, 1000)
       }
     },
     prepare() {
@@ -181,5 +217,3 @@ export default {
   },
 }
 </script>
-
-<style></style>
