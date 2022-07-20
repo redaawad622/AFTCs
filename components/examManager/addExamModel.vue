@@ -15,16 +15,16 @@
           <v-row>
             <v-col cols="12">
               <v-text-field
+                v-model="form.Exm_Name"
                 label="اسم الاختبار"
                 outlined
                 color="primary"
-                v-model="form.Exm_Name"
               ></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-select
-                :items="categories"
                 v-model="form.category"
+                :items="categories"
                 outlined
                 label="التصنيف"
                 color="primary"
@@ -32,8 +32,8 @@
             </v-col>
             <v-col cols="12">
               <v-select
-                :items="order"
                 v-model="form.random"
+                :items="order"
                 label="الترتيب"
                 outlined
                 color="primary"
@@ -41,11 +41,11 @@
             </v-col>
             <v-col cols="12">
               <v-text-field
+                v-model="form.Exm_Duration_In_Mins"
                 label="مدة الاختبار"
                 outlined
                 color="primary"
                 type="number"
-                v-model="form.Exm_Duration_In_Mins"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -56,12 +56,12 @@
         <v-btn
           color="red darken-1"
           text
-          @click="$emit('input', false)"
           :disabled="loading"
+          @click="$emit('input', false)"
         >
           الغاء
         </v-btn>
-        <v-btn color="primary" text @click="saveExam()" :loading="loading">
+        <v-btn color="primary" text :loading="loading" @click="saveExam()">
           حفظ
         </v-btn>
       </v-card-actions>

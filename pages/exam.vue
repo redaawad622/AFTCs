@@ -178,12 +178,9 @@ export default {
 
   methods: {
     nextGroup() {
-      console.log(this.groups.length, this.cursor)
       if (this.cursor < this.groups.length - 1) {
         this.cursor++
       } else {
-        console.log(this.groups.length, this.cursor)
-
         this.done = true
         this.interval = setInterval(() => {
           if (this.num < 100) this.num += 20
@@ -211,7 +208,7 @@ export default {
             res[element.category + '-' + element.random] = []
           res[element.category + '-' + element.random].push(element)
         })
-        this.groupExams = res
+        this.groupExams = Object.fromEntries(Object.entries(res).reverse())
       }
     },
   },

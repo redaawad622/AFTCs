@@ -42,6 +42,7 @@ require('./badanyRoutes')(app, prisma, types)
 require('./oracleRoutes')(app, prisma, types)
 require('./followRoutes')(app, prisma, io, types)
 require('./logRoute')(app, prisma, types)
+require('./interview')(app, prisma, types)
 require('./fake')(app, prisma, types)
 httpServer.listen(3000)
 module.exports = app

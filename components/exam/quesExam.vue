@@ -144,31 +144,25 @@ export default {
     },
   },
   watch: {
-    exam() {
-      this.initAnswer = [...this.answers]
-      this.setTiming()
-      if (this.questions.length < 1) {
-        this.finished()
-      }
-      if (this.exam.Exm_ID === 3) {
-        this.autoHide()
-      }
+    exam: {
+      handler() {
+        this.initAnswer = [...this.answers]
+        this.setTiming()
+        if (this.questions.length < 1) {
+          this.finished()
+        }
+        if (this.exam.Exm_ID === 3) {
+          this.autoHide()
+        }
+      },
+      immediate: true,
+      deep: true,
     },
     play(val) {
       if (val) this.stopAns()
     },
   },
-  created() {
-    this.setTiming()
 
-    this.initAnswer = [...this.answers]
-    if (this.questions.length < 1) {
-      this.finished()
-    }
-    if (this.exam.Exm_ID === 3) {
-      this.autoHide()
-    }
-  },
   methods: {
     stopAns() {
       if (this.ansAudio) {

@@ -12,6 +12,14 @@
     <v-btn color="primary" class="mx-1"
       >تصدير بيانات الممتحنين الي فرع الانتقاء</v-btn
     >
+    <v-btn
+      v-if="permissions.admin.includes(user.type)"
+      :loading="wLoading"
+      color="primary"
+      class="mx-1"
+      @click="saveWeapon"
+      >سحب بيانات الاسلحة</v-btn
+    >
   </div>
 </template>
 
@@ -21,6 +29,7 @@ export default {
   data() {
     return {
       loading: false,
+      wLoading: false,
     }
   },
   computed: {
@@ -36,6 +45,12 @@ export default {
       this.loading = true
       this.$axios('/api/getStageSold').finally(() => {
         this.loading = false
+      })
+    },
+    saveWeapon() {
+      this.wLoading = true
+      this.$axios('/api/saveWeapon').finally(() => {
+        this.wLoading = false
       })
     },
   },

@@ -184,10 +184,7 @@ export default {
         title: 'برامج النظري و العملي',
         to: '/external',
         permission: (function () {
-          return el.checkPermission([
-            ...el.permissions.center,
-            ...el.permissions.area,
-          ])
+          return el.checkPermission('admin')
         })(),
       },
       {
@@ -259,6 +256,9 @@ export default {
   },
   mounted() {
     this.setPageZoom()
+  },
+  beforeMount() {
+    this.$store.dispatch('User/getUsers')
   },
   methods: {
     checkPermission(per) {

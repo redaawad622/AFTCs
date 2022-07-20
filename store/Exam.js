@@ -15,6 +15,8 @@ export const state = () => ({
   categories: [],
   order: [],
   editableExam: null,
+  battary: {},
+  weapons: [],
 })
 export const getters = {
   exams(state) {
@@ -48,6 +50,9 @@ export const getters = {
   battaries(state) {
     return state.battaries
   },
+  weapons(state) {
+    return state.weapons
+  },
   stage(state) {
     return state.stage
   },
@@ -63,6 +68,9 @@ export const getters = {
   editableExam(state) {
     return state.editableExam
   },
+  battary(state) {
+    return state.battary
+  },
 }
 export const mutations = {
   setHelpers(state, payload) {
@@ -70,6 +78,7 @@ export const mutations = {
     state.stage = payload.stage
     state.categories = payload.categories
     state.order = payload.order
+    state.weapons = payload.weapons
   },
   setExams(state, payload) {
     state.exams = payload.exams
@@ -92,6 +101,9 @@ export const mutations = {
   setEditableExam(state, payload) {
     state.editableExam = payload
   },
+  setBattaryData(state, payload) {
+    state.battary = payload
+  },
   setCurrentExamTime(state, payload) {
     state.currentExamTime = payload
   },
@@ -111,7 +123,7 @@ export const mutations = {
     } else {
       state.customExam = localCustomExam
     }
-
+    this.$setLocal(`customExam${national_id}`, state.customExam)
     if (answers && answers.length > 0) {
       const examiner_ids = answers.map((elm) => elm.examiner_id)
       const filteredLocalBackup = localBackup.filter(function (obj) {
@@ -121,6 +133,7 @@ export const mutations = {
     } else {
       state.answers = localBackup
     }
+    this.$setLocal(`answer${national_id}`, state.answers)
   },
 
   reset(state, payload) {
@@ -239,7 +252,21 @@ export const actions = {
       commit('setEditableExam', res.data)
     })
   },
+  getBattaryData({ commit }, payload) {
+    this.$axios(`/api/battaryData`, { params: payload }).then((res) => {
+      commit('setBattaryData', res.data)
+    })
+  },
   saveNewQues(_, payload) {
     return this.$axios.post(`/api/saveNewQues`, payload)
+  },
+  saveBattary(_, payload) {
+    return this.$axios.post(`/api/saveBattary`, payload)
+  },
+  saveManualCustomExam(_, payload) {
+    return this.$axios.post(`/api/saveManualCustomExam`, payload)
+  },
+  again(_, payload) {
+    return this.$axios.post(`/api/again`, payload)
   },
 }

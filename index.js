@@ -1,5 +1,3 @@
-
-
 const SerialPort = require('serialport')
 const Readline = require('@serialport/parser-readline')
 
@@ -14,4 +12,3 @@ parser.on('data', (line) => {
 })
 
 port.write('fwefwe wfwef')
-

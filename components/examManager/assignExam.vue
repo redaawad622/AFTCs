@@ -18,18 +18,18 @@
               offset-y
             >
               <v-list>
-                <v-list-item @click="editExam('add')" link>
+                <v-list-item link @click="editExam('add')">
                   <v-list-item-title>اضافة اختبار جديد</v-list-item-title>
                 </v-list-item>
-                <v-list-item @click="editExam('edit')" link>
+                <v-list-item link @click="editExam('edit')">
                   <v-list-item-title v-if="activeExam"
                     >تعديل اختبار ({{ activeExam.Exm_Name }})</v-list-item-title
                   >
                 </v-list-item>
-                <v-list-item @click="editExamQ()" link>
+                <v-list-item link @click="editExamQ()">
                   <v-list-item-title>تعديل أسئلة الاختبار</v-list-item-title>
                 </v-list-item>
-                <v-list-item @click="softDeleteExam()" link>
+                <v-list-item link @click="softDeleteExam()">
                   <v-list-item-title>حذف الاختبار</v-list-item-title>
                 </v-list-item>
               </v-list>
@@ -72,110 +72,127 @@
           :loading="loading"
           outlined
         >
-          <v-card-text>
-            <div class="d-flex justify-space-between">
-              <v-btn @click="examList = []" color="error">حذف الكل</v-btn>
-              <v-btn @click="examList = filterExam" color="success"
-                >اضافة الكل</v-btn
-              >
-              <v-dialog v-model="dialog" width="500">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    color="red lighten-2"
-                    :disabled="examList.length < 1"
-                    dark
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    اضافة كبطارية
-                  </v-btn>
-                </template>
-
-                <v-card>
-                  <v-card-title class="text-h5 grey lighten-2">
-                    اكتب اسم
-                  </v-card-title>
-
-                  <v-card-text class="pt-2">
-                    <v-text-field
-                      v-model="name"
-                      color="primary"
-                      outlined
-                    ></v-text-field>
-                  </v-card-text>
-
-                  <v-divider></v-divider>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
+          <v-card-text class="d-flex">
+            <div style="flex: 1">
+              <div v-for="(group, k) in examGroup(examList)" :key="k">
+                <v-alert
+                  border="left"
+                  colored-border
+                  dense
+                  text
+                  class="font-weight-bold my-2"
+                  color="grey"
+                  >{{ k }}</v-alert
+                >
+                <v-chip
+                  v-for="exam in group"
+                  :key="exam.Exm_ID"
+                  close
+                  class="ma-1"
+                  @click="removeFromExam(exam)"
+                  @click:close="removeFromExam(exam)"
+                >
+                  {{ exam.Exm_Name }}
+                </v-chip>
+              </div>
+            </div>
+            <v-divider vertical class="mx-2"></v-divider>
+            <div style="width: 210px">
+              <div class="d-flex flex-column justify-space-between">
+                <v-btn color="error" class="mb-2" @click="examList = []"
+                  >حذف الكل</v-btn
+                >
+                <v-btn
+                  color="success"
+                  class="mb-2"
+                  @click="examList = filterExam"
+                  >اضافة الكل</v-btn
+                >
+                <v-dialog v-model="dialog" width="500" class="mb-2">
+                  <template #activator="{ on, attrs }">
                     <v-btn
-                      color="primary"
-                      :loading="addLoading"
-                      text
-                      @click="addAsBattary()"
+                      color="red lighten-2"
+                      :disabled="examList.length < 1"
+                      dark
+                      v-bind="attrs"
+                      v-on="on"
                     >
-                      اضافة
+                      اضافة كبطارية
                     </v-btn>
-                    <v-btn color="error" text @click="dialog = false">
-                      الغاء
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </div>
+                  </template>
 
-            <div class="d-flex my-3" v-if="battaries.length > 0">
-              <v-combobox
-                v-model="battary_id"
-                :items="battaries"
-                item-text="name"
-                item-value="id"
-                dense
-                outlined
-                label="البطاريات"
-                placeholder="البطاريات"
-                class="me-3"
-                hide-details
-              ></v-combobox>
-              <v-btn color="primary" @click="getAndAdd()" :loading="getLoading"
-                >اضافة البطارية الي الاختبارات</v-btn
-              >
-              <v-btn
-                color="primary"
-                @click="addAsBattary(true)"
-                class="ms-2"
-                :loading="editLoading"
-                >تعديل البطارية الحالية</v-btn
-              >
-            </div>
+                  <v-card>
+                    <v-card-title class="text-h5 grey lighten-2">
+                      اكتب اسم
+                    </v-card-title>
 
-            <v-divider class="my-4"></v-divider>
-            <div v-for="(group, k) in examGroup(examList)" :key="k">
-              <v-alert
-                border="left"
-                colored-border
-                dense
-                text
-                class="font-weight-bold my-2"
-                color="grey"
-                >{{ k }}</v-alert
-              >
-              <v-chip
-                close
-                v-for="exam in group"
-                class="ma-1"
-                @click="removeFromExam(exam)"
-                @click:close="removeFromExam(exam)"
-                :key="exam.Exm_ID"
-              >
-                {{ exam.Exm_Name }}
-              </v-chip>
+                    <v-card-text class="pt-2">
+                      <v-text-field
+                        v-model="name"
+                        color="primary"
+                        outlined
+                      ></v-text-field>
+                    </v-card-text>
+
+                    <v-divider></v-divider>
+
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        color="primary"
+                        :loading="addLoading"
+                        text
+                        @click="addAsBattary()"
+                      >
+                        اضافة
+                      </v-btn>
+                      <v-btn color="error" text @click="dialog = false">
+                        الغاء
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </div>
+
+              <div v-if="battaries.length > 0" class="d-flex flex-column my-3">
+                <v-combobox
+                  v-model="battary_id"
+                  :items="battaries"
+                  item-text="name"
+                  item-value="id"
+                  dense
+                  outlined
+                  label="البطاريات"
+                  placeholder="البطاريات"
+                  class="mb-3"
+                  hide-details
+                ></v-combobox>
+                <v-btn
+                  color="primary"
+                  :loading="getLoading"
+                  @click="getAndAdd()"
+                  >اضافة البطارية الي الاختبارات</v-btn
+                >
+                <v-btn
+                  color="primary"
+                  class="my-2"
+                  :loading="editLoading"
+                  @click="addAsBattary(true)"
+                  >تعديل البطارية الحالية</v-btn
+                >
+                <v-btn
+                  color="primary"
+                  :loading="editLoading"
+                  :to="`/examsManager/battaries/${battary_id.id}`"
+                  >تعديل بيانات البطارية</v-btn
+                >
+              </div>
             </div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
-    <v-btn class="my-5" @click="saveSetting" :loading="sLoading" color="primary"
+    <v-btn class="my-5" :loading="sLoading" color="primary" @click="saveSetting"
       >حفظ الاعدادات</v-btn
     >
     <add-exam-model

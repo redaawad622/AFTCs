@@ -44,7 +44,7 @@
     </v-sheet>
     <examiner-data></examiner-data>
     <v-spacer></v-spacer>
-
+    <div class="red--text">اصدار رقم: 1.1.1</div>
     <div class="text-center">
       <v-dialog v-model="dialog" width="500" hide-overlay>
         <v-card>

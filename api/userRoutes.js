@@ -1,7 +1,7 @@
 import { execFile } from 'child_process'
 const bcrypt = require('bcryptjs')
 
-module.exports = function (app, prisma) {
+module.exports = function (app, prisma, types) {
   app.get('/getAllUser', async (req, res) => {
     const users = await prisma.T_Categories.findMany({
       where: {
@@ -83,6 +83,14 @@ module.exports = function (app, prisma) {
         password: bcrypt.hashSync(newPassword, 8),
       },
     })
+    await prisma.Log.create({
+      data: {
+        user_id: Number(user.Cat_ID),
+        operation_type: 'delete',
+        description: ' تم تغير كلمة سر' + user.Cat_Name,
+        type: types[1],
+      },
+    })
     res.status(200).json(user)
   })
   app.post('/logout', async (req, res) => {
@@ -117,6 +125,14 @@ module.exports = function (app, prisma) {
       await prisma.Battary_Exam.deleteMany({})
     }
     await prisma[table].deleteMany({})
+    await prisma.Log.create({
+      data: {
+        user_id: Number(user.Cat_ID),
+        operation_type: 'delete',
+        description: ' مسح بيانات جدول  ' + table,
+        type: table,
+      },
+    })
     res.status(200).json('done')
   })
   app.post('/setAudio', async (req, res) => {

@@ -62,7 +62,7 @@ export default {
         })
         return null
       }
-      if (!this.examiner.register) {
+      if (!this.examiner.user_id) {
         this.$store.commit('Notifications/setNotification', {
           text: 'يجب تأكيد تسجيل هذا الممتحن اولا',
           color: 'error',

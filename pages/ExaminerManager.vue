@@ -165,6 +165,18 @@
                     item-value="value"
                   ></v-autocomplete>
                   <v-autocomplete
+                    v-model="filters.interview"
+                    append-icon="mdi-menu-swap"
+                    outlined
+                    dense
+                    placeholder="المقابلة"
+                    label="المقابلة"
+                    cache-items
+                    :items="helpers.interview"
+                    item-text="name"
+                    item-value="value"
+                  ></v-autocomplete>
+                  <v-autocomplete
                     v-if="permissions.admin.includes(user.type)"
                     v-model="filters.battaryId"
                     append-icon="mdi-menu-swap"
@@ -236,7 +248,12 @@
           show-select
         >
           <template #[`item.actions`]="{ item }">
-            <v-btn color="success" :to="`/Examiners/${item.national_id}`" icon>
+            <v-btn
+              color="success"
+              :to="`/Examiners/${item.national_id}`"
+              icon
+              title="تعديل المختبر"
+            >
               <v-img
                 contain
                 width="24px"
@@ -244,7 +261,12 @@
                 src="/icon/edit.png"
               ></v-img>
             </v-btn>
-            <v-btn icon color="error" @click="deleteItem(item)">
+            <v-btn
+              v-if="permissions.admin.includes(user.type)"
+              icon
+              color="error"
+              @click="deleteItem(item)"
+            >
               <v-img
                 width="24px"
                 contain
@@ -252,9 +274,68 @@
                 src="/icon/trash.png"
               ></v-img>
             </v-btn>
+            <v-btn
+              icon
+              color="info"
+              :to="`/Examiners/${item.national_id}/interview`"
+              title="المقابلة الشخصية"
+            >
+              <v-icon>mdi-account</v-icon>
+            </v-btn>
+          </template>
+          <template #[`item.again`]="{ item }">
+            <v-btn
+              v-if="item._count.Answers > 0"
+              color="primary"
+              text
+              title="تعديل المختبر"
+              @click="currentDelete = item"
+            >
+              اعادة
+            </v-btn>
+            <v-chip v-else>لم يتم امتحانه بعد</v-chip>
+          </template>
+          <template #[`item.CustomExam`]="{ item }">
+            <diV class="d-felx">
+              <v-btn
+                color="primary"
+                text
+                @click="currentSelectedExaminer = item"
+                >تسجيل
+              </v-btn>
+              <v-chip class="mx-1 font-weight-bold" color="red">{{
+                item.CustomExam.length
+              }}</v-chip>
+            </diV>
           </template>
           <template #[`item.Answers`]="{ item, header }">
             {{ item.Answers[header.text] }}
+          </template>
+          <template #[`item.sold_id`]="{ item }">
+            <v-chip v-if="item.sold_id">{{ item.sold_id }}</v-chip>
+            <v-btn
+              v-else
+              color="info"
+              :to="`/Examiners/${item.national_id}`"
+              text
+              >اضافة</v-btn
+            >
+          </template>
+          <template #[`item.stage`]="{ item }">
+            <v-chip
+              outlined
+              color="primary"
+              @click="setFilter('stage', item.stage)"
+            >
+              {{ item.stage }}</v-chip
+            >
+          </template>
+          <template #[`item._count`]="{ item }">
+            <v-chip
+              :to="`/Examiners/${item.national_id}/interview`"
+              :color="item._count['Interview'] > 0 ? 'success' : 'error'"
+              >{{ item._count['Interview'] > 0 ? 'نعم' : 'لا' }}</v-chip
+            >
           </template>
           <template #[`item.image`]="{ item }">
             <v-avatar class="ma-2" size="50" color="accent">
@@ -280,6 +361,96 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+        <v-dialog v-if="currentDelete" :value="true" max-width="300px">
+          <v-card :loading="currentDeleteLoading">
+            <v-card-title class="text-h5"
+              >هل انت متاكد انك تريد الاعادة؟</v-card-title
+            >
+            <v-card-text v-if="currentDelete">
+              سيتم حذف جميع اجابات {{ currentDelete.name }}
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="primary"
+                text
+                :loading="currentDeleteLoading"
+                @click="removeExamAns()"
+                >نعم</v-btn
+              >
+              <v-btn
+                :disabled="currentDeleteLoading"
+                color="error"
+                text
+                @click="currentDelete = null"
+                >لا</v-btn
+              >
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-row justify="center">
+          <v-dialog
+            v-if="currentSelectedExaminer"
+            :value="true"
+            persistent
+            max-width="600px"
+          >
+            <v-card>
+              <v-card-title class="grey lighten-2"
+                >الاختبارات التي تمت
+              </v-card-title>
+              <v-chip-group
+                v-if="currentSelectedExaminer.CustomExam.length > 0"
+                class="my-3"
+              >
+                <v-chip
+                  v-for="cExam in currentSelectedExaminer.CustomExam"
+                  :key="cExam.id + 'cExam'"
+                  >{{ cExam.exam.Exm_Name }}</v-chip
+                >
+              </v-chip-group>
+              <v-card-text v-else class="my-3"
+                >لا يوجد اختبارات تمت</v-card-text
+              >
+              <v-card-title class="grey lighten-2">
+                <span class="text-h5">تسجيل درجات الاختبارات التالية</span>
+              </v-card-title>
+              <v-card-text v-if="exams.length > 0" class="my-3">
+                <v-text-field
+                  v-for="item in exams"
+                  :key="item.Exm_Name"
+                  v-model.number="examsVal[item.Exm_ID]"
+                  outlined
+                  :label="item.Exm_Name"
+                  type="number"
+                ></v-text-field>
+              </v-card-text>
+              <v-card-text v-else class="my-3"
+                >لا يوجد اختبارات لتسجيلها</v-card-text
+              >
+              <v-divider></v-divider>
+              <v-card-actions>
+                <v-btn
+                  :disabled="examLoading"
+                  color="blue darken-1"
+                  text
+                  @click="currentSelectedExaminer = false"
+                >
+                  الغاء
+                </v-btn>
+                <v-btn
+                  color="blue darken-1"
+                  :loading="examLoading"
+                  text
+                  @click="saveManualCustomExam()"
+                >
+                  حفظ
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-row>
       </div>
     </v-col>
     <v-text-field v-if="false" v-model="ans"></v-text-field>
@@ -292,7 +463,14 @@ export default {
   name: 'ExaminerManager',
   data() {
     return {
+      dialog: false,
+      examLoading: false,
+      currentSelectedExaminer: null,
+      exams: [],
+      examsVal: {},
       audio: null,
+      currentDelete: null,
+      currentDeleteLoading: false,
       helpers: {
         qualification: [
           { name: 'عليا', value: 2 },
@@ -303,6 +481,10 @@ export default {
         examFinish: [
           { name: 'من انهوا', value: 1 },
           { name: 'من لم ينتهوا بعد', value: 0 },
+        ],
+        interview: [
+          { name: 'تم عمل مقابلة لهم ', value: 1 },
+          { name: 'لم يتم عمل مقابلة لهم', value: 0 },
         ],
         register: [
           { name: 'من تم تسجيلهم', value: 1 },
@@ -324,6 +506,7 @@ export default {
       filters: {
         qualification: '',
         examFinish: '',
+        interview: '',
         battaryId: '',
         stage: '',
         register: 1,
@@ -359,6 +542,28 @@ export default {
           align: 'center',
           value: 'stage',
           hide: false,
+        },
+        {
+          text: 'المقابلة',
+          align: 'center',
+          value: '_count',
+          hide: false,
+          sortable: false,
+        },
+        {
+          text: 'اعادة الاختبار',
+          value: 'again',
+          sortable: false,
+          align: 'center',
+          hide: true,
+        },
+        {
+          text: 'الاختبارت العملية و البدنية',
+
+          value: 'CustomExam',
+          sortable: false,
+          align: 'center',
+          hide: true,
         },
         {
           text: 'الوحده',
@@ -444,12 +649,34 @@ export default {
           hide: false,
         },
         {
-          text: 'الوحده',
+          text: 'المقابلة',
           align: 'center',
-          value: 'UNIT_NAME',
+          value: '_count',
+          sortable: false,
           hide: false,
         },
 
+        {
+          text: 'اعادة الاختبار',
+          value: 'again',
+          sortable: false,
+          align: 'center',
+          hide: true,
+        },
+        {
+          text: 'عدد الاسئلة التي تم الاجابة عليها',
+          align: 'center',
+          value: '_count.Answers',
+          sortable: false,
+          hide: false,
+        },
+        {
+          text: 'الاختبارت العملية و البدنية',
+          value: 'CustomExam',
+          sortable: false,
+          align: 'center',
+          hide: true,
+        },
         {
           text: 'Actions',
           value: 'actions',
@@ -505,15 +732,79 @@ export default {
     filtersItems(val) {
       Object.keys(val).length || this.fetchExaminers(true)
     },
+    currentSelectedExaminer(val) {
+      if (val) {
+        this.$store
+          .dispatch('Exam/getAssignExams', this.currentSelectedExaminer.id)
+          .then((res) => {
+            const custom = res.data.customExam.map((elm) => elm.exam_id)
+            this.exams = res.data.battary.filter(
+              (elm) => elm.random === 'جهاز' && !custom.includes(elm.Exm_ID)
+            )
+          })
+          .catch(() => {
+            this.exams = []
+          })
+      }
+    },
   },
   mounted() {
     this.audio = new Audio(`${this.$audioPath}4357/4357.mp3`)
-    window.open(
-      'C:/Program Files (x86)/IObit/Driver Booster/8.2.0/DriverBooster.exe'
-    )
   },
 
   methods: {
+    saveManualCustomExam() {
+      const exams = Object.fromEntries(
+        Object.entries(this.examsVal).filter(([key, elm]) => elm)
+      )
+      if (Object.keys(exams).length > 0) {
+        this.examLoading = true
+        this.$store
+          .dispatch('Exam/saveManualCustomExam', {
+            exams,
+            id: this.currentSelectedExaminer.id,
+          })
+          .then(() => {
+            this.currentSelectedExaminer = null
+            this.exams = []
+            this.examsVal = []
+          })
+          .finally(() => {
+            this.examLoading = false
+          })
+      }
+    },
+    removeExamAns() {
+      this.currentDeleteLoading = true
+      this.$store
+        .dispatch('Exam/again', { national_id: this.currentDelete.national_id })
+        .then(() => {
+          this.$store.commit('Notifications/setNotification', {
+            text: 'تم الحذف بنجاح',
+            color: 'success',
+          })
+          const index = this.examiners.findIndex(
+            (elm) => elm.id === this.currentDelete.id
+          )
+          this.examiners[index]._count.Answers = 0
+          this.currentDelete = null
+          this.currentDeleteLoading = false
+        })
+        .catch((ex) => {
+          console.log(ex)
+          this.$store.commit('Notifications/setNotification', {
+            text: 'هناك مشكلة في الحذف',
+            color: 'error',
+          })
+        })
+        .finally(() => {
+          this.currentDeleteLoading = false
+        })
+    },
+    setFilter(filter, value) {
+      this.filters[filter] = value
+      this.fetchExaminers(true)
+    },
     async saveF() {
       await this.$axios.post('/api/saveFake', {
         examinerId: this.selectedExaminer[0].id,

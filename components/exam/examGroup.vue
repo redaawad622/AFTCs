@@ -22,13 +22,18 @@
           <ques-exam
             v-if="mcq.includes(random[1])"
             :exam="exams[cursor]"
-            @done="nextExam()"
+            @done="nextExam('mcq')"
           ></ques-exam>
-          <div v-else-if="random[1] === 'شاشة'">
+          <div
+            v-else-if="
+              random[1] === 'شاشة' &&
+              allCustomScreen.includes(exams[cursor].Exm_ID)
+            "
+          >
             <component
               :is="`screen${exams[cursor].Exm_ID}`"
               :exam="exams[cursor]"
-              @done="nextExam()"
+              @done="nextExam('screen')"
             ></component>
           </div>
           <div
@@ -41,6 +46,7 @@
         </div>
         <div v-else class="font-weight-bold text-center display-1 mt-8">
           لا يوجد امتحانات
+          {{ nextExam('لا يوجد') }}
         </div>
       </template>
     </v-fade-transition>
@@ -67,6 +73,7 @@ export default {
   data() {
     return {
       exams: [],
+      allCustomScreen: [2, 28, 29],
       loading: false,
       mcq: ['عشوائي', 'مخصص', 'ترتيب'],
       cursor: 0,
@@ -75,6 +82,9 @@ export default {
   computed: {
     random() {
       return this.k.split('-')
+    },
+    customExam() {
+      return this.$store.getters['Exam/customExam']
     },
   },
   watch: {
@@ -91,10 +101,14 @@ export default {
   },
   methods: {
     callNext(exam) {
-      alert(`  الاختبار يتم علي جهاز مخصص (${exam.Exm_Name}) `)
-      this.nextExam()
+      this.$desktopNotify(`  الاختبار يتم علي جهاز مخصص (${exam.Exm_Name}) `)
+      this.$store.commit('Notifications/setNotification', {
+        text: `  الاختبار يتم علي جهاز مخصص (${exam.Exm_Name}) `,
+        color: 'info',
+      })
+      this.nextExam('جهاز')
     },
-    nextExam() {
+    nextExam(type) {
       if (this.cursor < this.exams.length - 1) {
         this.cursor++
       } else {
@@ -137,19 +151,23 @@ export default {
     },
     getGroup(val) {
       this.loading = true
-      const ids = val.map((elm) => elm.Exm_ID)
-      this.$store
-        .dispatch('Exam/getExamsData', ids)
-        .then((res) => {
-          this.exams = this.resolveExam(res.data || [])
-          this.loading = false
-        })
-        .catch(() => {
-          this.loading = false
-        })
-        .finally(() => {
-          this.loading = false
-        })
+      let ids = val.map((elm) => elm.Exm_ID)
+      const customExam = this.customExam.map((elm) => elm.exam_id)
+      ids = ids.filter((id) => !customExam.includes(id))
+      if (ids.length > 0) {
+        this.$store
+          .dispatch('Exam/getExamsData', ids)
+          .then((res) => {
+            this.exams = this.resolveExam(res.data || [])
+            this.loading = false
+          })
+          .catch(() => {
+            this.loading = false
+          })
+      } else {
+        this.exams = []
+        this.loading = false
+      }
     },
   },
 }

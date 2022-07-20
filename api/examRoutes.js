@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 module.exports = function (app, prisma) {
   app.get('/getAssignExams', async (req, res) => {
     const { examinerId } = req.query
@@ -10,10 +11,9 @@ module.exports = function (app, prisma) {
         CustomExam: true,
       },
     })
-    // check if exist
 
-    // step 1 get by assign battary
     if (examiner.battary_id) {
+      // step 1 get by assign battary
       let battary = await prisma.Battries.findUnique({
         where: {
           id: examiner.battary_id,
@@ -106,38 +106,73 @@ module.exports = function (app, prisma) {
           let weaponId = examiner.sold_id
 
           if (weaponId && weaponId.length === 13) {
-            weaponId = weaponId[6] + weaponId[7]
-            let battary = await prisma.Battries.findUnique({
-              where: {
-                weapon_id: Number(weaponId),
-              },
-              include: {
-                Battary_Exam: {
-                  include: {
-                    exam: {
-                      select: {
-                        Exm_ID: true,
-                        Exm_Name: true,
-                        Exm_Display_Name: false,
-                        Exm_Duration_In_Mins: true,
-                        category: true,
-                        random: true,
+            // check if عاده
+
+            const qualification = examiner.sold_id[5]
+            if (qualification == 0) {
+              let battary = await prisma.Battries.findUnique({
+                where: {
+                  id: 11, // بطارية النفسي
+                },
+                include: {
+                  Battary_Exam: {
+                    include: {
+                      exam: {
+                        select: {
+                          Exm_ID: true,
+                          Exm_Name: true,
+                          Exm_Display_Name: false,
+                          Exm_Duration_In_Mins: true,
+                          category: true,
+                          random: true,
+                        },
                       },
                     },
                   },
                 },
-              },
-            })
-            if (battary) {
-              battary = battary.Battary_Exam.map((x) => x.exam)
-
-              res.json({
-                battary,
-                Answers: examiner.Answers,
-                customExam: examiner.CustomExam,
               })
+              if (battary) {
+                battary = battary.Battary_Exam.map((x) => x.exam)
+                res.json({
+                  battary,
+                  Answers: examiner.Answers,
+                  customExam: examiner.CustomExam,
+                })
+              }
             } else {
-              res.status(404).json('لا يوجد امتحانات متوفره')
+              weaponId = Number(weaponId[6] + weaponId[7])
+              let battary = await prisma.Battries.findUnique({
+                where: {
+                  weapon_id: weaponId,
+                },
+                include: {
+                  Battary_Exam: {
+                    include: {
+                      exam: {
+                        select: {
+                          Exm_ID: true,
+                          Exm_Name: true,
+                          Exm_Display_Name: false,
+                          Exm_Duration_In_Mins: true,
+                          category: true,
+                          random: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              })
+              if (battary) {
+                battary = battary.Battary_Exam.map((x) => x.exam)
+
+                res.json({
+                  battary,
+                  Answers: examiner.Answers,
+                  customExam: examiner.CustomExam,
+                })
+              } else {
+                res.status(404).json('لا يوجد امتحانات متوفره')
+              }
             }
           } else {
             res.status(404).json('لا يوجد امتحانات متوفره')
@@ -266,33 +301,46 @@ module.exports = function (app, prisma) {
 
     res.json('done')
   })
-  app.post('/saveAnswers', (req, res) => {
+  app.post('/saveAnswers', async (req, res) => {
     const { examinerId, answers, endTime, customExam } = req.body
-    const ans = JSON.parse(answers)
+
     if (customExam) {
       const customEx = JSON.parse(customExam)
-      customEx.forEach(async (elm) => {
-        await prisma.CustomExam.upsert({
-          where: {
-            examiner_id_exam_id: {
-              examiner_id: examinerId,
-              exam_id: Number(elm.exam_id),
-            },
-          },
-          create: {
-            examiner_id: examinerId,
-            value: Number(elm.value),
-            exam_id: Number(elm.exam_id),
-          },
-          update: {},
-        })
-      })
+      const queryToRun = customEx.map((elm) =>
+        prisma.$executeRawUnsafe(
+          ` INSERT INTO \`CustomExam\` (examiner_id,value,exam_id)
+          select ${Number(examinerId)}, '${elm.value}', ${Number(elm.exam_id)}
+          where NOT EXISTS (SELECT 1 FROM CustomExam WHERE examiner_id = ${Number(
+            examinerId
+          )} and exam_id =${Number(elm.exam_id)}  )
+          `
+        )
+      )
+      if (queryToRun && queryToRun.length > 0) {
+        await prisma.$transaction(queryToRun)
+      }
     }
-    ans.forEach(async (x) => {
-      await prisma.Answers.create({
-        data: { examiner_id: examinerId, ...x, duration: Number(endTime) },
-      })
-    })
+    if (answers) {
+      const ans = JSON.parse(answers)
+      const queryToRun2 = ans.map((elm) =>
+        prisma.$executeRawUnsafe(
+          ` INSERT INTO \`Answers\` (examiner_id,exam_id,question_id,answer_id,duration)
+          select ${Number(examinerId)},${Number(elm.exam_id)},${Number(
+            elm.question_id
+          )},${Number(elm.answer_id)}, ${Number(endTime)}
+          where NOT EXISTS (SELECT 1 FROM Answers WHERE examiner_id = ${Number(
+            examinerId
+          )} and exam_id =${Number(elm.exam_id)} and question_id =${Number(
+            elm.question_id
+          )}  )
+          `
+        )
+      )
+      if (queryToRun2 && queryToRun2.length > 0) {
+        await prisma.$transaction(queryToRun2)
+      }
+    }
+
     res.json('done')
   })
   app.post('/saveFake', async (req, res) => {
@@ -395,6 +443,7 @@ module.exports = function (app, prisma) {
   })
   app.get('/getExamHelpers', async (req, res) => {
     const battaries = await prisma.Battries.findMany()
+    const weapons = await prisma.Weapons.findMany()
     const stage = await prisma.Examiners.groupBy({
       by: ['stage'],
       select: {
@@ -415,11 +464,13 @@ module.exports = function (app, prisma) {
     })
     res.json({
       battaries,
+      weapons,
       stage,
       categories: mapBy(categories, 'category'),
       order: mapBy(order, 'random'),
     })
   })
+
   app.get('/editableExam', async (req, res) => {
     const { id } = req.query
 
@@ -455,6 +506,76 @@ module.exports = function (app, prisma) {
       })
     })
     return res.json(q)
+  })
+
+  app.get('/battaryData', async (req, res) => {
+    const { id } = req.query
+    const battary = await prisma.Battries.findUnique({
+      where: {
+        id: Number(id),
+      },
+    })
+
+    res.json(battary)
+  })
+  app.post('/saveBattary', async (req, res) => {
+    const data = req.body
+    const id = data.id
+    delete data.id
+    if (data.weapon_id && data.weapon_id !== 'null')
+      data.weapon_id = Number(data.weapon_id)
+    else {
+      delete data.weapon_id
+    }
+    if (data.user_id && data.user_id !== 'null')
+      data.user_id = Number(data.user_id)
+    else {
+      delete data.user_id
+    }
+
+    const battary = await prisma.Battries.upsert({
+      where: {
+        id: Number(id),
+      },
+      create: data,
+      update: data,
+    })
+
+    res.json(battary)
+  })
+
+  app.post('/saveManualCustomExam', async (req, res) => {
+    const { id, exams } = req.body
+
+    const queryToRun = Object.keys(exams).map((key) =>
+      prisma.$executeRawUnsafe(
+        ` INSERT INTO \`CustomExam\` (examiner_id,value,exam_id)
+          select ${Number(id)}, '${exams[key]}', ${Number(key)}
+          where NOT EXISTS (SELECT 1 FROM CustomExam WHERE examiner_id = ${Number(
+            id
+          )} and exam_id =${Number(key)}  )
+          `
+      )
+    )
+    if (queryToRun && queryToRun.length > 0) {
+      await prisma.$transaction(queryToRun)
+    }
+
+    res.json('done')
+  })
+  app.post('/again', async (req, res) => {
+    const { national_id } = req.body
+    const examiner = await prisma.Examiners.findUnique({
+      where: {
+        national_id,
+      },
+    })
+    await prisma.Answers.deleteMany({
+      where: {
+        examiner_id: examiner.id,
+      },
+    })
+    res.json('done')
   })
 }
 function mapBy(arr, item) {

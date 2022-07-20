@@ -32,7 +32,8 @@ model T_Categories {
   password String  @default("$2a$08$oAi0Hoi5q949I/bLp9QxkeHvakgwmbApRkxVOU2YDEoYSaXoyU6My")
   Log      Log[]
 
-  Battries Battries[]
+  Battries  Battries[]
+  Examiners Examiners[]
 }
 
 model T_Exams {
@@ -51,6 +52,7 @@ model T_Exams {
   random                    String?        @default("عشوائي")
   Questions                 T_Questions[]
   Battary_Exam              Battary_Exam[]
+  CustomExam                CustomExam[]
 }
 
 model T_Questions {
@@ -66,31 +68,36 @@ model T_Questions {
 }
 
 model Examiners {
-  id                 Int          @id @default(autoincrement())
-  national_id        String       @unique
-  triple_number      String?      @unique
+  id                 Int           @id @default(autoincrement())
+  national_id        String        @unique
+  triple_number      String?       @unique
   name               String
   stage              String
-  barcode            String?      @unique
-  sold_id            String?      @unique
+  barcode            String?       @unique
+  sold_id            String?       @unique
   mohafza_code       Int?
   qualification_code Int?
-  register           Boolean      @default(false)
-  created_at         DateTime     @default(now())
+  marital_state      String?
+  educational_degree String?
+  user_id            Int?
+  created_at         DateTime      @default(now())
   update_at          DateTime?
   Answers            Answers[]
   battary_id         Int?
-  isDeleted          Boolean      @default(false)
+  isDeleted          Boolean       @default(false)
   //unit details
   UNIT_NAME          String?
   GEHA_NAME          String?
   TAMARKZ_NAME       String?
   UNIT_ARMY_NAME     String?
   ARMY_TAGNEED_NAME  String?
-  isNoticed          Boolean      @default(false)
+  isNoticed          Boolean       @default(false)
   nextFollowDate     DateTime?
-  numFollowUps       Int          @default(0)
+  numFollowUps       Int           @default(0)
   CustomExam         CustomExam[]
+  T_Categories       T_Categories? @relation(fields: [t_CategoriesCat_ID], references: [Cat_ID])
+  t_CategoriesCat_ID Int?
+  Interview          Interview[]
 }
 
 model Battries {
@@ -149,6 +156,8 @@ model Log {
   description    String?
   operation_type String?
   type           String?
+  oldVal         String?
+  newVal         String?
   created_at     DateTime      @default(now())
 }
 
@@ -156,9 +165,41 @@ model CustomExam {
   id          Int        @id @default(autoincrement())
   examiner_id Int
   exam_id     Int
-  value       Int
+  value       String
   Examiners   Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
+  exam        T_Exams?   @relation(fields: [exam_id], references: [Exm_ID], onDelete: Cascade)
   created_at  DateTime   @default(now())
 
   @@unique([examiner_id, exam_id])
+}
+
+model Interview {
+  id                    Int        @id @default(autoincrement())
+  examiner_id           Int
+  Examiners             Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
+  parent_job            String
+  siblings_num          Int
+  family_relation       String
+  complaint             String
+  appearance            String
+  focus_ability         String
+  mood                  String
+  speaking_disorder     String
+  medicine_type         String
+  has_medical_history   String
+  hospital_name         String?
+  drugs_history         String
+  drug_type             String?
+  final_opinion         String
+  examiner_status       String
+  final_hospital_result String
+  created_at            DateTime   @default(now())
+  updated_at            DateTime   @default(now())
+
+}
+
+model Weapons {
+  id        Int     @id @default(autoincrement())
+  V_SELAH   String?
+  MIL_SELAH String?
 }

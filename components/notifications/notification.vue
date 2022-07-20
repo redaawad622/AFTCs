@@ -27,7 +27,7 @@ export default {
 
   data: () => ({
     snackbar: true,
-    timeout: 200000,
+    timeout: 2000,
     icons: {
       error: 'mdi-alert-circle-outline ',
       warning: 'mdi-alert-outline ',
@@ -51,5 +51,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>

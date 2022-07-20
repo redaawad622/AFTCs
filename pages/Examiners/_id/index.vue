@@ -92,6 +92,7 @@
         placeholder="المرحلة"
       ></v-select>
       <v-text-field
+        v-if="permissions.admin.includes(user.type)"
         v-model="form.barcode"
         outlined
         color="primary"
@@ -100,6 +101,7 @@
         placeholder="الباركود"
       ></v-text-field>
       <v-select
+        v-if="permissions.admin.includes(user.type)"
         v-model="form.battary_id"
         :items="battaries"
         outlined
@@ -111,7 +113,50 @@
         label="البطارية"
         placeholder="البطارية"
       ></v-select>
-      <v-btn color="primary" @click="save()">حفظ</v-btn>
+      <v-btn color="primary" class="my-2" @click="save()">حفظ</v-btn>
+      <v-row justify="center">
+        <v-dialog v-if="examiner" v-model="dialog" persistent max-width="600px">
+          <template #activator="{ on, attrs }">
+            <v-btn color="error" dark v-bind="attrs" v-on="on">
+              تسجيل درجات
+            </v-btn>
+          </template>
+          <v-card>
+            <v-card-title class="grey lighten-2">
+              <span class="text-h5">تسجيل درجات الاختبارات التالية</span>
+            </v-card-title>
+            <v-card-text class="my-3">
+              <v-text-field
+                v-for="item in exams"
+                :key="item.Exm_Name"
+                v-model.number="examsVal[item.Exm_ID]"
+                outlined
+                :label="item.Exm_Name"
+                type="number"
+              ></v-text-field>
+            </v-card-text>
+            <v-divider></v-divider>
+            <v-card-actions>
+              <v-btn
+                :disabled="examLoading"
+                color="blue darken-1"
+                text
+                @click="dialog = false"
+              >
+                الغاء
+              </v-btn>
+              <v-btn
+                color="blue darken-1"
+                :loading="examLoading"
+                text
+                @click="saveManualCustomExam()"
+              >
+                حفظ
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-row>
     </v-form>
   </v-card>
 </template>
@@ -120,10 +165,15 @@
 import validation from '~/mixins/validation'
 
 export default {
+  name: 'InsertExaminer',
   mixins: [validation],
   data: () => {
     return {
+      dialog: false,
+      examLoading: false,
       valid: true,
+      exams: [],
+      examsVal: {},
       form: {
         national_id: '',
         triple_number: '',
@@ -156,6 +206,12 @@ export default {
     examiner() {
       return this.$store.getters['Examiner/examiner']
     },
+    user() {
+      return this.$store.getters['User/user']
+    },
+    permissions() {
+      return this.$store.getters['User/permissions']
+    },
   },
   watch: {
     examiner(val) {
@@ -170,6 +226,18 @@ export default {
             }
           } else this.form[item] = val[item]
         })
+      }
+    },
+    dialog(val) {
+      if (val) {
+        this.$store
+          .dispatch('Exam/getAssignExams', this.examiner.id)
+          .then((res) => {
+            const custom = res.data.customExam.map((elm) => elm.exam_id)
+            this.exams = res.data.battary.filter(
+              (elm) => elm.random === 'جهاز' && !custom.includes(elm.Exm_ID)
+            )
+          })
       }
     },
   },
@@ -188,6 +256,27 @@ export default {
     }
   },
   methods: {
+    saveManualCustomExam() {
+      const exams = Object.fromEntries(
+        Object.entries(this.examsVal).filter(([key, elm]) => elm)
+      )
+      if (Object.keys(exams).length > 0) {
+        this.examLoading = true
+        this.$store
+          .dispatch('Exam/saveManualCustomExam', {
+            exams,
+            id: this.examiner.id,
+          })
+          .then(() => {
+            this.dialog = false
+            this.exams = []
+            this.examsVal = []
+          })
+          .finally(() => {
+            this.examLoading = false
+          })
+      }
+    },
     searchByNationalId() {
       if (this.form.national_id) {
         this.$store.dispatch('Examiner/getExaminer', this.form.national_id)
@@ -222,6 +311,8 @@ export default {
             this.f_num = ''
             this.sec_num = ''
             this.th_num = ''
+            this.$refs.form.reset()
+            this.$refs.form.resetValidation()
           })
           .catch((rej) => {
             if (rej instanceof Array) {
@@ -245,5 +336,3 @@ export default {
   },
 }
 </script>
-
-<style></style>

@@ -36,6 +36,7 @@ module.exports = function (app, prisma, types) {
         },
       },
     })
+
     res.json(examiner)
   })
   app.get('/getExaminers', async (req, res) => {
@@ -52,6 +53,7 @@ module.exports = function (app, prisma, types) {
       withResualt,
       register,
       deleteItems,
+      interview,
     } = req.query
     const option = {
       where: {},
@@ -94,7 +96,8 @@ module.exports = function (app, prisma, types) {
       ]
     }
     if (register) {
-      option.where.register = { equals: Boolean(register) }
+      const id = req.headers.id
+      option.where.user_id = { equals: Number(id) }
     }
     if (qualification) {
       option.where.qualification_code = { equals: Number(qualification) }
@@ -116,6 +119,17 @@ module.exports = function (app, prisma, types) {
         }
       }
     }
+    if (interview) {
+      if (Number(interview)) {
+        option.where.Interview = {
+          some: {},
+        }
+      } else {
+        option.where.Interview = {
+          none: {},
+        }
+      }
+    }
 
     if (sortBy && sortBy.length > 0) {
       const sorts = sortBy[0].split('.')
@@ -129,19 +143,31 @@ module.exports = function (app, prisma, types) {
         option.orderBy[sortBy[0]] = dir ? 'desc' : 'asc'
       }
     }
+    option.include = {
+      _count: {
+        select: { Interview: true, Answers: true },
+      },
+      CustomExam: {
+        include: {
+          exam: {
+            select: {
+              Exm_Name: true,
+            },
+          },
+        },
+      },
+    }
     if (withResualt) {
-      option.include = {
-        Answers: {
-          select: {
-            id: true,
-            exam_id: true,
-            question_id: true,
-            answer_id: true,
-            examiner_id: true,
-            answer: {
-              select: {
-                Ans_Value: true,
-              },
+      option.include.Answers = {
+        select: {
+          id: true,
+          exam_id: true,
+          question_id: true,
+          answer_id: true,
+          examiner_id: true,
+          answer: {
+            select: {
+              Ans_Value: true,
             },
           },
         },
@@ -185,7 +211,7 @@ module.exports = function (app, prisma, types) {
       (k) => (data[k] == null || data[k] === '') && delete data[k]
     )
     if (data.sold_id) {
-      data.register = true
+      data.user_id = Number(id)
     }
     try {
       const examiner = await prisma.Examiners.upsert({
@@ -282,9 +308,11 @@ module.exports = function (app, prisma, types) {
         isDeleted: true,
       },
     })
+    const userId = req.headers.id
+
     await prisma.Log.create({
       data: {
-        user_id: Number(id),
+        user_id: Number(userId),
         operation_type: 'delete',
         description: ' مسح بيانات ممتحن يحمل رقم قومي ' + id,
         type: types[4],
@@ -317,18 +345,114 @@ module.exports = function (app, prisma, types) {
     res.json(examiners) // [{id: 5, name: 'Ashley', color: 'black'}, ...]
   })
 
-  app.post('/saveExam', (req, res) => {
+  app.post('/saveExam', async (req, res) => {
     const { barcode, examid, result } = req.body
-    console.log(barcode, examid, result)
-
+    const examiner = await prisma.Examiners.findFirst({
+      where: {
+        OR: [
+          {
+            national_id: {
+              equals: barcode,
+            },
+          },
+          {
+            triple_number: {
+              equals: barcode,
+            },
+          },
+          {
+            barcode: {
+              equals: barcode,
+            },
+          },
+          {
+            sold_id: {
+              equals: barcode,
+            },
+          },
+        ],
+      },
+    })
+    if (examiner) {
+      await prisma.CustomExam.upsert({
+        where: {
+          examiner_id_exam_id: {
+            examiner_id: examiner.id,
+            exam_id: Number(examid),
+          },
+        },
+        create: {
+          examiner_id: examiner.id,
+          value: result,
+          exam_id: Number(examid),
+        },
+        update: {},
+      })
+    }
     res.json(result)
   })
-  app.get('/checkIsDone', (req, res) => {
-    // const { id, examId } = req.body
+  app.get('/checkIsDone', async (req, res) => {
+    const { id, examId } = req.query
+    const examiner = await prisma.Examiners.findFirst({
+      where: {
+        OR: [
+          {
+            national_id: {
+              equals: id,
+            },
+          },
+          {
+            triple_number: {
+              equals: id,
+            },
+          },
+          {
+            barcode: {
+              equals: id,
+            },
+          },
+          {
+            sold_id: {
+              equals: id,
+            },
+          },
+        ],
+      },
+    })
+    let done = 0
+    if (examiner) {
+      const exam = await prisma.CustomExam.findUnique({
+        where: {
+          examiner_id_exam_id: {
+            examiner_id: examiner.id,
+            exam_id: Number(examId),
+          },
+        },
+      })
 
+      if (exam) {
+        done = 1
+      }
+      res.json({ done })
+    } else {
+      res.json({ done })
+    }
     // check if done
-    const done = 0
+  })
 
-    res.json({ done })
+  app.get('/saveWeapon', async (req, res) => {
+    const buffer = readFileSync('./prisma/selah_cod.mdb')
+    const reader = new MDBReader(buffer)
+    const table = await reader.getTable('SELAH_COD')
+    // table.getColumnNames() // ['id', 'name', 'color']
+    const data = await table.getData()
+    const values = data
+      .map((value) => `('${value.V_SELAH}', '${value.MIL_SELAH}')`)
+      .join(',\n\t')
+
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO \`Weapons\` (V_SELAH, MIL_SELAH) VALUES \n\t${values};`
+    )
+    res.json(data)
   })
 }
