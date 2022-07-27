@@ -54,6 +54,8 @@ module.exports = function (app, prisma, types) {
       register,
       deleteItems,
       interview,
+      user,
+      nafsy,
     } = req.query
     const option = {
       where: {},
@@ -98,6 +100,9 @@ module.exports = function (app, prisma, types) {
     if (register) {
       const id = req.headers.id
       option.where.user_id = { equals: Number(id) }
+    }
+    if (user) {
+      option.where.user_id = { equals: Number(user) }
     }
     if (qualification) {
       option.where.qualification_code = { equals: Number(qualification) }
@@ -158,17 +163,28 @@ module.exports = function (app, prisma, types) {
       },
     }
     if (withResualt) {
-      option.include.Answers = {
-        select: {
-          id: true,
-          exam_id: true,
-          question_id: true,
-          answer_id: true,
-          examiner_id: true,
-          answer: {
-            select: {
-              Ans_Value: true,
-            },
+      option.include.Answers = {}
+      if (nafsy) {
+        let battary = await prisma.Battries.findUnique({
+          where: {
+            id: 11, // بطارية النفسي
+          },
+          include: {
+            Battary_Exam: true,
+          },
+        })
+        battary = battary.Battary_Exam.map((ex) => ex.exam_id)
+        option.include.Answers.where = { exam_id: { in: battary } }
+      }
+      option.include.Answers.select = {
+        id: true,
+        exam_id: true,
+        question_id: true,
+        answer_id: true,
+        examiner_id: true,
+        answer: {
+          select: {
+            Ans_Value: true,
           },
         },
       }

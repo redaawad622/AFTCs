@@ -244,7 +244,11 @@ export default {
     },
   },
   created() {
-    this.getExams()
+    if (this.exams.length < 1) {
+      this.getExams()
+    } else {
+      this.filterExam = this.exams
+    }
   },
   methods: {
     editExamQ() {

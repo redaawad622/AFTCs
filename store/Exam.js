@@ -17,6 +17,7 @@ export const state = () => ({
   editableExam: null,
   battary: {},
   weapons: [],
+  previewResult: null,
 })
 export const getters = {
   exams(state) {
@@ -71,6 +72,9 @@ export const getters = {
   battary(state) {
     return state.battary
   },
+  previewResult(state) {
+    return state.previewResult
+  },
 }
 export const mutations = {
   setHelpers(state, payload) {
@@ -106,6 +110,9 @@ export const mutations = {
   },
   setCurrentExamTime(state, payload) {
     state.currentExamTime = payload
+  },
+  setPreviewResult(state, payload) {
+    state.previewResult = payload
   },
   loadAnswers(state, payload) {
     state.answers = this.$getLocal(`answer${payload}`) || []
@@ -268,5 +275,11 @@ export const actions = {
   },
   again(_, payload) {
     return this.$axios.post(`/api/again`, payload)
+  },
+  loadAndSendAnswersData() {
+    return this.$axios.post(`/api/loadAndSendAnswersData`)
+  },
+  loadExaminerDataFromLocalServer() {
+    return this.$axios.post(`/api/loadExaminerDataFromLocalServer`)
   },
 }

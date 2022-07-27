@@ -132,6 +132,7 @@ model Answers {
   answer_id   Int
   examiner_id Int
   created_at  DateTime   @default(now())
+  update_at   DateTime   @default(now())
   duration    Int?
   Examiners   Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
   answer      T_Answers? @relation(fields: [answer_id], references: [Ans_ID])

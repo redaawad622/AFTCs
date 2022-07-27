@@ -140,9 +140,13 @@ export default {
       return this.$store.getters['User/permissions']
     },
   },
+
   created() {
     this.$store.dispatch('Exam/getHelpers')
     this.$store.dispatch('Exam/getSerials')
+    this.$store.dispatch('Exam/getExams').then((res) => {
+      this.$store.commit('Exam/setExams', res.data)
+    })
     const el = this
     this.items = [
       {

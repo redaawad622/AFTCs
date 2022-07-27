@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-5" v-if="report">
+  <div v-if="report" class="pa-5">
     <v-sheet
       color="#eee"
       class="py-3 px-4 d-flex justify-space-between align-center"
@@ -8,7 +8,7 @@
         <v-img src="/logo.webp"></v-img>
       </v-avatar>
 
-      <div contenteditable="true" class="headline pa-2" >كشف اسماء</div>
+      <div contenteditable="true" class="headline pa-2">كشف اسماء</div>
       <div>{{ $localeDate() }}</div>
       <div class="hideOnPrint align-center">
         <v-combobox
@@ -26,7 +26,7 @@
         ></v-combobox>
         <v-btn color="primary" @click="print()">طباعة</v-btn>
         <v-dialog v-model="dialog" width="500">
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
               تصدير لملف اكسس
             </v-btn>
@@ -61,8 +61,8 @@
       </div>
     </v-sheet>
 
-    <v-simple-table class="printTable" id="printTable">
-      <template v-slot:default>
+    <v-simple-table id="printTable" class="printTable" dense>
+      <template #default>
         <thead>
           <tr>
             <th class="">مسلسل</th>

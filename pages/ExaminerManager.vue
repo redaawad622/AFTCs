@@ -1,3 +1,4 @@
+/* eslint-disable vue/valid-v-slot */
 <template>
   <v-row justify="center" align="center">
     <v-col cols="12">
@@ -214,25 +215,51 @@
                     cache-items
                     :items="helpers.register"
                   ></v-autocomplete>
+                  <v-autocomplete
+                    v-if="permissions.admin.includes(user.type)"
+                    v-model="filters.user"
+                    append-icon="mdi-menu-swap"
+                    outlined
+                    dense
+                    placeholder="المستخدمين"
+                    label="المستخدمين"
+                    item-value="Cat_ID"
+                    item-text="Cat_Name"
+                    cache-items
+                    :items="users"
+                  ></v-autocomplete>
                   <v-checkbox
                     v-if="permissions.admin.includes(user.type)"
                     v-model="withResualt"
                     label=" مع النتيجة"
+                  ></v-checkbox>
+                  <v-checkbox
+                    v-if="permissions.admin.includes(user.type)"
+                    v-model="nafsy"
+                    label="النفسي"
                   ></v-checkbox>
                 </v-card-text>
               </v-card>
             </v-menu>
           </div>
         </div>
-        <v-select
-          v-if="permissions.admin.includes(user.type)"
-          v-model="headers"
-          return-object
-          outlined
-          chips
-          multiple
-          :items="defaultHeaders"
-        ></v-select>
+        <div class="d-flex align-center mb-5">
+          <v-select
+            v-if="permissions.admin.includes(user.type)"
+            v-model="headers"
+            return-object
+            outlined
+            chips
+            dense
+            multiple
+            hide-details
+            :items="defaultHeaders"
+            class="ml-5"
+          ></v-select>
+          <v-btn color="primary" @click="filterByExamDegree"
+            >استخراج النتائج</v-btn
+          >
+        </div>
         <v-data-table
           v-model="selectedExaminer"
           :headers="headers"
@@ -246,7 +273,28 @@
           :single-expand="true"
           :single-select="true"
           show-select
-        >
+          >`
+          <template #[`header.Answers`]="{ header }">
+            <div class="d-flex flex-column">
+              <v-text-field
+                v-model="filterExam[`from_${header.id}`]"
+                solo-inverted
+                placeholder="من"
+                type="number"
+                dense
+                style="min-width: 60px"
+              ></v-text-field>
+              <v-text-field
+                v-model="filterExam[`to_${header.id}`]"
+                solo-inverted
+                placeholder="الي"
+                type="number"
+                dense
+                style="min-width: 60px"
+              ></v-text-field>
+              <div class="text-no-wrap text-primary">{{ header.text }}</div>
+            </div>
+          </template>
           <template #[`item.actions`]="{ item }">
             <v-btn
               color="success"
@@ -309,7 +357,7 @@
             </diV>
           </template>
           <template #[`item.Answers`]="{ item, header }">
-            {{ item.Answers[header.text] }}
+            {{ item.Answers[header.id] }}%
           </template>
           <template #[`item.sold_id`]="{ item }">
             <v-chip v-if="item.sold_id">{{ item.sold_id }}</v-chip>
@@ -463,6 +511,7 @@ export default {
   name: 'ExaminerManager',
   data() {
     return {
+      filterExam: {},
       dialog: false,
       examLoading: false,
       currentSelectedExaminer: null,
@@ -494,6 +543,7 @@ export default {
       selectedExaminer: [],
       deleteItems: false,
       examiners: [],
+      examinersList: [],
       ans: '',
       expanded: [],
       allExaminers: 0,
@@ -503,12 +553,14 @@ export default {
       readUnitsLoading: false,
       search: '',
       withResualt: 0,
+      nafsy: 0,
       filters: {
         qualification: '',
         examFinish: '',
         interview: '',
         battaryId: '',
         stage: '',
+        user: '',
         register: 1,
       },
       defaultHeaders: [
@@ -692,6 +744,9 @@ export default {
     user() {
       return this.$store.getters['User/user']
     },
+    users() {
+      return this.$store.getters['User/users']
+    },
     permissions() {
       return this.$store.getters['User/permissions']
     },
@@ -700,6 +755,9 @@ export default {
     },
     stage() {
       return this.$store.getters['Exam/stage']
+    },
+    examsBank() {
+      return this.$store.getters['Exam/exams']
     },
     filtersItems() {
       const res = Object.fromEntries(
@@ -712,6 +770,8 @@ export default {
           res[elm] = this.battaryId.find((x) => x.id === res[elm]).name
         } else if (elm === 'stage') {
           // nothing
+        } else if (elm === 'user') {
+          res[elm] = this.users.find((x) => x.Cat_ID === res[elm]).Cat_Name
         } else
           res[elm] = this.helpers[elm].find((x) => x.value === res[elm]).name
       })
@@ -753,6 +813,44 @@ export default {
   },
 
   methods: {
+    filterByExamDegree() {
+      console.log(this.filterExam, [0])
+      const keys = Object.keys(this.filterExam)
+      if (keys.length > 0) {
+        this.examiners = this.examinersList.filter((ex) => {
+          let isNoticed = false
+          keys.forEach((k) => {
+            const id = k.split('_')[1]
+            if (
+              ex.Answers[id] >= this.filterExam[`from_${id}`] &&
+              ex.Answers[id] <= this.filterExam[`to_${id}`]
+            ) {
+              return (isNoticed = true)
+            }
+          })
+          return isNoticed
+        })
+      } else {
+        this.examiners = this.examinersList
+      }
+    },
+    getExamPres(val, fullMark) {
+      if (fullMark > 0) {
+        return Math.floor((val / fullMark) * 100)
+      } else {
+        return 0
+      }
+    },
+    getExamById(id) {
+      const exam = this.examsBank.find(
+        (elm) => Number(elm.Exm_ID) === Number(id)
+      )
+      if (exam) {
+        return exam
+      } else {
+        return id
+      }
+    },
     saveManualCustomExam() {
       const exams = Object.fromEntries(
         Object.entries(this.examsVal).filter(([key, elm]) => elm)
@@ -791,7 +889,6 @@ export default {
           this.currentDeleteLoading = false
         })
         .catch((ex) => {
-          console.log(ex)
           this.$store.commit('Notifications/setNotification', {
             text: 'هناك مشكلة في الحذف',
             color: 'error',
@@ -824,6 +921,7 @@ export default {
     async fetchExaminers(isSearch = false) {
       this.options.page = isSearch ? 1 : this.options.page
       if (this.withResualt) this.options.withResualt = this.withResualt
+      if (this.nafsy) this.options.nafsy = this.nafsy
 
       this.loading = true
       if (this.deleteItems) {
@@ -839,18 +937,30 @@ export default {
         })
         .then((res) => {
           this.examiners = res.data.examiners
+          this.examinersList = res.data.examiners
           this.allExaminers = res.data.allExaminers
           this.headers = [...this.headers]
           if (this.examiners && this.examiners.length > 0) {
             if (this.examiners[0].Answers) {
-              Object.keys(this.examiners[0].Answers).forEach((k) => {
-                if (this.headers.findIndex((e) => e.text === k) === -1)
-                  this.headers.push({
-                    text: k,
-                    align: 'center',
-                    value: `Answers`,
-                    hide: false,
-                  })
+              this.examiners.forEach((element, index) => {
+                Object.keys(element.Answers).forEach((k) => {
+                  const ex = this.getExamById(k)
+
+                  this.examiners[index].Answers[k] = this.getExamPres(
+                    element.Answers[k],
+                    ex.fullMark
+                  )
+                  if (this.headers.findIndex((e) => e.id === k) === -1) {
+                    this.headers.push({
+                      text: ex.Exm_Name,
+                      id: k,
+                      align: 'center',
+                      value: `Answers`,
+                      hide: false,
+                      sortable: false,
+                    })
+                  }
+                })
               })
             }
           }
