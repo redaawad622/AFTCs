@@ -31,6 +31,7 @@
         prepend-inner-icon="mdi-search"
         hide-details
         class="me-3 display-1"
+        @keyup.enter="getExaminerData()"
       ></v-text-field>
       <v-btn
         :loading="loading"
@@ -44,7 +45,7 @@
     </v-sheet>
     <examiner-data></examiner-data>
     <v-spacer></v-spacer>
-    <div class="red--text">اصدار رقم: 1.1.1</div>
+    <div class="red--text">اصدار رقم: {{ version }} - {{ version_date }}</div>
     <div class="text-center">
       <v-dialog v-model="dialog" width="500" hide-overlay>
         <v-card>
@@ -73,6 +74,7 @@
               outlined
               label="رقم الدخول"
               :error-messages="error"
+              @keyup.enter="loginThenNotify()"
             ></v-text-field>
           </v-form>
           <v-divider></v-divider>
@@ -83,7 +85,7 @@
               color="primary"
               class="title"
               text
-              @click="login()"
+              @click="loginThenNotify()"
             >
               تسجيل الدخول
             </v-btn>
@@ -96,6 +98,7 @@
 
 <script>
 import examinerData from '~/components/exam/examinerData.vue'
+import version from '~/package.json'
 export default {
   name: 'IndexPage',
   components: { examinerData },
@@ -106,6 +109,8 @@ export default {
       dialog: false,
       loading: false,
       logining: false,
+      version: version.version,
+      version_date: version.version_date,
       id: '',
       error: null,
       form: {
@@ -121,7 +126,6 @@ export default {
     currentLogin() {
       return this.$store.getters['User/currentLogin']
     },
-
     user() {
       return this.$store.getters['User/user']
     },
@@ -144,7 +148,7 @@ export default {
   },
 
   methods: {
-    login() {
+    loginThenNotify() {
       this.logining = true
       this.error = null
       this.$store
@@ -163,18 +167,19 @@ export default {
           this.logining = false
         })
     },
+    examinerNotFound() {
+      this.$store.commit('Notifications/setNotification', {
+        text: 'الممتحن غير موجود',
+        color: 'error',
+      })
+    },
     getExaminerData() {
       if (this.id) {
         this.loading = true
         this.message = ''
         this.$store.dispatch('Examiner/getExaminer', this.id).finally(() => {
           this.loading = false
-          if (!this.examiner) {
-            this.$store.commit('Notifications/setNotification', {
-              text: 'الممتحن غير موجود',
-              color: 'error',
-            })
-          }
+          if (!this.examiner) this.examinerNotFound()
         })
       }
     },
