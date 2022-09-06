@@ -9,6 +9,7 @@ import assignExam from '~/components/examManager/assignExam.vue'
 export default {
   name: 'ExamsManager',
   components: { assignExam },
+  middleware: 'admin',
   data() {
     return {
       tab: null,

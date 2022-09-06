@@ -102,10 +102,10 @@
             label="درجة الاجابة"
           ></v-text-field>
         </div>
-        <v-btn @click="addMore()" color="secondary" :disabled="saveLoading"
+        <v-btn color="secondary" :disabled="saveLoading" @click="addMore()"
           >اضافة المزيد</v-btn
         >
-        <v-btn color="primary" @click="saveNewQues()" :loading="saveLoading"
+        <v-btn color="primary" :loading="saveLoading" @click="saveNewQues()"
           >حفظ</v-btn
         >
       </div>

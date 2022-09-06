@@ -7,7 +7,7 @@
   >
     <v-icon large class="me-2">{{ icon }}</v-icon>
     <span class="font-weight-bold pa-1">{{ notification.text }}</span>
-    <template v-slot:action="{ attrs }">
+    <template #action="{ attrs }">
       <v-btn
         color="#fff"
         class="mx-1"

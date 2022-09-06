@@ -18,10 +18,22 @@ export const state = () => ({
   battary: {},
   weapons: [],
   previewResult: null,
+  UnitNames: [],
+  TamarkzNames: [],
+  ArmyNames: [],
 })
 export const getters = {
   exams(state) {
     return state.exams
+  },
+  UnitNames(state) {
+    return state.UnitNames
+  },
+  TamarkzNames(state) {
+    return state.TamarkzNames
+  },
+  ArmyNames(state) {
+    return state.ArmyNames
   },
 
   assignExams(state) {
@@ -83,6 +95,9 @@ export const mutations = {
     state.categories = payload.categories
     state.order = payload.order
     state.weapons = payload.weapons
+    state.ArmyNames = payload.ArmyNames
+    state.TamarkzNames = payload.TamarkzNames
+    state.UnitNames = payload.UnitNames
   },
   setExams(state, payload) {
     state.exams = payload.exams
@@ -279,7 +294,24 @@ export const actions = {
   loadAndSendAnswersData() {
     return this.$axios.post(`/api/loadAndSendAnswersData`)
   },
-  loadExaminerDataFromLocalServer() {
-    return this.$axios.post(`/api/loadExaminerDataFromLocalServer`)
+  loadExaminerDataFromLocalServer(_, payload) {
+    return this.$axios.post(`/api/loadExaminerDataFromLocalServer`, {
+      ids: payload || [],
+    })
+  },
+  deleteExaminerDataFromLocalServer(_, payload) {
+    return this.$axios.post(`/api/deleteExaminerDataFromLocalServer`, payload)
+  },
+  setAsAgain(_, payload) {
+    return this.$axios.post(`/api/setAsAgain`, payload)
+  },
+  setAsFNoticed(_, payload) {
+    return this.$axios.post(`/api/setAsFNoticed`, payload)
+  },
+  saveUnit(_, payload) {
+    return this.$axios.post(`/api/saveUnit`, payload)
+  },
+  extractToDevice(_, payload) {
+    return this.$axios.post(`/api/extractToDevice`, payload)
   },
 }

@@ -11,14 +11,15 @@ datasource db {
 
 model T_Answers {
   Ans_Qus_ID  Int
-  Ans_ID      Int         @id @default(autoincrement())
-  Ans_Is_Pic  Boolean     @default(false)
+  Ans_ID      Int           @id @default(autoincrement())
+  Ans_Is_Pic  Boolean       @default(false)
   Ans_Text    String?
   Ans_Value   Float?
   Ans_audio   Bytes?
   Ans_Cat     String?
-  T_Questions T_Questions @relation(fields: [Ans_Qus_ID], references: [Qus_ID], onDelete: Cascade, onUpdate: NoAction)
+  T_Questions T_Questions   @relation(fields: [Ans_Qus_ID], references: [Qus_ID], onDelete: Cascade, onUpdate: NoAction)
   Answers     Answers[]
+  Answers_old Answers_old[]
 }
 
 model T_Categories {
@@ -32,8 +33,9 @@ model T_Categories {
   password String  @default("$2a$08$oAi0Hoi5q949I/bLp9QxkeHvakgwmbApRkxVOU2YDEoYSaXoyU6My")
   Log      Log[]
 
-  Battries  Battries[]
-  Examiners Examiners[]
+  Battries     Battries[]
+  Examiners    Examiners[]
+  ExpectedPlan ExpectedPlan[]
 }
 
 model T_Exams {
@@ -85,6 +87,7 @@ model Examiners {
   Answers            Answers[]
   battary_id         Int?
   isDeleted          Boolean       @default(false)
+  again              Boolean       @default(false)
   //unit details
   UNIT_NAME          String?
   GEHA_NAME          String?
@@ -92,12 +95,14 @@ model Examiners {
   UNIT_ARMY_NAME     String?
   ARMY_TAGNEED_NAME  String?
   isNoticed          Boolean       @default(false)
+  isNoticedAgain     Boolean       @default(false)
   nextFollowDate     DateTime?
   numFollowUps       Int           @default(0)
   CustomExam         CustomExam[]
   T_Categories       T_Categories? @relation(fields: [t_CategoriesCat_ID], references: [Cat_ID])
   t_CategoriesCat_ID Int?
   Interview          Interview[]
+  Answers_old        Answers_old[]
 }
 
 model Battries {
@@ -132,11 +137,25 @@ model Answers {
   answer_id   Int
   examiner_id Int
   created_at  DateTime   @default(now())
-  update_at   DateTime   @default(now())
   duration    Int?
   Examiners   Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
   answer      T_Answers? @relation(fields: [answer_id], references: [Ans_ID])
 
+  @@unique([examiner_id, question_id])
+}
+
+model Answers_old {
+  id          Int        @id @default(autoincrement())
+  exam_id     Int
+  question_id Int
+  answer_id   Int
+  examiner_id Int
+  created_at  DateTime   @default(now())
+  duration    Int?
+  Examiners   Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
+  answer      T_Answers? @relation(fields: [answer_id], references: [Ans_ID])
+
+  @@unique([examiner_id, question_id])
 }
 
 model reception {
@@ -175,32 +194,83 @@ model CustomExam {
 }
 
 model Interview {
-  id                    Int        @id @default(autoincrement())
-  examiner_id           Int
-  Examiners             Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
-  parent_job            String
-  siblings_num          Int
-  family_relation       String
-  complaint             String
-  appearance            String
-  focus_ability         String
-  mood                  String
-  speaking_disorder     String
-  medicine_type         String
-  has_medical_history   String
-  hospital_name         String?
-  drugs_history         String
-  drug_type             String?
-  final_opinion         String
-  examiner_status       String
-  final_hospital_result String
-  created_at            DateTime   @default(now())
-  updated_at            DateTime   @default(now())
+  id                     Int        @id @default(autoincrement())
+  examiner_id            Int        @unique
+  Examiners              Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
+  parent_job             String
+  siblings_num           Int
+  family_relation        String
+  complaint              String
+  appearance             String
+  focus_ability          String
+  mood                   String
+  speaking_disorder      String
+  medicine_type          String
+  has_medical_history    String
+  hospital_name          String?
+  drugs_history          String
+  drug_type              String?
+  final_opinion          String
+  examiner_status        String
+  final_hospital_result  String
+  order_brothers         Int?
+  parent_rel             Int?
+  rel_between_parents    Int?
+  family_income          Int?
+  family_medical         Int?
+  personal_medical       Int?
+  half_brothers          Int?
+  complaint_f            String?
+  transReason            Int?
+  moving                 Int?
+  faceExprission         Int?
+  timeAware              Int?
+  situationAware         Int?
+  judgeAbility           Int?
+  awareDisorder          Int?
+  thinkDisorder          Int?
+  appetite               Int?
+  sleeping               Int?
+  smoking                Int?
+  prayer                 Int?
+  interviewer_opinion    String?
+  historyDate            DateTime?
+  recommendation         Int?
+  recommendation_res     Int?
+  recommendation_summary String?
+  interviewer            String?
 
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
 }
 
 model Weapons {
   id        Int     @id @default(autoincrement())
   V_SELAH   String?
   MIL_SELAH String?
+}
+
+model ArmyNames {
+  id   Int     @id @default(autoincrement())
+  name String?
+}
+
+model TamarkzNames {
+  id   Int     @id @default(autoincrement())
+  name String?
+}
+
+model UnitNames {
+  id   Int     @id @default(autoincrement())
+  name String?
+}
+
+model ExpectedPlan {
+  id            Int           @id @default(autoincrement())
+  expcted       Int?
+  actual_arrive Int?
+  user_id       Int?
+  users         T_Categories? @relation(fields: [user_id], references: [Cat_ID], onDelete: Cascade)
+
 }

@@ -1,16 +1,8 @@
 const { createServer } = require('http')
 const express = require('express')
 const { PrismaClient } = require('@prisma/client')
-// const gulp = require('gulp');
-// const jsdoc = require('gulp-jsdoc3')
-
 const app = express()
 const httpServer = createServer(app)
-// gulp.task('doc', function (cb) {
-//   gulp.src(['README.md', './store/*.js'], { read: false }).pipe(jsdoc(cb))
-// })
-// const multer = require('multer')
-// const upload = multer({ dest: 'static/uploads' })
 const { Server } = require('socket.io')
 
 const io = new Server(httpServer, {
@@ -32,11 +24,12 @@ const types = [
 ]
 
 const prisma = new PrismaClient()
-app.use(express.json({ limit: '50mb' }))
-app.use(express.urlencoded({ limit: '50mb' }))
+app.use(express.json({ limit: '500mb' }))
+app.use(express.urlencoded({ limit: '500mb' }))
 
 require('./examinerRoutes.js')(app, prisma, types)
 require('./examRoutes.js')(app, prisma, types)
+require('./reportsRoutes')(app, prisma)
 require('./userRoutes')(app, prisma, types)
 require('./badanyRoutes')(app, prisma, types)
 require('./oracleRoutes')(app, prisma, types)

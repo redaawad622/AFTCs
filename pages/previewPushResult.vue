@@ -21,12 +21,20 @@
         </tbody>
       </v-simple-table>
       <v-btn
-        v-if="previewPushResult && previewPushResult.type == 'notRegister'"
+        v-if="previewResult && previewResult.type == 'notRegister'"
         color="error"
         :loading="loadLoading2"
         class="mx-1"
         @click="loadExaminerDataFromLocalServer()"
         >تسجيل بيانات الممتحنين الي سيرفر فرع الانتقاء</v-btn
+      >
+      <v-btn
+        v-if="previewResult && previewResult.type == 'notRegister'"
+        color="error"
+        :loading="loadLoading3"
+        class="mx-1"
+        @click="deleteExaminerDataFromLocalServer()"
+        >مسح الممتحنين</v-btn
       >
       <v-sheet
         v-if="previewResult.report"
@@ -86,6 +94,24 @@
             </tr>
           </tbody>
         </v-simple-table>
+        <v-simple-table
+          v-if="previewResult.report.interview"
+          class="repTable ma-1"
+        >
+          <tr>
+            <th colspan="2">العمليات علي تسجيل المقابلة الشخصية</th>
+          </tr>
+          <tbody>
+            <tr>
+              <td>الناجحة</td>
+              <td>{{ previewResult.report.interview.successNum }}</td>
+            </tr>
+            <tr>
+              <td>الفاشلة</td>
+              <td>{{ previewResult.report.interview.failNum }}</td>
+            </tr>
+          </tbody>
+        </v-simple-table>
       </v-sheet>
     </v-col>
   </v-row>
@@ -96,6 +122,7 @@ export default {
   data() {
     return {
       loadLoading2: false,
+      loadLoading3: false,
     }
   },
   computed: {
@@ -106,8 +133,11 @@ export default {
   methods: {
     loadExaminerDataFromLocalServer() {
       this.loadLoading2 = true
+      const ids = this.previewResult.examiners
+        ? this.previewResult.examiners.map((elm) => elm.national_id)
+        : []
       this.$store
-        .dispatch('Exam/loadExaminerDataFromLocalServer')
+        .dispatch('Exam/loadExaminerDataFromLocalServer', ids)
         .then((res) => {
           this.$store.commit('Exam/setPreviewResult', res.data)
           this.$router.push('/previewPushResult')
@@ -117,6 +147,24 @@ export default {
         })
         .finally(() => {
           this.loadLoading2 = false
+        })
+    },
+    deleteExaminerDataFromLocalServer() {
+      this.loadLoading3 = true
+      const ids = this.previewResult.examiners
+        ? this.previewResult.examiners.map((elm) => elm.national_id)
+        : []
+      this.$store
+        .dispatch('Exam/deleteExaminerDataFromLocalServer', { ids })
+        .then((res) => {
+          this.$store.commit('Exam/setPreviewResult', res.data)
+          this.$router.push('/previewPushResult')
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+        .finally(() => {
+          this.loadLoading3 = false
         })
     },
   },

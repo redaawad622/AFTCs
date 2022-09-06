@@ -83,6 +83,7 @@ module.exports = function (app, prisma, types) {
         password: bcrypt.hashSync(newPassword, 8),
       },
     })
+
     await prisma.Log.create({
       data: {
         user_id: Number(user.Cat_ID),

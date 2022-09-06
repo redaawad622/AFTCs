@@ -2,6 +2,7 @@ export const state = () => ({
   user: process.server ? '' : JSON.parse(sessionStorage.getItem('user')),
   users: [],
   currentLogin: null,
+  // Top-Down logic permission approach
   permissions: {
     developer: [0],
     admin: [0, 3],
@@ -11,6 +12,7 @@ export const state = () => ({
     follow: [0, 3, 4, 5],
   },
 })
+
 export const getters = {
   user(state) {
     return state.user
@@ -25,6 +27,7 @@ export const getters = {
     return state.permissions
   },
 }
+
 export const mutations = {
   setUser(state, payload) {
     state.user = payload

@@ -1,4 +1,8 @@
-# AFTCs
+# AFTCs Build setup
+
+## Greetings
+
+Welcome to AFTCs (Armed forces training centers)! Follow this breif explanation to understand how to setup.
 
 ## Build Setup
 

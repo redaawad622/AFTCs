@@ -167,7 +167,7 @@ export default {
           this.logining = false
         })
     },
-    examinerNotFound() {
+    notifyExaminerNotFound() {
       this.$store.commit('Notifications/setNotification', {
         text: 'الممتحن غير موجود',
         color: 'error',
@@ -179,7 +179,7 @@ export default {
         this.message = ''
         this.$store.dispatch('Examiner/getExaminer', this.id).finally(() => {
           this.loading = false
-          if (!this.examiner) this.examinerNotFound()
+          if (!this.examiner) this.notifyExaminerNotFound()
         })
       }
     },

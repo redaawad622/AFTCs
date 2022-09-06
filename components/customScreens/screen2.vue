@@ -34,8 +34,8 @@
         >
         <div class="d-flex justify-center">
           <audio
-            src="/audio/words.mp3"
             ref="wordAudio"
+            src="/audio/words.mp3"
             @ended="cursor = 3"
           ></audio>
         </div>

@@ -4,23 +4,15 @@
 // $font-size-root: 20px;
 @font-face {
   font-family: 'Tajawal';
-
   src: url('/fonts/Tajawal-Medium.ttf') format('truetype'),
     url('/fonts/Tajawal-Regular.ttf') format('truetype');
 }
 .width-100 {
   width: 100%;
 }
-
-.v-application {
-  font-family: 'Tajawal', sans-serif;
-}
-
-button,
-[type='button'],
-[type='reset'],
-[type='submit'],
-[role='button'] {
-  cursor: pointer;
-  color: initial !important;
+.v-application,
+.v-application .subtitle-1,
+.v-application .headline,
+.v-application .title {
+  font-family: 'Tajawal', sans-serif !important;
 }

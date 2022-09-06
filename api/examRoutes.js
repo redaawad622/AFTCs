@@ -363,31 +363,6 @@ module.exports = function (app, prisma) {
 
     res.json('done')
   })
-  app.post('/saveFake', async (req, res) => {
-    const { examinerId, ans } = req.body
-    const ex = await prisma.Examiners.findUnique({
-      where: {
-        national_id: ans,
-      },
-    })
-    const answers = await prisma.Answers.findMany({
-      where: {
-        examiner_id: ex.id,
-      },
-      select: {
-        exam_id: true,
-        question_id: true,
-        answer_id: true,
-      },
-    })
-
-    answers.forEach(async (x) => {
-      await prisma.Answers.create({
-        data: { examiner_id: examinerId, ...x, duration: 5 },
-      })
-    })
-    res.json({ ex, answers })
-  })
 
   app.get('/getAndAdd', async (req, res) => {
     const { battaryId } = req.query
@@ -462,6 +437,9 @@ module.exports = function (app, prisma) {
     }
   })
   app.get('/getExamHelpers', async (req, res) => {
+    const ArmyNames = await prisma.ArmyNames.findMany()
+    const TamarkzNames = await prisma.TamarkzNames.findMany()
+    const UnitNames = await prisma.UnitNames.findMany()
     const battaries = await prisma.Battries.findMany()
     const weapons = await prisma.Weapons.findMany()
     const stage = await prisma.Examiners.groupBy({
@@ -483,6 +461,9 @@ module.exports = function (app, prisma) {
       },
     })
     res.json({
+      ArmyNames: mapBy(ArmyNames, 'name'),
+      UnitNames: mapBy(UnitNames, 'name'),
+      TamarkzNames: mapBy(TamarkzNames, 'name'),
       battaries,
       weapons,
       stage,
@@ -585,16 +566,67 @@ module.exports = function (app, prisma) {
   })
   app.post('/again', async (req, res) => {
     const { national_id } = req.body
-    const examiner = await prisma.Examiners.findUnique({
+    const examiner = await prisma.Examiners.update({
       where: {
         national_id,
       },
+      data: {
+        again: true,
+      },
     })
+    let battary = await prisma.Battries.findUnique({
+      where: {
+        id: 11, // بطارية النفسي
+      },
+      include: {
+        Battary_Exam: true,
+      },
+    })
+    battary = battary.Battary_Exam.map((ex) => ex.exam_id)
     await prisma.Answers.deleteMany({
       where: {
         examiner_id: examiner.id,
+        exam_id: { in: battary },
       },
     })
+    res.json(examiner)
+  })
+  app.post('/setAsAgain', async (req, res) => {
+    const { nationals } = req.body
+    await prisma.Examiners.updateMany({
+      where: {
+        national_id: { in: nationals },
+      },
+      data: {
+        again: true,
+      },
+    })
+
+    res.json('done')
+  })
+  app.post('/setAsFNoticed', async (req, res) => {
+    const { nationals, second } = req.body
+    await prisma.Examiners.updateMany({
+      where: {
+        national_id: { in: nationals },
+      },
+      data: {
+        isNoticed: true,
+        isNoticedAgain: Boolean(Number(second)),
+      },
+    })
+
+    res.json('done')
+  })
+  app.post('/saveUnit', async (req, res) => {
+    const { id, unit } = req.body
+    await prisma.Examiners.update({
+      where: {
+        id: Number(id),
+      },
+      data: unit,
+    })
+
     res.json('done')
   })
 
@@ -602,6 +634,7 @@ module.exports = function (app, prisma) {
   app.post('/loadAndSendAnswersData', async (_, res) => {
     const answers = await prisma.Examiners.findMany({
       where: {
+        isDeleted: { equals: Boolean(false) },
         Answers: {
           some: {},
         },
@@ -611,6 +644,10 @@ module.exports = function (app, prisma) {
         name: true,
         sold_id: true,
         user_id: true,
+        again: true,
+        UNIT_NAME: true,
+        TAMARKZ_NAME: true,
+        UNIT_ARMY_NAME: true,
         Answers: {
           select: {
             exam_id: true,
@@ -620,8 +657,24 @@ module.exports = function (app, prisma) {
         },
       },
     })
+    const interviews = await prisma.Examiners.findMany({
+      where: {
+        isDeleted: { equals: Boolean(false) },
+        Interview: {
+          some: {},
+        },
+      },
+      select: {
+        national_id: true,
+        name: true,
+        sold_id: true,
+        user_id: true,
+        Interview: true,
+      },
+    })
     const customExam = await prisma.Examiners.findMany({
       where: {
+        isDeleted: { equals: Boolean(false) },
         CustomExam: {
           some: {},
         },
@@ -645,11 +698,17 @@ module.exports = function (app, prisma) {
         {
           answers: JSON.stringify(answers),
           customExam: JSON.stringify(customExam),
+          interviews: JSON.stringify(interviews),
+        },
+        {
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity,
         }
       )
 
       res.json(result.data)
     } catch (error) {
+      console.log(error)
       res.json({
         message: 'لا يمكن الاتصال بالسيرفر',
         examiners: [],
@@ -659,7 +718,7 @@ module.exports = function (app, prisma) {
   })
   // check and save data from another server
   app.post('/checkAndSaveAnswers', async (req, res) => {
-    const { customExam, answers } = req.body
+    const { customExam, answers, interviews } = req.body
     const report = {
       customExam: null,
       answers: null,
@@ -696,7 +755,8 @@ module.exports = function (app, prisma) {
             color: 'error',
           })
         } else {
-          await updateSolidNum(ans, prisma)
+          await updateSolidNum(ans, prisma, true)
+
           ans = ans
             .map((elm) => {
               const examiner = examiners.find(
@@ -716,7 +776,7 @@ module.exports = function (app, prisma) {
           const queryToRun = ans.map((elm) =>
             prisma.$executeRawUnsafe(
               `INSERT OR REPLACE INTO \`Answers\` (examiner_id,exam_id,question_id,answer_id)
-          select ${Number(elm.examiner_id)},${Number(elm.exam_id)},${Number(
+            select ${Number(elm.examiner_id)},${Number(elm.exam_id)},${Number(
                 elm.question_id
               )},${Number(elm.answer_id)}`
             )
@@ -731,10 +791,84 @@ module.exports = function (app, prisma) {
         }
       }
     }
+    if (interviews) {
+      let examinerInterviews = JSON.parse(interviews)
+      if (examinerInterviews.length < 0) {
+        report.interview = {
+          failNum: 0,
+          successNum: 0,
+        }
+      } else {
+        const nationals = examinerInterviews.map((elm) => elm.national_id)
+        const examiners = await prisma.Examiners.findMany({
+          where: {
+            national_id: { in: nationals },
+          },
+          select: {
+            id: true,
+            national_id: true,
+          },
+        })
+        const exNationals = examiners.map((elm) => elm.national_id)
+        const diff = examinerInterviews.filter(
+          (elm) => !exNationals.includes(elm.national_id)
+        )
+        if (diff.length > 0) {
+          res.json({
+            message:
+              'المختبرين التاليين غير موجودين بالسرفر الرئيسي من فضلك قوم بتصديرهم او تسجيلهم اولا',
+            examiners: diff,
+            type: 'notRegister',
+            color: 'error',
+          })
+        } else {
+          await updateSolidNum(examinerInterviews, prisma)
+          examinerInterviews = examinerInterviews
+            .map((elm) => {
+              const examiner = examiners.find(
+                (ex) => ex.national_id === elm.national_id
+              )
+              return {
+                interview: elm.Interview[0],
+                examiner_id: examiner.id,
+              }
+            })
+            .flat()
+
+          // SAVE INTERVIEW
+          const queryToRunInterview = examinerInterviews.map((elm) => {
+            const inter = elm.interview
+            return prisma.$executeRawUnsafe(
+              `INSERT OR REPLACE INTO \`Interview\` (examiner_id,parent_job,siblings_num,family_relation,complaint,
+                appearance,focus_ability,mood,speaking_disorder,medicine_type,has_medical_history,hospital_name,
+                drugs_history,drug_type,final_opinion,examiner_status,final_hospital_result)
+          select ${Number(elm.examiner_id)},'${inter.parent_job}',${Number(
+                inter.siblings_num || 0
+              )},'${inter.family_relation}','${inter.complaint}','${
+                inter.appearance
+              }','${inter.focus_ability}','${inter.mood}','${
+                inter.speaking_disorder
+              }','${inter.medicine_type}','${inter.has_medical_history}','${
+                inter.hospital_name || ''
+              }','${inter.drugs_history}','${inter.drug_type || ''}','${
+                inter.final_opinion
+              }','${inter.examiner_status}','${inter.final_hospital_result}'`
+            )
+          })
+          if (queryToRunInterview && queryToRunInterview.length > 0) {
+            const out = await prisma.$transaction(queryToRunInterview)
+            report.interview = {
+              failNum: out.filter((elm) => elm === 0).length,
+              successNum: out.filter((elm) => elm === 1).length,
+            }
+          }
+        }
+      }
+    }
     if (customExam) {
       let customEx = JSON.parse(customExam)
       if (customEx.length < 1) {
-        console.log('لا يوجد اختبارات مخصصه')
+        console.log('no custom exam')
       } else {
         const nationals = customEx.map((elm) => elm.national_id)
         const examiners = await prisma.Examiners.findMany({
@@ -803,8 +937,9 @@ module.exports = function (app, prisma) {
     })
   })
   // load all examiner data and send it to primary device
-  app.post('/loadExaminerDataFromLocalServer', async (_, res) => {
-    const examiners = await prisma.Examiners.findMany({
+  app.post('/loadExaminerDataFromLocalServer', async (req, res) => {
+    const ids = req.body.ids || []
+    const option = {
       select: {
         national_id: true,
         triple_number: true,
@@ -812,7 +947,15 @@ module.exports = function (app, prisma) {
         name: true,
         stage: true,
       },
-      where: {
+    }
+    if (ids.length > 0) {
+      option.where = {
+        isDeleted: { equals: Boolean(false) },
+        national_id: { in: ids },
+      }
+    } else {
+      option.where = {
+        isDeleted: { equals: Boolean(false) },
         OR: [
           {
             Answers: {
@@ -825,13 +968,18 @@ module.exports = function (app, prisma) {
             },
           },
         ],
-      },
-    })
+      }
+    }
+    const examiners = await prisma.Examiners.findMany(option)
     try {
       const result = await axios.post(
         'http://192.9.202.150:3000/api/saveDataFromLocalServer',
         {
           examiners: JSON.stringify(examiners),
+        },
+        {
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity,
         }
       )
 
@@ -845,8 +993,148 @@ module.exports = function (app, prisma) {
       })
     }
   })
+  app.post('/extractToDevice', async (req, res) => {
+    const { nationals, deviceIp } = req.body
 
-  // load all examiner data and send it to primary device
+    if (nationals.length > 0) {
+      const examiners = await prisma.Examiners.findMany({
+        where: {
+          national_id: { in: nationals },
+        },
+        select: {
+          national_id: true,
+          triple_number: true,
+          name: true,
+          stage: true,
+          barcode: true,
+          sold_id: true,
+          mohafza_code: true,
+          qualification_code: true,
+          marital_state: true,
+          educational_degree: true,
+          user_id: true,
+          battary_id: true,
+          isDeleted: true,
+          again: true,
+          UNIT_NAME: true,
+          GEHA_NAME: true,
+          TAMARKZ_NAME: true,
+          UNIT_ARMY_NAME: true,
+          ARMY_TAGNEED_NAME: true,
+          isNoticed: true,
+          isNoticedAgain: true,
+          nextFollowDate: true,
+          numFollowUps: true,
+          Answers: {
+            select: {
+              exam_id: true,
+              question_id: true,
+              answer_id: true,
+            },
+          },
+          Interview: {
+            select: {
+              parent_job: true,
+              siblings_num: true,
+              family_relation: true,
+              complaint: true,
+              appearance: true,
+              focus_ability: true,
+              mood: true,
+              speaking_disorder: true,
+              medicine_type: true,
+              has_medical_history: true,
+              hospital_name: true,
+              drugs_history: true,
+              drug_type: true,
+              final_opinion: true,
+              examiner_status: true,
+              final_hospital_result: true,
+              order_brothers: true,
+              parent_rel: true,
+              rel_between_parents: true,
+              family_income: true,
+              family_medical: true,
+              personal_medical: true,
+              half_brothers: true,
+              complaint_f: true,
+              transReason: true,
+              moving: true,
+              faceExprission: true,
+              timeAware: true,
+              situationAware: true,
+              judgeAbility: true,
+              awareDisorder: true,
+              thinkDisorder: true,
+              appetite: true,
+              sleeping: true,
+              smoking: true,
+              prayer: true,
+              interviewer_opinion: true,
+              historyDate: true,
+              recommendation: true,
+              recommendation_res: true,
+              recommendation_summary: true,
+              interviewer: true,
+            },
+          },
+        },
+      })
+      try {
+        const result = await axios.post(
+          `http://${deviceIp}:3000/api/exportToEmptyDb`,
+          {
+            examiners: JSON.stringify(examiners),
+          },
+          {
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+          }
+        )
+
+        res.json(result.data)
+      } catch (error) {
+        console.log(error)
+        res.json({
+          message: 'لا يمكن الاتصال بالسيرفر',
+          examiners: [],
+          color: 'error',
+        })
+      }
+    }
+  })
+  app.post('/exportToEmptyDb', async (req, res) => {
+    const { examiners } = req.body
+    const data = JSON.parse(examiners)
+    await data.forEach(async (examiner) => {
+      const interviews = examiner.Interview
+      const answers = examiner.Answers
+      delete examiner.Answers
+      delete examiner.Interview
+
+      await prisma.examiners.update({
+        where: {
+          national_id: examiner.national_id,
+        },
+        data: {
+          ...examiner,
+          Interview: {
+            createMany: {
+              data: interviews,
+            },
+          },
+          Answers: {
+            createMany: {
+              data: answers,
+            },
+          },
+        },
+      })
+    })
+    res.json('done')
+  })
+
+  // save all examiner data in primary device
   app.post('/saveDataFromLocalServer', async (req, res) => {
     const { examiners } = req.body
     const data = JSON.parse(examiners)
@@ -854,12 +1142,11 @@ module.exports = function (app, prisma) {
       prisma.$executeRawUnsafe(
         `INSERT OR ignore INTO \`Examiners\` (national_id,triple_number,sold_id,name,stage) select '${
           value.national_id
-        }','${value.triple_number || ''}','${value.sold_id || ''}', '${
-          value.name
-        }','${value.stage}'`
+        }',${value.triple_number ? `'${value.triple_number}'` : null},${
+          value.sold_id ? `'${value.sold_id}'` : null
+        }, '${value.name}','${value.stage}'`
       )
     )
-
     if (queryToRun && queryToRun.length > 0) {
       const out = await prisma.$transaction(queryToRun)
       res.json({
@@ -886,11 +1173,46 @@ module.exports = function (app, prisma) {
 function mapBy(arr, item) {
   return Array.isArray(arr) ? arr.map((elm) => elm[item]) : arr
 }
-async function updateSolidNum(examiners, prisma) {
-  examiners = examiners.map((v) => {
-    return prisma.$executeRawUnsafe(
-      `UPDATE Examiners SET sold_id ='${v.sold_id}',user_id ='${v.user_id}' WHERE national_id = '${v.national_id}'`
-    )
-  })
+async function updateSolidNum(examiners, prisma, again) {
+  if (again) {
+    const date = new Date().toISOString()
+    const examiners1 = examiners
+      .filter((elm) => elm.again)
+      .map((v) => {
+        return prisma.$executeRawUnsafe(
+          `UPDATE OR ignore Examiners SET sold_id ='${v.sold_id}',user_id ='${
+            v.user_id
+          }',again =${v.again},update_at ='${date}' ,UNIT_NAME =${
+            v.UNIT_NAME ? `'${v.UNIT_NAME}'` : null
+          } ,TAMARKZ_NAME =${
+            v.TAMARKZ_NAME ? `'${v.TAMARKZ_NAME}'` : null
+          },UNIT_ARMY_NAME =${
+            v.UNIT_ARMY_NAME ? `'${v.UNIT_ARMY_NAME}'` : null
+          } WHERE national_id = '${v.national_id}'`
+        )
+      })
+    const examiners2 = examiners
+      .filter((elm) => !elm.again)
+      .map((v) => {
+        return prisma.$executeRawUnsafe(
+          `UPDATE OR ignore Examiners SET sold_id ='${v.sold_id}',user_id ='${
+            v.user_id
+          }',update_at ='${date}' ,UNIT_NAME =${
+            v.UNIT_NAME ? `'${v.UNIT_NAME}'` : null
+          } ,TAMARKZ_NAME =${
+            v.TAMARKZ_NAME ? `'${v.TAMARKZ_NAME}'` : null
+          },UNIT_ARMY_NAME =${
+            v.UNIT_ARMY_NAME ? `'${v.UNIT_ARMY_NAME}'` : null
+          } WHERE national_id = '${v.national_id}'`
+        )
+      })
+    examiners = [...examiners1, ...examiners2]
+  } else {
+    examiners = examiners.map((v) => {
+      return prisma.$executeRawUnsafe(
+        `UPDATE OR ignore Examiners SET sold_id ='${v.sold_id}',user_id ='${v.user_id}' WHERE national_id = '${v.national_id}'`
+      )
+    })
+  }
   await prisma.$transaction(examiners)
 }

@@ -10,7 +10,7 @@
         max-width="290px"
         min-width="auto"
       >
-        <template v-slot:activator="{ on, attrs }">
+        <template #activator="{ on, attrs }">
           <v-text-field
             v-model="date"
             outlined
@@ -47,7 +47,7 @@
           checkbox-color="green"
           class="followTable"
         >
-          <template v-slot:top>
+          <template #top>
             <v-text-field
               v-model="search"
               label="بحث عن الاشخاص...."
@@ -61,7 +61,7 @@
             ></v-text-field>
           </template>
 
-          <template v-slot:[`item.actions`]="{ item }">
+          <template #[`item.actions`]="{ item }">
             <v-btn
               v-if="!permissions.manager.includes(user.type)"
               color="error"
@@ -92,24 +92,24 @@
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </template>
-          <template v-slot:[`item.case`]="{ item }">
+          <template #[`item.case`]="{ item }">
             <v-chip :color="cases[item.case].color">{{
               cases[item.case].name
             }}</v-chip>
           </template>
-          <template v-slot:[`item.name`]="{ item }">
+          <template #[`item.name`]="{ item }">
             <div class="font-weight-bold">
               {{ item.name }}
             </div>
           </template>
-          <template v-slot:[`item.created_at`]="{ item }">
+          <template #[`item.created_at`]="{ item }">
             <div style="direction: ltr">
               {{ new Date(item.created_at).toLocaleTimeString() }}
             </div>
           </template>
           <template
             v-if="!permissions.manager.includes(user.type)"
-            v-slot:[`body.append`]="{}"
+            #[`body.append`]="{}"
           >
             <tr>
               <td></td>
@@ -151,7 +151,7 @@
               </td>
             </tr>
           </template>
-          <template v-slot:footer>
+          <template #footer>
             <div class="py-2 d-flex justify-space-between">
               <v-btn icon @click="setDateTo(-1)"
                 ><v-icon>mdi-chevron-right</v-icon></v-btn
@@ -184,9 +184,10 @@
 <script>
 export default {
   name: 'FollowManager',
+  middleware: 'follow',
   data() {
     return {
-      menu1:false,
+      menu1: false,
       socket: null,
       intTime: null,
       lastIds: [],

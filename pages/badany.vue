@@ -11,12 +11,12 @@
     ></v-combobox>
     <div class="d-flex">
       <v-text-field
+        v-model="rightHand"
         outlined
         label="قبضة يمين"
         color="primary"
-        v-model="rightHand"
       ></v-text-field>
-      <v-btn color="primary" @click="connectPort()" :disabled="!!port"
+      <v-btn color="primary" :disabled="!!port" @click="connectPort()"
         >connect</v-btn
       >
       <v-btn color="primary" @click="readData()">read</v-btn>
@@ -35,6 +35,7 @@
 <script>
 export default {
   name: 'BadanyPage',
+  middleware: 'admin',
   data() {
     return {
       path: '',
@@ -49,6 +50,7 @@ export default {
       rightHand: '',
     }
   },
+
   computed: {
     serials() {
       return this.$store.getters['Exam/serials']

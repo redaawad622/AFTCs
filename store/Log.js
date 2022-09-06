@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 export const state = () => ({
   logs: [],
   allLogs: 0,

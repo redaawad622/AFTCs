@@ -16,6 +16,7 @@
 <script>
 export default {
   name: 'ExternalPage',
+  middleware: 'admin',
 
   methods: {
     openProg(url) {

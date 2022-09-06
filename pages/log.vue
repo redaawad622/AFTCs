@@ -105,6 +105,8 @@
 <script>
 export default {
   name: 'LogActions',
+  middleware: 'admin',
+
   data() {
     return {
       headers: [

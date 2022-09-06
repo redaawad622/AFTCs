@@ -15,11 +15,12 @@
           append-icon="mdi-star"
           hide-spin-buttons
           type="number"
+          @keyup.enter="searchBy('national_id')"
         ></v-text-field>
         <v-btn
           class="primary mr-3"
           style="height: 55px; width: 80px"
-          @click="searchByNationalId"
+          @click="searchBy('national_id')"
           >بحث</v-btn
         >
       </div>
@@ -58,7 +59,14 @@
           hint="1234"
           color="primary"
           :error-messages="serverErr['triple_number']"
+          @keyup.enter="searchBy('triple_number')"
         ></v-text-field>
+        <v-btn
+          class="primary mr-3"
+          style="height: 55px; width: 80px"
+          @click="searchBy('triple_number')"
+          >بحث</v-btn
+        >
       </v-sheet>
 
       <v-text-field
@@ -113,6 +121,14 @@
         label="البطارية"
         placeholder="البطارية"
       ></v-select>
+      <v-checkbox
+        v-if="
+          permissions.center.includes(user.type) && user.Cat_Name == 'المدرعات'
+        "
+        color="primary"
+        label="نفسي"
+        @change="setBat"
+      ></v-checkbox>
       <v-btn color="primary" class="my-2" @click="save()">حفظ</v-btn>
       <v-row justify="center">
         <v-dialog v-if="examiner" v-model="dialog" persistent max-width="600px">
@@ -167,6 +183,7 @@ import validation from '~/mixins/validation'
 export default {
   name: 'InsertExaminer',
   mixins: [validation],
+  middleware: 'center',
   data: () => {
     return {
       dialog: false,
@@ -256,6 +273,13 @@ export default {
     }
   },
   methods: {
+    setBat(val) {
+      if (val) {
+        this.form.battary_id = 11
+      } else {
+        this.form.battary_id = ''
+      }
+    },
     saveManualCustomExam() {
       const exams = Object.fromEntries(
         Object.entries(this.examsVal).filter(([key, elm]) => elm)
@@ -277,9 +301,13 @@ export default {
           })
       }
     },
-    searchByNationalId() {
-      if (this.form.national_id) {
-        this.$store.dispatch('Examiner/getExaminer', this.form.national_id)
+    searchBy(item) {
+      if (this.f_num && this.sec_num && this.th_num)
+        this.form.triple_number =
+          this.f_num + '/' + this.sec_num + '/' + this.th_num
+
+      if (this.form[item]) {
+        this.$store.dispatch('Examiner/getExaminer', this.form[item])
       }
     },
 

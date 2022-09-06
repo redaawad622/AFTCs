@@ -1,8 +1,8 @@
-import { readFileSync } from 'fs'
-import MDBReader from 'mdb-reader'
+/* eslint-disable no-unused-vars */
+/* eslint-disable camelcase */
 module.exports = function (app, prisma, types) {
   app.get('/getExaminer', async (req, res) => {
-    const { id } = req.query
+    const { id, search } = req.query
     const examiner = await prisma.Examiners.findFirst({
       where: {
         OR: [
@@ -29,6 +29,20 @@ module.exports = function (app, prisma, types) {
         ],
       },
       include: {
+        Answers: {
+          select: {
+            id: true,
+            exam_id: true,
+            question_id: true,
+            answer_id: true,
+            examiner_id: true,
+            answer: {
+              select: {
+                Ans_Value: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             Answers: true,
@@ -39,6 +53,7 @@ module.exports = function (app, prisma, types) {
 
     res.json(examiner)
   })
+
   app.get('/getExaminers', async (req, res) => {
     const {
       search,
@@ -50,12 +65,23 @@ module.exports = function (app, prisma, types) {
       sortDesc,
       battaryId,
       stage,
-      withResualt,
+      withResult,
+      newSet,
       register,
       deleteItems,
+      transReason,
+      recommendation,
+      recommendation_res,
       interview,
+      examiner_status,
       user,
       nafsy,
+      final_opinion,
+      again,
+      date,
+      isNoticed,
+      showAll,
+      hasUnit,
     } = req.query
     const option = {
       where: {},
@@ -71,15 +97,16 @@ module.exports = function (app, prisma, types) {
     if (search) {
       option.where.OR = [
         {
-          name: {
-            contains: search,
-          },
-        },
-        {
           national_id: {
             contains: search,
           },
         },
+        {
+          name: {
+            contains: search,
+          },
+        },
+
         {
           barcode: {
             contains: search,
@@ -97,14 +124,40 @@ module.exports = function (app, prisma, types) {
         },
       ]
     }
+    if (date) {
+      option.where.update_at = {
+        gte: new Date(date),
+        //   lt: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
+      }
+    }
     if (register) {
       const id = req.headers.id
       option.where.user_id = { equals: Number(id) }
     }
+    if (again) {
+      option.where.again = { equals: Boolean(Number(again)) }
+    }
+    if (isNoticed) {
+      const noticed = Number(isNoticed)
+      switch (noticed) {
+        case 1:
+          option.where.isNoticed = { equals: true }
+          if (newSet) {
+            option.where.isNoticedAgain = { equals: false }
+          }
+          break
+        case 2:
+          option.where.isNoticedAgain = { equals: true }
+          break
+        case 3:
+          option.where.isNoticed = { equals: false }
+          break
+      }
+    }
     if (user) {
       option.where.user_id = { equals: Number(user) }
     }
-    if (qualification) {
+    if (qualification || qualification === '0' || qualification === 0) {
       option.where.qualification_code = { equals: Number(qualification) }
     }
     if (battaryId) {
@@ -112,6 +165,20 @@ module.exports = function (app, prisma, types) {
     }
     if (stage) {
       option.where.stage = { equals: stage }
+    }
+
+    if (hasUnit) {
+      if (Number(hasUnit)) {
+        option.where.NOT = [
+          {
+            UNIT_NAME: null,
+          },
+        ]
+      } else {
+        option.where.UNIT_NAME = {
+          equals: null,
+        }
+      }
     }
     if (examFinish) {
       if (Number(examFinish)) {
@@ -162,7 +229,20 @@ module.exports = function (app, prisma, types) {
         },
       },
     }
-    if (withResualt) {
+    if (
+      final_opinion ||
+      transReason ||
+      recommendation ||
+      recommendation_res ||
+      examiner_status
+    ) {
+      option.where.Interview = {
+        some: {},
+      }
+      option.include.Interview = {}
+    }
+
+    if (withResult) {
       option.include.Answers = {}
       if (nafsy) {
         let battary = await prisma.Battries.findUnique({
@@ -176,6 +256,7 @@ module.exports = function (app, prisma, types) {
         battary = battary.Battary_Exam.map((ex) => ex.exam_id)
         option.include.Answers.where = { exam_id: { in: battary } }
       }
+
       option.include.Answers.select = {
         id: true,
         exam_id: true,
@@ -192,6 +273,51 @@ module.exports = function (app, prisma, types) {
 
     let examiners = await prisma.Examiners.findMany(option)
 
+    // after fe
+
+    let showAllExaminers = null
+    if (showAll) {
+      delete option.skip
+      delete option.take
+      showAllExaminers = await prisma.Examiners.findMany(option)
+    }
+
+    // filter interview
+    const interviewFilter = {
+      final_opinion,
+      transReason,
+      recommendation,
+      recommendation_res,
+      examiner_status,
+    }
+    for (const key in interviewFilter) {
+      if (
+        Object.hasOwnProperty.call(interviewFilter, key) &&
+        !interviewFilter[key]
+      ) {
+        delete interviewFilter[key]
+      }
+    }
+    if (Object.keys(interviewFilter).length > 0) {
+      examiners = examiners.filter((elm) => {
+        let isTrue = true
+        for (const key in interviewFilter) {
+          const type = typeof elm.Interview[0][key]
+          let filter = interviewFilter[key]
+
+          if (type === 'number') {
+            filter = Number(filter)
+          }
+          if (filter !== elm.Interview[0][key]) {
+            isTrue = false
+            return false
+          }
+        }
+        return isTrue
+      })
+    }
+
+    // end filter
     if (examiners && examiners.length > 0) {
       if (examiners[0].Answers) {
         examiners = examiners.map((examiner) => {
@@ -210,15 +336,38 @@ module.exports = function (app, prisma, types) {
         })
       }
     }
-    delete option.skip
-    delete option.take
-    delete option.orderBy
-    delete option.include
-    if (deleteItems) {
-      await prisma.Examiners.deleteMany(option)
+    if (showAllExaminers && showAllExaminers.length > 0) {
+      if (showAllExaminers[0].Answers) {
+        showAllExaminers = showAllExaminers.map((examiner) => {
+          const exm = Object.assign({}, examiner, {
+            Answers: examiner.Answers.reduce((r, a) => {
+              r[a.exam_id] = [...(r[a.exam_id] || []), a]
+              return r
+            }, {}),
+          })
+          Object.keys(exm.Answers).forEach((k) => {
+            exm.Answers[k] = exm.Answers[k].reduce((a, b) => {
+              return a + b.answer.Ans_Value
+            }, 0)
+          })
+          return exm
+        })
+      }
     }
-    const allExaminers = await prisma.Examiners.count(option)
-    res.json({ examiners, allExaminers })
+    let allExaminers = 0
+    if (Object.keys(interviewFilter).length > 0) {
+      allExaminers = examiners.length
+    } else {
+      delete option.skip
+      delete option.take
+      delete option.orderBy
+      delete option.include
+      if (deleteItems) {
+        await prisma.Examiners.deleteMany(option)
+      }
+      allExaminers = await prisma.Examiners.count(option)
+    }
+    res.json({ examiners, allExaminers, showAllExaminers })
   })
   app.post('/save', async (req, res) => {
     const data = req.body
@@ -253,67 +402,6 @@ module.exports = function (app, prisma, types) {
     }
   })
 
-  app.get('/readExaminerFromMdb', async (req, res) => {
-    const buffer = readFileSync('./prisma/db.mdb')
-    const reader = new MDBReader(buffer)
-    const table = await reader.getTable('Examiners')
-    // table.getColumnNames() // ['id', 'name', 'color']
-    let data = await table.getData()
-    const exist = await prisma.Examiners.findMany()
-    data = data.filter(
-      (q) => exist.findIndex((a) => a.national_id === q.national_id) < 0
-    )
-    const values = data
-      .map(
-        (value) =>
-          `('${value.national_id}', '${value.name}', '${value.stage}', ${
-            value.mohafza_code || null
-          }, ${value.qualification_code || null})`
-      )
-      .join(',\n\t')
-
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO \`Examiners\` (national_id, name,stage,mohafza_code,qualification_code) VALUES \n\t${values};`
-    )
-    res.json(data)
-  })
-  app.post('/readUnitsFromMdb', async (req, res) => {
-    console.log('start')
-    try {
-      const buffer = readFileSync('./prisma/TNZ_GEHA_CODE.mdb')
-      const reader = new MDBReader(buffer)
-      const table = await reader.getTable('TNZ_GEHA_CODE')
-      // table.getColumnNames() // ['id', 'name', 'color']
-      console.log('fetching')
-      let data = await table.getData()
-      console.log('map data....')
-
-      data = data.map((v) => {
-        return prisma.$executeRawUnsafe(
-          `UPDATE Examiners SET UNIT_NAME ='${v.UNIT_NAME}',GEHA_NAME ='${
-            v.GEHA_NAME
-          }',TAMARKZ_NAME ='${v.TAMARKZ_NAME}',UNIT_ARMY_NAME ='${
-            v.UNIT_ARMY_NAME
-          }',ARMY_TAGNEED_NAME ='${v.ARMY_TAGNEED_NAME}',sold_id ='${
-            v.MIL_NO || null
-          }' WHERE triple_number = '${v.RAKMSOLASY}'`
-        )
-      })
-      console.log('start update ', data.length)
-      const whatDone = await prisma.$transaction(data)
-      console.log('done')
-      res.json(
-        `عدد ما تم تحديثه (${
-          whatDone.filter((e) => e === 1).length
-        }) عدد الاخطاء و ما لم يتم تحديثه (${
-          whatDone.filter((e) => e === 0).length
-        })`
-      )
-    } catch (error) {
-      console.log(error)
-      return res.status(422).json(error)
-    }
-  })
   app.post('/deleteExaminer', async (req, res) => {
     const { id } = req.body
     await prisma.Examiners.update({
@@ -336,29 +424,32 @@ module.exports = function (app, prisma, types) {
     })
     res.json('done')
   })
-  app.post('/writeExaminerToMdb', async (req, res) => {
-    const buffer = readFileSync('./prisma/db.mdb')
-    const reader = new MDBReader(buffer)
-    const table = await reader.getTable('Examiners')
-    // table.getColumnNames() // ['id', 'name', 'color']
-    const data = await table.getData()
-    const exist = await prisma.Examiners.findMany()
-    data.filter(
-      (q) => exist.findIndex((a) => a.national_id === q.national_id) < 0
-    )
-    const examiners = []
-    await data.forEach(async (e) => {
-      const ex = await prisma.Examiners.upsert({
-        where: {
-          national_id: e.national_id,
-        },
-        update: {},
-        create: e,
-      })
-      examiners.push(ex)
+  app.post('/deleteExaminerDataFromLocalServer', async (req, res) => {
+    const { ids } = req.body
+    await prisma.Examiners.updateMany({
+      where: {
+        national_id: { in: ids },
+      },
+      data: {
+        isDeleted: true,
+      },
     })
-
-    res.json(examiners) // [{id: 5, name: 'Ashley', color: 'black'}, ...]
+    const userId = req.headers.id
+    await prisma.Log.create({
+      data: {
+        user_id: Number(userId),
+        operation_type: 'delete',
+        description:
+          ' مسح بيانات ممتحنين يحملون ارقام قومية ' + ids.join(' , '),
+        type: types[4],
+      },
+    })
+    res.json({
+      message: 'تم مسح المختبرين  بنجاح',
+      examiners: [],
+      type: 'delete',
+      color: 'success',
+    })
   })
 
   app.post('/saveExam', async (req, res) => {
@@ -407,6 +498,7 @@ module.exports = function (app, prisma, types) {
     }
     res.json(result)
   })
+
   app.get('/checkIsDone', async (req, res) => {
     const { id, examId } = req.query
     const examiner = await prisma.Examiners.findFirst({
@@ -456,19 +548,48 @@ module.exports = function (app, prisma, types) {
     // check if done
   })
 
-  app.get('/saveWeapon', async (req, res) => {
-    const buffer = readFileSync('./prisma/selah_cod.mdb')
-    const reader = new MDBReader(buffer)
-    const table = await reader.getTable('SELAH_COD')
-    // table.getColumnNames() // ['id', 'name', 'color']
-    const data = await table.getData()
-    const values = data
-      .map((value) => `('${value.V_SELAH}', '${value.MIL_SELAH}')`)
-      .join(',\n\t')
+  app.post('/getDatesByUser', async (req, res) => {
+    const { user_id } = req.body
+    const dates = await prisma.Examiners.groupBy({
+      by: ['update_at'],
+      where: {
+        user_id: Number(user_id),
+      },
+      select: {
+        update_at: true,
+      },
+    })
 
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO \`Weapons\` (V_SELAH, MIL_SELAH) VALUES \n\t${values};`
-    )
-    res.json(data)
+    res.json(dates.map((elm) => elm.update_at))
+  })
+  app.post('/updateQualification', async (_, res) => {
+    let data = await prisma.Examiners.findMany({
+      where: {
+        AND: [
+          {
+            NOT: [{ sold_id: null }],
+          },
+          {
+            qualification_code: null,
+          },
+        ],
+      },
+      select: {
+        sold_id: true,
+      },
+    })
+
+    // update qualification_code
+    if (data.length > 0) {
+      data = data.map((v) => {
+        return prisma.$executeRawUnsafe(
+          `UPDATE Examiners SET qualification_code =${Number(
+            v.sold_id[5]
+          )} WHERE sold_id = '${v.sold_id}'`
+        )
+      })
+    }
+    const whatDone = await prisma.$transaction(data)
+    res.json(whatDone)
   })
 }

@@ -77,7 +77,14 @@
 export default {
   name: 'SettingPage',
   data: () => ({
-    tables: ['Examiners', 'Assign', 'Answers', 'Battries'],
+    tables: [
+      'Examiners',
+      'Assign',
+      'Answers',
+      'Battries',
+      'Interview',
+      'CustomExam',
+    ],
     table: '',
     password: '',
     loading: false,

@@ -41,4 +41,16 @@ export const actions = {
   deleteExaminer(_, payload) {
     return this.$axios.post(`/api/deleteExaminer`, payload)
   },
+  getDatesByUser(_, payload) {
+    return this.$axios.post(`/api/getDatesByUser`, payload)
+  },
+  getDataFromTag() {
+    return this.$axios.post(`/api/getDataFromTag`)
+  },
+  getReports(_, payload) {
+    return this.$axios.get(`/api/getReports`, { params: payload })
+  },
+  updateQualification() {
+    return this.$axios.post(`/api/updateQualification`)
+  },
 }

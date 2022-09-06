@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-navigation-drawer
-      color="accent"
+      color="customGrey"
       right
       :mini-variant="clipped"
       permanent
@@ -26,10 +26,10 @@
         <template v-for="(item, i) in items">
           <v-list-group
             v-show="item.permission"
-            :key="item.title"
             v-if="item.children"
+            :key="item.title"
           >
-            <template v-slot:activator>
+            <template #activator>
               <v-list-item-action>
                 <v-img v-if="item.img" :src="`/icon/${item.img}`"></v-img>
                 <v-icon v-else>{{ item.icon }}</v-icon>
@@ -40,9 +40,9 @@
             </template>
 
             <v-list-item
-              link
               v-for="child in item.children"
               :key="child.title"
+              link
               :to="child.to"
             >
               <v-list-item-content>
@@ -80,11 +80,10 @@
       >
       <v-spacer />
 
-      <v-avatar class="me-2" size="30" color="accent">
+      <v-avatar class="me-2" size="30" color="customGrey">
         <span class="secondaryT--text font-weight-bold">اح</span>
       </v-avatar>
       <v-btn
-        @click="getHelpers()"
         color="error"
         class="elevation-0 me-2"
         height="35"
@@ -92,6 +91,7 @@
         fab
         :loading="loading"
         title="تحديث النظام"
+        @click="getHelpers()"
         ><v-icon>mdi-update</v-icon></v-btn
       >
       <v-btn
@@ -170,6 +170,7 @@ export default {
           ])
         })(),
       },
+
       {
         icon: 'mdi-update',
         img: 'update.png',
@@ -255,8 +256,6 @@ export default {
         })(),
       },
     ].filter((elm) => elm.permission)
-    if (this.$route.path !== this.items[0].to)
-      this.$router.replace(this.items[0].to)
   },
   mounted() {
     this.setPageZoom()

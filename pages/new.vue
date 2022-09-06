@@ -1,39 +1,58 @@
 <template>
-  <div>
-    <v-btn
+  <v-row>
+    <v-col
       v-if="permissions.admin.includes(user.type)"
-      color="secondary"
-      class="mx-1"
-      :loading="loading"
-      @click="getStageSold()"
-      >سحب بيانات من عند النقيب شريف</v-btn
+      cols="12"
+      sm="6"
+      md="4"
+      lg="4"
     >
-    <v-btn color="primary" class="mx-1">سحب بيانات من فرع الانتقاء</v-btn>
-    <v-btn
-      color="primary"
-      :loading="loadLoading"
-      :disabled="loadLoading2"
-      class="mx-1"
-      @click="loadAndSendAnswersData()"
-      >تصدير بيانات الممتحنين الي فرع الانتقاء</v-btn
-    >
-    <v-btn
-      color="primary"
-      :disabled="loadLoading"
-      :loading="loadLoading2"
-      class="mx-1"
-      @click="loadExaminerDataFromLocalServer()"
-      >تسجيل بيانات الممتحنين الي سيرفر فرع الانتقاء</v-btn
-    >
-    <v-btn
+      <v-btn
+        color="secondary"
+        class="mx-1"
+        :loading="loading"
+        block
+        @click="getStageSold()"
+        >سحب بيانات من عند النقيب شريف</v-btn
+      >
+    </v-col>
+
+    <v-col cols="12" sm="6" md="4" lg="4">
+      <v-btn
+        color="primary"
+        :loading="loadLoading"
+        block
+        @click="loadAndSendAnswersData()"
+        >تصدير بيانات الممتحنين الي فرع الانتقاء</v-btn
+      >
+    </v-col>
+    <v-col
       v-if="permissions.admin.includes(user.type)"
-      :loading="wLoading"
-      color="primary"
-      class="mx-1"
-      @click="saveWeapon"
-      >سحب بيانات الاسلحة</v-btn
+      cols="12"
+      sm="6"
+      md="4"
+      lg="4"
     >
-  </div>
+      <v-btn :loading="wLoading" color="primary" block @click="saveWeapon"
+        >سحب بيانات الاسلحة</v-btn
+      >
+    </v-col>
+    <v-col
+      v-if="permissions.admin.includes(user.type)"
+      cols="12"
+      sm="6"
+      md="4"
+      lg="4"
+    >
+      <v-btn
+        :loading="qLoading"
+        color="primary"
+        block
+        @click="updateQualification()"
+        >تحديث المؤهلات بالرقم العسكري</v-btn
+      >
+    </v-col>
+  </v-row>
 </template>
 
 <script>
@@ -44,7 +63,7 @@ export default {
       loading: false,
       wLoading: false,
       loadLoading: false,
-      loadLoading2: false,
+      qLoading: false,
     }
   },
   computed: {
@@ -83,19 +102,24 @@ export default {
           this.loadLoading = false
         })
     },
-    loadExaminerDataFromLocalServer() {
-      this.loadLoading2 = true
+    updateQualification() {
+      this.qLoading = true
       this.$store
-        .dispatch('Exam/loadExaminerDataFromLocalServer')
-        .then((res) => {
-          this.$store.commit('Exam/setPreviewResult', res.data)
-          this.$router.push('/previewPushResult')
+        .dispatch('Examiner/updateQualification')
+        .then(() => {
+          this.$store.commit('Notifications/setNotification', {
+            text: 'تم التحديث بنجاح بنجاح',
+            color: 'success',
+          })
         })
-        .catch((err) => {
-          console.log(err)
+        .catch(() => {
+          this.$store.commit('Notifications/setNotification', {
+            text: 'هناك مشكلة ',
+            color: 'error',
+          })
         })
         .finally(() => {
-          this.loadLoading2 = false
+          this.qLoading = false
         })
     },
   },

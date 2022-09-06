@@ -103,7 +103,7 @@ export default {
       themes: {
         dark: {
           primary: '#7048eb',
-          accent: '#f1f1f4',
+          accent: '#a42cd6',
           secondary: '#DB5461',
           info: colors.teal.base,
           warning: colors.amber.darken2,
@@ -111,10 +111,12 @@ export default {
           success: '#5bceae',
           primaryT: '#2f475f',
           secondaryT: '#adbfd0',
+          customGrey: '#f1f1f4',
         },
         light: {
           primary: '#7048eb',
-          accent: '#f1f1f4',
+          accent: '#a42cd6',
+          customGrey: '#f1f1f4',
           secondary: '#DB5461',
           info: colors.blue.base,
           warning: colors.amber.darken2,
