@@ -73,12 +73,12 @@ module.exports = function (app, prisma, types) {
       recommendation,
       recommendation_res,
       interview,
+      interviewEntqaDone,
       examiner_status,
       user,
       nafsy,
       final_opinion,
       again,
-      date,
       isNoticed,
       showAll,
       hasUnit,
@@ -124,12 +124,7 @@ module.exports = function (app, prisma, types) {
         },
       ]
     }
-    if (date) {
-      option.where.update_at = {
-        gte: new Date(date),
-        //   lt: new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000),
-      }
-    }
+
     if (register) {
       const id = req.headers.id
       option.where.user_id = { equals: Number(id) }
@@ -202,7 +197,6 @@ module.exports = function (app, prisma, types) {
         }
       }
     }
-
     if (sortBy && sortBy.length > 0) {
       const sorts = sortBy[0].split('.')
       if (sorts.length > 1) {
@@ -228,6 +222,24 @@ module.exports = function (app, prisma, types) {
           },
         },
       },
+    }
+
+    if (interviewEntqaDone) {
+      if (Number(interviewEntqaDone)) {
+        option.where.NOT = {
+          Interview: {
+            some: {
+              recommendation: null,
+            },
+          },
+        }
+      } else {
+        option.where.Interview = {
+          some: {
+            recommendation: null,
+          },
+        }
+      }
     }
     if (
       final_opinion ||
@@ -298,6 +310,7 @@ module.exports = function (app, prisma, types) {
         delete interviewFilter[key]
       }
     }
+
     if (Object.keys(interviewFilter).length > 0) {
       examiners = examiners.filter((elm) => {
         let isTrue = true
@@ -316,7 +329,6 @@ module.exports = function (app, prisma, types) {
         return isTrue
       })
     }
-
     // end filter
     if (examiners && examiners.length > 0) {
       if (examiners[0].Answers) {
@@ -369,6 +381,7 @@ module.exports = function (app, prisma, types) {
     }
     res.json({ examiners, allExaminers, showAllExaminers })
   })
+
   app.post('/save', async (req, res) => {
     const data = req.body
     const id = req.headers.id

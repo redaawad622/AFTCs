@@ -10,6 +10,7 @@
         >
           <div class="d-flex align-center" style="flex: 1">
             <v-autocomplete
+              v-if="permissions.admin.includes(user.type)"
               v-model="noticedAction"
               outlined
               :items="noticedActions"
@@ -251,6 +252,25 @@
                         label="سبب الإحالة"
                         cache-items
                         :items="helperData.transReason"
+                      ></v-autocomplete>
+                    </v-col>
+                    <v-col
+                      v-if="permissions.admin.includes(user.type)"
+                      cols="12"
+                      sm="6"
+                      md="3"
+                      lg="2"
+                      xl="1"
+                    >
+                      <v-autocomplete
+                        v-model="filters.interviewEntqaDone"
+                        append-icon="mdi-menu-swap"
+                        outlined
+                        dense
+                        placeholder="عرض على الفرع"
+                        label="عرض على الفرع"
+                        cache-items
+                        :items="helperData.interviewEntqaDone"
                       ></v-autocomplete>
                     </v-col>
                     <v-col
@@ -1053,6 +1073,7 @@ export default {
         recommendation: '',
         stage: '',
         user: '',
+        interviewEntqaDone: '',
         transReason: '',
         examiner_status: '',
         register: 1,
@@ -1329,7 +1350,8 @@ export default {
           elm === 'recommendation_res' ||
           elm === 'recommendation' ||
           elm === 'report' ||
-          elm === 'examiner_status'
+          elm === 'examiner_status' ||
+          elm === 'interviewEntqaDone'
         ) {
           res[elm] = this.getTextByValue(elm, res[elm])
         } else

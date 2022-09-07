@@ -14,14 +14,11 @@ export const state = () => ({
         text: 'نتيجة لما ظهر علي المجند من اعراض مرضية بمركز التدريب',
         value: 3,
       },
-      {
-        text: 'عدد الملحوظين بعد الاعاده و تم ترحيلهم قبل العرض علي الفرع',
-        value: 4,
-      },
     ],
     marital_states: ['أعزب', 'متزوج', 'مطلق', 'أرمل'],
     appearance: ['لائق', 'غير لائق'],
     focus_ability: ['جيد', 'مشتت'],
+
     mood: ['معتدل', 'مكتئب', 'الرغبة بالبكاء', 'تهته'],
     parent_rel: [
       {
@@ -115,6 +112,16 @@ export const state = () => ({
       { text: 'منتظم', value: 1 },
       { text: 'غير منتظم', value: 2 },
       { text: 'منقطع', value: 3 },
+    ],
+    interviewEntqaDone: [
+      {
+        text: 'تم عرضه على الفرع',
+        value: 1,
+      },
+      {
+        text: 'لم يتم عرضه على الفرع',
+        value: 0,
+      },
     ],
     recommendation: [
       {
