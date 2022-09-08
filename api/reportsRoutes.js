@@ -37,6 +37,7 @@ module.exports = function (app, prisma) {
         option.select = {
           user_id: true,
           again: true,
+          UNIT_NAME: true,
           isNoticed: true,
           isNoticedAgain: true,
           qualification_code: true,
@@ -141,7 +142,9 @@ function getReport2(result) {
   const eqtesady = result.filter(
     (item) => item.Interview[0]?.recommendation === 4
   )
-
+  const examinerHasUnit = result.filter(
+    (item) => item?.UNIT_NAME !== null
+  ).length
   const newRes = [
     {
       name: 'كل المختبرين',
@@ -172,9 +175,18 @@ function getReport2(result) {
       value: isNoticedAgain,
     },
     {
+      name: 'عدد من تم تسجيل وحدته',
+      value: examinerHasUnit,
+    },
+    {
+      name: 'عدد من لم يتم تسجيل وحدته',
+      value: result.length - examinerHasUnit,
+    },
+    {
       name: 'عدد من تم عمل مقابلة شخصية لهم',
       value: result.filter((item) => item.Interview.length > 0).length,
     },
+
     {
       name: 'عدد من تم عمل مقابلة اكلينيكية لهم',
       value: interviewEntqaDone,
