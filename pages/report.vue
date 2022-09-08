@@ -210,7 +210,8 @@ export default {
       title: 'كشف بأسماء',
       filterColumns: [],
       fileName:
-        'exel-examiner-' + new Date().toLocaleDateString().replaceAll('/', '-'),
+        'excel-examiner-' +
+        new Date().toLocaleDateString().replaceAll('/', '-'),
       msFileName:
         'word-examiner-' +
         new Date().toLocaleDateString().replaceAll('/', '-') +

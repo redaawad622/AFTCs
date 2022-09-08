@@ -82,39 +82,66 @@ function report2Filters(option) {
     },
   }
 }
-
+function examinerQualification(examiner, qualificationCode) {
+  return examiner.qualification_code === qualificationCode
+}
+function getArraysIntersection(a1, a2) {
+  return a2.filter((a2elem) => a1.includes(a2elem))
+}
 function getReport1(filteredExaminers) {
   const totalNoticed = filteredExaminers.filter((item) => item.isNoticed)
 
   let groupedExaminers = filteredExaminers.reduce(
-    (groupedByTrainingCenter, elm) => {
-      groupedByTrainingCenter[elm.user_id] =
-        groupedByTrainingCenter[elm.user_id] ?? []
-      groupedByTrainingCenter[elm.user_id].push(elm)
+    (groupedByTrainingCenter, nextExaminer) => {
+      groupedByTrainingCenter[nextExaminer.user_id] =
+        groupedByTrainingCenter[nextExaminer.user_id] ?? []
+      groupedByTrainingCenter[nextExaminer.user_id].push(nextExaminer)
       return groupedByTrainingCenter
     },
     {}
   )
 
   groupedExaminers = Object.keys(groupedExaminers).map((k) => {
-    const elm = groupedExaminers[k]
-    const noticed = elm.filter((item) => item.isNoticed)
-    const again = elm.filter((item) => item.again)
-    const noticedAgain = elm.filter((item) => item.isNoticedAgain)
+    const trainingCenterExaminers = groupedExaminers[k]
+    const noticed = trainingCenterExaminers.filter((item) => item.isNoticed)
+    const again = trainingCenterExaminers.filter((item) => item.again)
+    const noticedAgain = trainingCenterExaminers.filter(
+      (item) => item.isNoticedAgain
+    )
+    const high = trainingCenterExaminers.filter((item) =>
+      examinerQualification(item, 2)
+    )
+    const above = trainingCenterExaminers.filter((item) =>
+      examinerQualification(item, 8)
+    )
+    const middle = trainingCenterExaminers.filter((item) =>
+      examinerQualification(item, 1)
+    )
+    const usually = trainingCenterExaminers.filter((item) =>
+      examinerQualification(item, 0)
+    )
     return {
       user_id: k,
-      total: elm.length,
+      total: trainingCenterExaminers.length,
       noticed: noticed.length,
       again: again.length,
       noticedAgain: noticedAgain.length,
-      high: elm.filter((item) => item.qualification_code === 2).length,
-      middle: elm.filter((item) => item.qualification_code === 1).length,
-      usually: elm.filter((item) => item.qualification_code === 0).length,
-      above: elm.filter((item) => item.qualification_code === 8).length,
-      n_high: noticed.filter((item) => item.qualification_code === 2).length,
-      n_middle: noticed.filter((item) => item.qualification_code === 1).length,
-      n_usually: noticed.filter((item) => item.qualification_code === 0).length,
-      n_above: noticed.filter((item) => item.qualification_code === 8).length,
+      high: high.length,
+      above: above.length,
+      middle: middle.length,
+      usually: usually.length,
+      n_high: getArraysIntersection(high, noticed).length,
+      n_above: getArraysIntersection(above, noticed).length,
+      n_middle: getArraysIntersection(middle, noticed).length,
+      n_usually: getArraysIntersection(usually, noticed).length,
+      na_high: getArraysIntersection(high, noticedAgain).length,
+      na_above: getArraysIntersection(above, noticedAgain).length,
+      na_middle: getArraysIntersection(middle, noticedAgain).length,
+      na_usually: getArraysIntersection(usually, noticedAgain).length,
+      a_high: getArraysIntersection(high, again).length,
+      a_above: getArraysIntersection(above, again).length,
+      a_middle: getArraysIntersection(middle, again).length,
+      a_usually: getArraysIntersection(usually, again).length,
     }
   })
   // Add total row

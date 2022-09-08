@@ -11,21 +11,6 @@ export default {
       hide: false,
     },
     {
-      text: 'عدد الملحوظين',
-      value: 'noticed',
-      hide: false,
-    },
-    {
-      text: 'تم الاعاده',
-      value: 'again',
-      hide: false,
-    },
-    {
-      text: 'ملحوظ بعد الاعاده',
-      value: 'noticedAgain',
-      hide: false,
-    },
-    {
       text: 'عليا',
       value: 'high',
       hide: false,
@@ -46,6 +31,11 @@ export default {
       hide: false,
     },
     {
+      text: 'عدد الملحوظين',
+      value: 'noticed',
+      hide: false,
+    },
+    {
       text: 'ملحوظين عليا',
       value: 'n_high',
       hide: true,
@@ -63,6 +53,59 @@ export default {
     {
       text: 'ملحوظين عاده',
       value: 'n_usually',
+      hide: true,
+    },
+    {
+      text: 'تم الاعاده',
+      value: 'again',
+      hide: false,
+    },
+    {
+      text: 'تم الاعاده عليا',
+      value: 'a_high',
+      hide: true,
+    },
+
+    {
+      text: 'تم الاعاده فوق متوسط',
+      value: 'a_above',
+      hide: true,
+    },
+
+    {
+      text: 'تم الاعاده متوسطة',
+      value: 'a_middle',
+      hide: true,
+    },
+
+    {
+      text: 'تم الاعاده عادة',
+      value: 'a_usually',
+      hide: true,
+    },
+    {
+      text: 'ملحوظ بعد الاعاده',
+      value: 'noticedAgain',
+      hide: false,
+    },
+    {
+      text: 'ملحوظ بعد الاعاده عليا',
+      value: 'na_high',
+      hide: true,
+    },
+    {
+      text: 'ملحوظ بعد الاعاده فوق متوسطة',
+      value: 'na_above',
+      hide: true,
+    },
+    {
+      text: 'ملحوظ بعد الاعاده متوسطة',
+      value: 'na_middle',
+      hide: true,
+    },
+    {
+      text: 'ملحوظ بعد الاعاده عادة',
+      value: 'na_usually',
       hide: true,
     },
   ],
