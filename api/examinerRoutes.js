@@ -74,6 +74,7 @@ module.exports = function (app, prisma, types) {
       recommendation_res,
       interview,
       interviewEntqaDone,
+      final_hospital_result,
       examiner_status,
       user,
       nafsy,
@@ -246,7 +247,8 @@ module.exports = function (app, prisma, types) {
       transReason ||
       recommendation ||
       recommendation_res ||
-      examiner_status
+      examiner_status ||
+      final_hospital_result
     ) {
       option.where.Interview = {
         some: {},
@@ -301,6 +303,7 @@ module.exports = function (app, prisma, types) {
       recommendation,
       recommendation_res,
       examiner_status,
+      final_hospital_result,
     }
     for (const key in interviewFilter) {
       if (

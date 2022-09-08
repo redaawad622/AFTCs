@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable camelcase */
-
 module.exports = function (app, prisma) {
   app.get('/getReports', async (req, res) => {
     const { examFinish, stage, report, user } = req.query
@@ -122,24 +119,29 @@ function getReport1(result) {
   return groups
 }
 function getReport2(result) {
-  const noticedAfter = result.filter((item) => item.isNoticedAgain).length
+  const isNoticed = result.filter((item) => item.isNoticed).length
+  const isNoticedAgain = result.filter((item) => item.isNoticedAgain).length
+  const allReExamed = result.filter((item) => item.again).length
   const interviewEntqaDone = result.filter(
     (item) => item.Interview[0]?.recommendation
   ).length
-  const nafsy = result.filter(
+  const examinerStatusNafsyMarkaz = result.filter(
     (item) => item.Interview[0]?.examiner_status === 'عرض مست نفسي'
   )
-  const tepy = [
+  const examinerStatusTebyMarkaz = result.filter(
+    (item) => item.Interview[0]?.examiner_status === 'عرض مست طبي'
+  )
+  const examinerStatusNafsyEntqa = result.filter(
+    (item) => item.Interview[0]?.recommendation === 1
+  )
+  const examinerStatusTebyEntqa = [
     ...result.filter((item) => item.Interview[0]?.recommendation === 2),
     ...result.filter((item) => item.Interview[0]?.recommendation === 3),
   ]
-
-  const eqtsdy = result.filter(
+  const eqtesady = result.filter(
     (item) => item.Interview[0]?.recommendation === 4
   )
-  const allNoticed = result.filter((item) => item.isNoticed).length
 
-  const allReExamed = result.filter((item) => item.again).length
   const newRes = [
     {
       name: 'كل المختبرين',
@@ -155,7 +157,7 @@ function getReport2(result) {
     },
     {
       name: 'كل الملحوظين',
-      value: allNoticed,
+      value: isNoticed,
     },
     {
       name: 'تم الاعاده عليهم',
@@ -163,11 +165,11 @@ function getReport2(result) {
     },
     {
       name: 'لم يتم الاعاده عليهم',
-      value: allNoticed - allReExamed,
+      value: isNoticed - allReExamed,
     },
     {
       name: 'ملحوظ بعد الاعاده',
-      value: noticedAfter,
+      value: isNoticedAgain,
     },
     {
       name: 'عدد من تم عمل مقابلة شخصية لهم',
@@ -179,17 +181,15 @@ function getReport2(result) {
     },
     {
       name: 'عدد الملحوظين بعد الاعاده و تم ترحيلهم قبل العرض علي الفرع',
-      value: noticedAfter - interviewEntqaDone,
+      value: isNoticedAgain - interviewEntqaDone,
     },
     {
       name: 'عرض مست نفسي من قبل المركز',
-      value: nafsy.length,
+      value: examinerStatusNafsyMarkaz.length,
     },
     {
       name: 'عرض مست طبي من قبل المركز',
-      value: result.filter(
-        (item) => item.Interview[0]?.examiner_status === 'عرض مست طبي'
-      ).length,
+      value: examinerStatusTebyMarkaz.length,
     },
     {
       name: 'عرض مست نفسي من قبل الفرع',
@@ -198,7 +198,7 @@ function getReport2(result) {
     },
     {
       name: 'عرض مست طبى  فرع',
-      value: tepy.length,
+      value: examinerStatusTebyEntqa.length,
     },
     {
       name: 'عرض مست طبى كوبري القبه فرع',
@@ -212,14 +212,25 @@ function getReport2(result) {
     },
     {
       name: 'موقف إقتصادى /إجتماعى',
-      value: eqtsdy.length,
+      value: eqtesady.length,
     },
     {
       name: 'عودة للوحدة بعد العرض علي الفرع',
       value: result.filter((item) => item.Interview[0]?.recommendation === 5)
         .length,
     },
-
+    {
+      name: 'عودة للوحدة بعد العرض علي المست طبي (مركز)',
+      value: examinerStatusTebyMarkaz.filter(
+        (item) => item.Interview[0]?.final_hospital_result === 'عودة للوحدة'
+      ).length,
+    },
+    {
+      name: 'عودة للوحدة بعد العرض علي المست نفسي (مركز)',
+      value: examinerStatusNafsyMarkaz.filter(
+        (item) => item.Interview[0]?.final_hospital_result === 'عودة للوحدة'
+      ).length,
+    },
     {
       name: 'نفسى +إقتصادى',
       value: result.filter((item) => item.Interview[0]?.recommendation === 6)
@@ -230,30 +241,33 @@ function getReport2(result) {
       value: result.filter((item) => item.Interview[0]?.recommendation === 7)
         .length,
     },
-
     {
-      name: 'عودة للوحده بعد العرض علي مست نفسي',
-      value: nafsy.filter((item) => item.Interview[0]?.recommendation_res === 2)
-        .length,
+      name: 'رفت نفسي فرع',
+      value: examinerStatusNafsyEntqa.filter(
+        (item) => item.Interview[0]?.recommendation_res === 3
+      ).length,
     },
     {
-      name: 'عودة للوحده بعد العرض علي مست طبي',
-      value: tepy.filter((item) => item.Interview[0]?.recommendation_res === 2)
-        .length,
+      name: 'رفت طبي فرع',
+      value: examinerStatusTebyEntqa.filter(
+        (item) => item.Interview[0]?.recommendation_res === 3
+      ).length,
     },
     {
-      name: 'رفت نفسي',
-      value: nafsy.filter((item) => item.Interview[0]?.recommendation_res === 3)
-        .length,
+      name: 'رفت نفسي مركز',
+      value: result.filter(
+        (item) => item.Interview[0]?.final_hospital_result === 'رفت نفسي'
+      ).length,
     },
     {
-      name: 'رفت طبي',
-      value: tepy.filter((item) => item.Interview[0]?.recommendation_res === 3)
-        .length,
+      name: 'رفت طبي مركز',
+      value: result.filter(
+        (item) => item.Interview[0]?.final_hospital_result === 'رفت طبي'
+      ).length,
     },
     {
       name: 'عوده للوحده موقف اقتصادي او اجتماعي',
-      value: eqtsdy.filter(
+      value: eqtesady.filter(
         (item) => item.Interview[0]?.recommendation_res === 3
       ).length,
     },

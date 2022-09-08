@@ -264,6 +264,26 @@
                       xl="1"
                     >
                       <v-autocomplete
+                        v-model="filters.final_hospital_result"
+                        append-icon="mdi-menu-swap"
+                        outlined
+                        dense
+                        placeholder="نتيجة العرض على المست مركز"
+                        label="نتيجة العرض على المست مركز"
+                        cache-items
+                        :items="helperData.final_hospital_result"
+                      >
+                      </v-autocomplete>
+                    </v-col>
+                    <v-col
+                      v-if="permissions.admin.includes(user.type)"
+                      cols="12"
+                      sm="6"
+                      md="3"
+                      lg="2"
+                      xl="1"
+                    >
+                      <v-autocomplete
                         v-model="filters.interviewEntqaDone"
                         append-icon="mdi-menu-swap"
                         outlined
@@ -1042,6 +1062,7 @@ export default {
           'عرضه علي فرع الانتقاء و التوجيه',
           'لا يعاني من اي مشاكل',
         ],
+
         examiner_status: ['عرض مست طبي', 'عرض مست نفسي'],
       },
       tagLoading: false,
@@ -1077,6 +1098,7 @@ export default {
         user: '',
         interviewEntqaDone: '',
         transReason: '',
+        final_hospital_result: '',
         examiner_status: '',
         register: 1,
         again: '',
@@ -1342,7 +1364,8 @@ export default {
           elm === 'stage' ||
           elm === 'final_opinion' ||
           elm === 'date' ||
-          elm === 'examiner_status'
+          elm === 'examiner_status' ||
+          elm === 'final_hospital_result'
         ) {
           // nothing
         } else if (elm === 'user') {
