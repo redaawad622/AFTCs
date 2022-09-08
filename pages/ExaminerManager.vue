@@ -677,8 +677,9 @@
           <template #[`item.again`]="{ item }">
             <template v-if="item._count.Answers > 0">
               <v-chip v-if="item.again" outlined>تم الاعاده</v-chip>
+
               <v-btn
-                v-else
+                v-else-if="item.isNoticed"
                 color="primary"
                 text
                 title="تعديل المختبر"
@@ -686,6 +687,7 @@
               >
                 اعادة
               </v-btn>
+              <v-chip v-else outlined>ليس ملحوظ</v-chip>
             </template>
 
             <v-chip v-else>لم يتم امتحانه بعد</v-chip>
@@ -1350,7 +1352,6 @@ export default {
           elm === 'recommendation_res' ||
           elm === 'recommendation' ||
           elm === 'report' ||
-          elm === 'examiner_status' ||
           elm === 'interviewEntqaDone'
         ) {
           res[elm] = this.getTextByValue(elm, res[elm])
