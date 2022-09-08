@@ -87,7 +87,7 @@ module.exports = function (app, prisma, types) {
       where: {},
       orderBy: {},
     }
-    // eslint-disable-next-line eqeqeq
+    // eslint-disable-next-line
     if (itemsPerPage != -1) {
       option.skip = (page - 1) * Number(itemsPerPage) || 0
       option.take = Number(itemsPerPage) || 50
@@ -329,6 +329,7 @@ module.exports = function (app, prisma, types) {
         return isTrue
       })
     }
+
     // end filter
     if (examiners && examiners.length > 0) {
       if (examiners[0].Answers) {
@@ -367,18 +368,18 @@ module.exports = function (app, prisma, types) {
       }
     }
     let allExaminers = 0
-    if (Object.keys(interviewFilter).length > 0) {
-      allExaminers = examiners.length
-    } else {
-      delete option.skip
-      delete option.take
-      delete option.orderBy
-      delete option.include
-      if (deleteItems) {
-        await prisma.Examiners.deleteMany(option)
-      }
-      allExaminers = await prisma.Examiners.count(option)
+    // if (Object.keys(interviewFilter).length > 0) {
+    //   allExaminers = examiners.length
+    // } else {
+    delete option.skip
+    delete option.take
+    delete option.orderBy
+    delete option.include
+    if (deleteItems) {
+      await prisma.Examiners.deleteMany(option)
     }
+    allExaminers = await prisma.Examiners.count(option)
+    // }
     res.json({ examiners, allExaminers, showAllExaminers })
   })
 

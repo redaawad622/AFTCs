@@ -244,15 +244,16 @@
                       xl="1"
                     >
                       <v-autocomplete
-                        v-model="filters.transReason"
+                        v-model="filters.examiner_status"
                         append-icon="mdi-menu-swap"
                         outlined
                         dense
-                        placeholder="سبب الإحالة"
-                        label="سبب الإحالة"
+                        placeholder="التوصية مركز"
+                        label="التوصية مركز"
                         cache-items
-                        :items="helperData.transReason"
-                      ></v-autocomplete>
+                        :items="helpers.examiner_status"
+                      >
+                      </v-autocomplete>
                     </v-col>
                     <v-col
                       v-if="permissions.admin.includes(user.type)"
@@ -282,16 +283,17 @@
                       xl="1"
                     >
                       <v-autocomplete
-                        v-model="filters.recommendation"
+                        v-model="filters.transReason"
                         append-icon="mdi-menu-swap"
                         outlined
                         dense
-                        placeholder="التوصية"
-                        label="التوصية"
+                        placeholder="سبب الإحالة"
+                        label="سبب الإحالة"
                         cache-items
-                        :items="helperData.recommendation"
+                        :items="helperData.transReason"
                       ></v-autocomplete>
                     </v-col>
+
                     <v-col
                       v-if="permissions.admin.includes(user.type)"
                       cols="12"
@@ -301,16 +303,15 @@
                       xl="1"
                     >
                       <v-autocomplete
-                        v-model="filters.examiner_status"
+                        v-model="filters.recommendation"
                         append-icon="mdi-menu-swap"
                         outlined
                         dense
-                        placeholder="التوصية مركز"
-                        label="التوصية مركز"
+                        placeholder="التوصية"
+                        label="التوصية"
                         cache-items
-                        :items="helpers.examiner_status"
-                      >
-                      </v-autocomplete>
+                        :items="helperData.recommendation"
+                      ></v-autocomplete>
                     </v-col>
                     <v-col
                       v-if="permissions.admin.includes(user.type)"
@@ -677,7 +678,6 @@
           <template #[`item.again`]="{ item }">
             <template v-if="item._count.Answers > 0">
               <v-chip v-if="item.again" outlined>تم الاعاده</v-chip>
-
               <v-btn
                 v-else-if="item.isNoticed"
                 color="primary"
