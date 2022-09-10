@@ -128,6 +128,7 @@ module.exports = function (app, prisma, types) {
 
     if (register) {
       const id = req.headers.id
+      console.log(register)
       option.where.user_id = { equals: Number(id) }
     }
     if (again) {
@@ -151,6 +152,7 @@ module.exports = function (app, prisma, types) {
       }
     }
     if (user) {
+      console.log('IN USER : ' + user)
       option.where.user_id = { equals: Number(user) }
     }
     if (qualification || qualification === '0' || qualification === 0) {
@@ -225,30 +227,14 @@ module.exports = function (app, prisma, types) {
       },
     }
 
-    if (interviewEntqaDone) {
-      if (Number(interviewEntqaDone)) {
-        option.where.NOT = {
-          Interview: {
-            some: {
-              recommendation: null,
-            },
-          },
-        }
-      } else {
-        option.where.Interview = {
-          some: {
-            recommendation: null,
-          },
-        }
-      }
-    }
     if (
       final_opinion ||
       transReason ||
       recommendation ||
       recommendation_res ||
       examiner_status ||
-      final_hospital_result
+      final_hospital_result ||
+      interviewEntqaDone
     ) {
       option.where.Interview = {
         some: {},
@@ -332,7 +318,17 @@ module.exports = function (app, prisma, types) {
         return isTrue
       })
     }
-
+    if (interviewEntqaDone) {
+      if (Number(interviewEntqaDone)) {
+        examiners = examiners.filter((elm) => {
+          return elm.Interview[0].recommendation
+        })
+      } else {
+        examiners = examiners.filter((elm) => {
+          return !elm.Interview[0].recommendation
+        })
+      }
+    }
     // end filter
     if (examiners && examiners.length > 0) {
       if (examiners[0].Answers) {
