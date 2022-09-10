@@ -326,7 +326,7 @@ export default {
     })
 
     vm.socket.on('guestSaved', (guests) => {
-      console.log(guests)
+      // console.log(guests)
     })
 
     // this.listToChange()

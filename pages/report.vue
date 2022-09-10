@@ -37,7 +37,8 @@
           class="ma-2"
           color="primary"
           return-object
-        ></v-combobox>
+        >
+        </v-combobox>
 
         <v-select
           v-if="report.filterData"
@@ -130,7 +131,7 @@
         <thead>
           <tr>
             <th class="hideOnPrint">اختيار</th>
-            <th>مسلسل</th>
+            <th>م</th>
             <th v-for="column in filterColumns" :key="column.text">
               {{ column.text }}
             </th>
