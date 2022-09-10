@@ -9,9 +9,15 @@
 
       <v-btn
         color="primary"
-        :to="`/Examiners/${$route.params.id}/interview/report`"
+        :to="`/Examiners/${$route.params.id}/interview/report?withDeg=${withDeg}`"
         >استخراج التقرير</v-btn
       >
+      <v-checkbox
+        v-model="withDeg"
+        :true-value="1"
+        :false-value="0"
+        label="بالدرجات"
+      ></v-checkbox>
     </div>
 
     <v-container v-if="!fLoading" fluid>
@@ -697,6 +703,7 @@ export default {
   mixins: [validation],
   data() {
     return {
+      withDeg: 0,
       valid: true,
       menu2: false,
       form: {

@@ -59,7 +59,7 @@
           :content="abilityProblems"
         ></table-content>
         <table-content
-          v-if="examiner"
+          v-if="examiner && withDeg"
           class="mb-5"
           title="نتائج الاختبارات  :-"
           :content="examiner.Answers"
@@ -68,7 +68,7 @@
           <table-title class="ml-2">سبب الاحالة :- </table-title>
           <p>{{ getTextByValue('transReason', form.transReason) }}</p>
         </div>
-        <div v-if="form.complaint_f">
+        <div v-if="form.complaint && withDeg">
           <table-title> الشكوي كما ذكرها المجند بالمركز :- </table-title>
           <p>{{ form.complaint }}</p>
         </div>
@@ -81,16 +81,16 @@
           <table-title>الدلالات التشخيصية :- </table-title>
           <p>{{ form.interviewer_opinion }}</p>
         </div>
-        <div v-if="form.final_opinion">
+        <div v-if="form.final_opinion && withDeg">
           <table-title> الدلالات التشخيصية من المركز :- </table-title>
           <p>{{ form.final_opinion }}</p>
         </div>
 
-        <div v-if="form.examiner_status">
+        <div v-if="form.examiner_status && withDeg">
           <table-title> موقف المجند من المركز :- </table-title>
           <p>{{ form.examiner_status }}</p>
         </div>
-        <template v-if="examiner">
+        <template v-if="examiner && withDeg">
           <div v-if="examiner">
             <table-title>المركز :- </table-title>
             <p>{{ getName(examiner.user_id) }}</p>
@@ -108,7 +108,7 @@
           <table-title> التوصية :- </table-title>
           <p>{{ form.recommendation_summary }}</p>
         </div>
-        <div v-if="form.recommendation_res">
+        <div v-if="form.recommendation_res && withDeg">
           <table-title> نتيجة التوصية :- </table-title>
           <p>
             {{ getTextByValue('recommendation_res', form.recommendation_res) }}
@@ -302,6 +302,9 @@ export default {
         'اضطراب بالادراك': this.getTextByValue('awareDisorder', awareDisorder),
         'اضطراب بالتفكير': this.getTextByValue('thinkDisorder', thinkDisorder),
       }
+    },
+    withDeg() {
+      return Number(this.$route.query.withDeg || 0)
     },
   },
 
