@@ -212,7 +212,7 @@ model Interview {
   drug_type              String?
   final_opinion          String
   examiner_status        String
-  final_hospital_result  String
+  final_hospital_result  String?
   order_brothers         Int?
   parent_rel             Int?
   rel_between_parents    Int?
