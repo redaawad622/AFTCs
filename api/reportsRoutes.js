@@ -88,6 +88,9 @@ function examinerQualification(examiner, qualificationCode) {
 function getArraysIntersection(a1, a2) {
   return a2.filter((a2elem) => a1.includes(a2elem))
 }
+function getArraysDifference(a1, a2) {
+  return a2.filter((a2elem) => !a1.includes(a2elem))
+}
 function getReport1(filteredExaminers) {
   const totalNoticed = filteredExaminers.filter((item) => item.isNoticed)
 
@@ -149,7 +152,7 @@ function getReport1(filteredExaminers) {
     user_id: 'الكل',
     total: filteredExaminers.length,
     noticed: totalNoticed.length,
-    again: filteredExaminers.filter((item) => item.again).length,
+    again: filteredExaminers.filter((item) => item.again),
     noticedAgain: filteredExaminers.filter((item) => item.isNoticedAgain)
       .length,
     high: filteredExaminers.filter((item) => item.qualification_code === 2)
@@ -172,37 +175,33 @@ function getReport1(filteredExaminers) {
 }
 
 function getReport2(filteredExaminers) {
-  const isNoticed = filteredExaminers.filter((item) => item.isNoticed).length
-  const isNoticedAgain = filteredExaminers.filter(
-    (item) => item.isNoticedAgain
-  ).length
-  const allReExamed = filteredExaminers.filter((item) => item.again).length
+  const isNoticed = filteredExaminers.filter((_) => _.isNoticed)
+  const isNoticedAgain = filteredExaminers.filter((_) => _.isNoticedAgain)
+  const allReExamed = filteredExaminers.filter((_) => _.again)
+  const interviewDone = filteredExaminers.filter((_) => _.Interview.length > 0)
   const interviewEntqaDone = filteredExaminers.filter(
-    (item) => item.Interview[0]?.recommendation
-  ).length
+    (_) => _.Interview[0]?.recommendation
+  )
+  const didntFinishExam = filteredExaminers.filter(
+    (_) => _.Answers?.length === 0
+  )
   const examinerStatusNafsyMarkaz = filteredExaminers.filter(
-    (item) => item.Interview[0]?.examiner_status === 'عرض مست نفسي'
+    (_) => _.Interview[0]?.examiner_status === 'عرض مست نفسي'
   )
   const examinerStatusTebyMarkaz = filteredExaminers.filter(
-    (item) => item.Interview[0]?.examiner_status === 'عرض مست طبي'
+    (_) => _.Interview[0]?.examiner_status === 'عرض مست طبي'
   )
   const examinerStatusNafsyEntqa = filteredExaminers.filter(
-    (item) => item.Interview[0]?.recommendation === 1
+    (_) => _.Interview[0]?.recommendation === 1
   )
   const examinerStatusTebyEntqa = [
-    ...filteredExaminers.filter(
-      (item) => item.Interview[0]?.recommendation === 2
-    ),
-    ...filteredExaminers.filter(
-      (item) => item.Interview[0]?.recommendation === 3
-    ),
+    ...filteredExaminers.filter((_) => _.Interview[0]?.recommendation === 2),
+    ...filteredExaminers.filter((_) => _.Interview[0]?.recommendation === 3),
   ]
   const eqtesady = filteredExaminers.filter(
-    (item) => item.Interview[0]?.recommendation === 4
+    (_) => _.Interview[0]?.recommendation === 4
   )
-  const examinerHasUnit = filteredExaminers.filter(
-    (item) => item?.UNIT_NAME !== null
-  ).length
+  const examinerHasUnit = filteredExaminers.filter((_) => _?.UNIT_NAME !== null)
 
   const reportObject = [
     {
@@ -217,47 +216,83 @@ function getReport2(filteredExaminers) {
     },
     {
       name: 'من لم ينهوا الاختبار',
-      value: filteredExaminers.filter(
-        (examiner) => examiner.Answers?.length === 0
-      ).length,
+      value: didntFinishExam.length,
     },
     {
       name: 'كل الملحوظين',
-      value: isNoticed,
+      value: isNoticed.length,
     },
     {
       name: 'تم الاعاده عليهم',
-      value: allReExamed,
+      value: allReExamed.length,
     },
     {
       name: 'لم يتم الاعاده عليهم',
-      value: isNoticed - allReExamed,
+      value: isNoticed.length - allReExamed.length,
     },
     {
       name: 'ملحوظ بعد الاعاده',
-      value: isNoticedAgain,
+      value: isNoticedAgain.length,
     },
     {
       name: 'عدد من تم تسجيل وحدته',
-      value: examinerHasUnit,
+      value: examinerHasUnit.length,
+    },
+    {
+      name: 'عدد من تم تسجيل وحدته و تم عرضهم على الفرع',
+      value: getArraysIntersection(examinerHasUnit, interviewEntqaDone).length,
+    },
+    {
+      name: 'عدد من تم تسجيل وحدته و تم ترحيلهم قبل الإعادة',
+      value: getArraysIntersection(
+        examinerHasUnit,
+        getArraysDifference(isNoticed, allReExamed)
+      ).length,
+    },
+    {
+      name: 'عدد من تم تسجيل وحدته و تم ترحيلهم قبل العرض على الفرع',
+      value: getArraysIntersection(
+        examinerHasUnit,
+        getArraysDifference(isNoticedAgain, interviewEntqaDone)
+      ).length,
+    },
+    {
+      name: 'عدد من تم تسجيل وحدته و تم ترحيلهم قبل تطبيق الاختبارات',
+      value: getArraysIntersection(examinerHasUnit, didntFinishExam).length,
+    },
+    {
+      name: 'عدد من تم تسجيل وحدته و تم عرضهم على مست نفسي من قبل المركز',
+      value: getArraysIntersection(examinerHasUnit, examinerStatusNafsyMarkaz)
+        .length,
+    },
+    {
+      name: 'عدد من تم تسجيل وحدته و تم عرضهم على مست طبي من قبل المركز',
+      value: getArraysIntersection(examinerHasUnit, examinerStatusTebyMarkaz)
+        .length,
+    },
+    {
+      name: 'عدد من تم تسجيل وحدته و لم يتم تطبيق المقابلة الشخصية معهم',
+      value: getArraysIntersection(
+        examinerHasUnit,
+        getArraysDifference(filteredExaminers, interviewDone)
+      ).length,
     },
     {
       name: 'عدد من لم يتم تسجيل وحدته',
-      value: filteredExaminers.length - examinerHasUnit,
+      value: filteredExaminers.length - examinerHasUnit.length,
     },
     {
       name: 'عدد من تم عمل مقابلة شخصية لهم',
-      value: filteredExaminers.filter((item) => item.Interview.length > 0)
-        .length,
+      value: interviewDone.length,
     },
 
     {
       name: 'عدد من تم عمل مقابلة اكلينيكية لهم',
-      value: interviewEntqaDone,
+      value: interviewEntqaDone.length,
     },
     {
       name: 'عدد الملحوظين بعد الاعاده و تم ترحيلهم قبل العرض علي الفرع',
-      value: isNoticedAgain - interviewEntqaDone,
+      value: isNoticedAgain.length - interviewEntqaDone.length,
     },
     {
       name: 'عرض مست نفسي من قبل المركز',
@@ -274,7 +309,7 @@ function getReport2(filteredExaminers) {
       ).length,
     },
     {
-      name: 'عرض مست طبى  فرع',
+      name: 'عرض مست طبى فرع',
       value: examinerStatusTebyEntqa.length,
     },
     {
