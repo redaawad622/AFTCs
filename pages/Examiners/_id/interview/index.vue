@@ -22,662 +22,660 @@
 
     <v-container v-if="!fLoading" fluid>
       <v-row justify="center">
-        <keep-alive>
-          <v-expansion-panels v-model="openPanel" accordion focusable mandatory>
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <v-card-title>البيانات الاساسية</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-row>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model="form.sold_id"
-                      outlined
-                      color="primary"
-                      label="الرقم العسكري"
-                      placeholder="0000000000000"
-                      counter="13"
-                      maxlength="13"
-                      readonly
-                      :rules="required"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model="form.national_id"
-                      outlined
-                      color="primary"
-                      label="الرقم القومي"
-                      placeholder="00000000000000"
-                      counter="14"
-                      maxlength="14"
-                      readonly
-                      :rules="required"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model="form.name"
-                      outlined
-                      color="primary"
-                      label="الاسم"
-                      readonly
-                      :rules="required"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      :value="age"
-                      outlined
-                      color="primary"
-                      label="السن"
-                      readonly
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.marital_state"
-                      :items="helperData.marital_states"
-                      outlined
-                      label="الحالة الاجتماعيه"
-                      :rules="required"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model="form.educational_degree"
-                      outlined
-                      color="primary"
-                      label="المؤهل الدراسي"
-                      :rules="required"
-                    ></v-text-field>
-                  </v-col>
+        <v-expansion-panels v-model="openPanel" accordion focusable mandatory>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <v-card-title>البيانات الاساسية</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model="form.sold_id"
+                    outlined
+                    color="primary"
+                    label="الرقم العسكري"
+                    placeholder="0000000000000"
+                    counter="13"
+                    maxlength="13"
+                    readonly
+                    :rules="required"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model="form.national_id"
+                    outlined
+                    color="primary"
+                    label="الرقم القومي"
+                    placeholder="00000000000000"
+                    counter="14"
+                    maxlength="14"
+                    readonly
+                    :rules="required"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model="form.name"
+                    outlined
+                    color="primary"
+                    label="الاسم"
+                    readonly
+                    :rules="required"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    :value="age"
+                    outlined
+                    color="primary"
+                    label="السن"
+                    readonly
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.marital_state"
+                    :items="helperData.marital_states"
+                    outlined
+                    label="الحالة الاجتماعيه"
+                    :rules="required"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model="form.educational_degree"
+                    outlined
+                    color="primary"
+                    label="المؤهل الدراسي"
+                    :rules="required"
+                  ></v-text-field>
+                </v-col>
 
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.transReason"
-                      :items="helperData.transReason"
-                      outlined
-                      label="سبب الاحالة"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-menu
-                      v-model="menu2"
-                      :close-on-content-click="false"
-                      :nudge-right="40"
-                      transition="scale-transition"
-                      offset-y
-                      min-width="auto"
-                    >
-                      <template #activator="{ on, attrs }">
-                        <v-text-field
-                          v-model="form.historyDate"
-                          label="تاريخ المرض"
-                          prepend-inner-icon="mdi-calendar"
-                          readonly
-                          outlined
-                          v-bind="attrs"
-                          :rules="required"
-                          v-on="on"
-                        ></v-text-field>
-                      </template>
-                      <v-date-picker
-                        v-model="form.historyDate"
-                        @input="menu2 = false"
-                      ></v-date-picker>
-                    </v-menu>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model="form.stage"
-                      outlined
-                      color="primary"
-                      label="المرحله"
-                      readonly
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <v-card-title>البيانات الاجتماعيه</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-row>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model="form.parent_job"
-                      outlined
-                      color="primary"
-                      label="وظيفة الوالد"
-                      :rules="required"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model.number="form.siblings_num"
-                      outlined
-                      type="number"
-                      color="primary"
-                      label=" عدد الاخوات اشقاء"
-                      minlength="1"
-                      :rules="required"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model.number="form.half_brothers"
-                      outlined
-                      type="number"
-                      color="primary"
-                      label=" عدد الاخوات غير اشقاء"
-                      minlength="0"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-text-field
-                      v-model.number="form.order_brothers"
-                      outlined
-                      type="number"
-                      color="primary"
-                      label="ترتيبه بين اخواته"
-                      minlength="1"
-                      :rules="required"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.parent_rel"
-                      outlined
-                      color="primary"
-                      label="الحالة الاجتماعية للوالدين"
-                      :rules="required"
-                      :items="helperData.parent_rel"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-combobox
-                      v-model="form.family_relation"
-                      outlined
-                      color="primary"
-                      label="علاقته بالاسره"
-                      :rules="required"
-                      :items="helperData.family_relation"
-                    ></v-combobox>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.rel_between_parents"
-                      outlined
-                      color="primary"
-                      label="صلة قرابة بين الوالدين"
-                      :items="helperData.yesNo"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.family_income"
-                      outlined
-                      color="primary"
-                      label="المستوي الاقتصادي للاسره"
-                      :items="helperData.family_income"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.personal_medical"
-                      outlined
-                      color="primary"
-                      label="تاريخ مرضي شخصي"
-                      :items="helperData.yesNo"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.family_medical"
-                      outlined
-                      color="primary"
-                      label="تاريخ مرضي عائلي"
-                      :items="helperData.yesNo"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-            <v-expansion-panel v-if="permissions.admin.includes(user.type)">
-              <v-expansion-panel-header>
-                <v-card-title>معلومات تمهيدية</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-row>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.medicine_type"
-                      :items="medicine_type"
-                      outlined
-                      label="تعاطي ادوية"
-                      :rules="required"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.has_medical_history"
-                      :items="has_medical_history"
-                      :rules="required"
-                      outlined
-                      label="سبق عرضه علي  أي مست/عياده"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-show="form.has_medical_history == 'نعم'"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-text-field
-                      v-model="form.hospital_name"
-                      :rules="form.has_medical_history == 'نعم' ? required : []"
-                      outlined
-                      color="primary"
-                      label="اسم المست/العيادة"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.drugs_history"
-                      :items="has_medical_history"
-                      outlined
-                      :rules="required"
-                      label="لديه خبره بتعاطي مواد مخدره"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-show="form.drugs_history == 'نعم'"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-text-field
-                      v-model="form.drug_type"
-                      :rules="form.drugs_history == 'نعم' ? required : []"
-                      outlined
-                      color="primary"
-                      label="نوع المخدر"
-                    ></v-text-field>
-                  </v-col>
-
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.appetite"
-                      :items="helperData.appetite"
-                      outlined
-                      label="الشهية للطعام"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.sleeping"
-                      :items="helperData.sleeping"
-                      outlined
-                      label="النوم"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.smoking"
-                      :items="helperData.smoking"
-                      outlined
-                      label="مدخن"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.prayer"
-                      :items="helperData.prayer"
-                      outlined
-                      label="الصلاه"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <v-card-title>الشكوي</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-textarea
-                  v-model="form.complaint"
-                  outlined
-                  color="primary"
-                  label="الشكوي كما ذكرها المجند (مركز)"
-                  rows="8"
-                  :rules="required"
-                ></v-textarea>
-                <v-textarea
+                <v-col
                   v-if="permissions.admin.includes(user.type)"
-                  v-model="form.complaint_f"
-                  outlined
-                  color="primary"
-                  label="الشكوي كما ذكرها المجند (فرع)"
-                  rows="8"
-                ></v-textarea>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.transReason"
+                    :items="helperData.transReason"
+                    outlined
+                    label="سبب الاحالة"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-menu
+                    v-model="menu2"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="form.historyDate"
+                        label="تاريخ المرض"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        outlined
+                        v-bind="attrs"
+                        :rules="required"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="form.historyDate"
+                      @input="menu2 = false"
+                    ></v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model="form.stage"
+                    outlined
+                    color="primary"
+                    label="المرحله"
+                    readonly
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <v-card-title>البيانات الاجتماعيه</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model="form.parent_job"
+                    outlined
+                    color="primary"
+                    label="وظيفة الوالد"
+                    :rules="required"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model.number="form.siblings_num"
+                    outlined
+                    type="number"
+                    color="primary"
+                    label=" عدد الاخوات اشقاء"
+                    minlength="1"
+                    :rules="required"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model.number="form.half_brothers"
+                    outlined
+                    type="number"
+                    color="primary"
+                    label=" عدد الاخوات غير اشقاء"
+                    minlength="0"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-text-field
+                    v-model.number="form.order_brothers"
+                    outlined
+                    type="number"
+                    color="primary"
+                    label="ترتيبه بين اخواته"
+                    minlength="1"
+                    :rules="required"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.parent_rel"
+                    outlined
+                    color="primary"
+                    label="الحالة الاجتماعية للوالدين"
+                    :rules="required"
+                    :items="helperData.parent_rel"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-combobox
+                    v-model="form.family_relation"
+                    outlined
+                    color="primary"
+                    label="علاقته بالاسره"
+                    :rules="required"
+                    :items="helperData.family_relation"
+                  ></v-combobox>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.rel_between_parents"
+                    outlined
+                    color="primary"
+                    label="صلة قرابة بين الوالدين"
+                    :items="helperData.yesNo"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.family_income"
+                    outlined
+                    color="primary"
+                    label="المستوي الاقتصادي للاسره"
+                    :items="helperData.family_income"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.personal_medical"
+                    outlined
+                    color="primary"
+                    label="تاريخ مرضي شخصي"
+                    :items="helperData.yesNo"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.family_medical"
+                    outlined
+                    color="primary"
+                    label="تاريخ مرضي عائلي"
+                    :items="helperData.yesNo"
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel v-if="permissions.admin.includes(user.type)">
+            <v-expansion-panel-header>
+              <v-card-title>معلومات تمهيدية</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.medicine_type"
+                    :items="medicine_type"
+                    outlined
+                    label="تعاطي ادوية"
+                    :rules="required"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.has_medical_history"
+                    :items="has_medical_history"
+                    :rules="required"
+                    outlined
+                    label="سبق عرضه علي  أي مست/عياده"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-show="form.has_medical_history == 'نعم'"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-text-field
+                    v-model="form.hospital_name"
+                    :rules="form.has_medical_history == 'نعم' ? required : []"
+                    outlined
+                    color="primary"
+                    label="اسم المست/العيادة"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.drugs_history"
+                    :items="has_medical_history"
+                    outlined
+                    :rules="required"
+                    label="لديه خبره بتعاطي مواد مخدره"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-show="form.drugs_history == 'نعم'"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-text-field
+                    v-model="form.drug_type"
+                    :rules="form.drugs_history == 'نعم' ? required : []"
+                    outlined
+                    color="primary"
+                    label="نوع المخدر"
+                  ></v-text-field>
+                </v-col>
 
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <v-card-title>المظهر و السلوك</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-row>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.appearance"
-                      :items="helperData.appearance"
-                      outlined
-                      label="المظهر الاجتماعي"
-                      :rules="required"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.speaking_disorder"
-                      :items="speaking_disorder"
-                      outlined
-                      label="اضطراب الكلام"
-                      :rules="required"
-                    ></v-select>
-                  </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.appetite"
+                    :items="helperData.appetite"
+                    outlined
+                    label="الشهية للطعام"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.sleeping"
+                    :items="helperData.sleeping"
+                    outlined
+                    label="النوم"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.smoking"
+                    :items="helperData.smoking"
+                    outlined
+                    label="مدخن"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.prayer"
+                    :items="helperData.prayer"
+                    outlined
+                    label="الصلاه"
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <v-card-title>الشكوي</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-textarea
+                v-model="form.complaint"
+                outlined
+                color="primary"
+                label="الشكوي كما ذكرها المجند (مركز)"
+                rows="8"
+                :rules="required"
+              ></v-textarea>
+              <v-textarea
+                v-if="permissions.admin.includes(user.type)"
+                v-model="form.complaint_f"
+                outlined
+                color="primary"
+                label="الشكوي كما ذكرها المجند (فرع)"
+                rows="8"
+              ></v-textarea>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
 
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.mood"
-                      :items="helperData.mood"
-                      outlined
-                      label="الحالة المزاجية"
-                      :rules="required"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.moving"
-                      :items="helperData.moving"
-                      outlined
-                      label="الحركة"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.faceExprission"
-                      :items="helperData.faceExprission"
-                      outlined
-                      label="تعبيرات الوجه"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <v-card-title>المظهر و السلوك</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.appearance"
+                    :items="helperData.appearance"
+                    outlined
+                    label="المظهر الاجتماعي"
+                    :rules="required"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.speaking_disorder"
+                    :items="speaking_disorder"
+                    outlined
+                    label="اضطراب الكلام"
+                    :rules="required"
+                  ></v-select>
+                </v-col>
 
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <v-card-title>المشكلات المعرفية</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-row>
-                  <v-col cols="12" sm="6" md="6" lg="4" xl="3">
-                    <v-select
-                      v-model="form.focus_ability"
-                      :items="helperData.focus_ability"
-                      outlined
-                      label="القدرة على التركيز و الانتباه"
-                      :rules="required"
-                    ></v-select>
-                  </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.mood"
+                    :items="helperData.mood"
+                    outlined
+                    label="الحالة المزاجية"
+                    :rules="required"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.moving"
+                    :items="helperData.moving"
+                    outlined
+                    label="الحركة"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.faceExprission"
+                    :items="helperData.faceExprission"
+                    outlined
+                    label="تعبيرات الوجه"
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
 
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.timeAware"
-                      :items="helperData.timeAware"
-                      outlined
-                      label="مدرك للزمان والمكان والاشخاص"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.situationAware"
-                      :items="helperData.situationAware"
-                      outlined
-                      label="مستبصر بموقفه الحالي"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.judgeAbility"
-                      :items="helperData.judgeAbility"
-                      outlined
-                      label="قدرته علي الحكم علي الامور"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.awareDisorder"
-                      :items="helperData.awareDisorder"
-                      outlined
-                      label="اضطراب بالادراك"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-if="permissions.admin.includes(user.type)"
-                    cols="12"
-                    sm="6"
-                    md="6"
-                    lg="4"
-                    xl="3"
-                  >
-                    <v-select
-                      v-model="form.thinkDisorder"
-                      :items="helperData.thinkDisorder"
-                      outlined
-                      label="اضطراب بالتفكير"
-                    ></v-select>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <v-card-title>المشكلات المعرفية</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-select
+                    v-model="form.focus_ability"
+                    :items="helperData.focus_ability"
+                    outlined
+                    label="القدرة على التركيز و الانتباه"
+                    :rules="required"
+                  ></v-select>
+                </v-col>
 
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <v-card-title>رأي القائم بالمقابله (مركز)</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-row>
-                  <v-col cols="12" sm="12" md="6" lg="4">
-                    <v-select
-                      v-model="form.final_opinion"
-                      :items="final_opinion"
-                      outlined
-                      :rules="required"
-                      label="رأي القائم بالمقابلة"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="12" md="6" lg="4">
-                    <v-select
-                      v-model="form.examiner_status"
-                      :items="examiner_status[form.final_opinion]"
-                      outlined
-                      :rules="required"
-                      label="موقف المجند"
-                    ></v-select>
-                  </v-col>
-                  <v-col
-                    v-show="form.final_opinion == final_opinion[0]"
-                    cols="12"
-                    sm="12"
-                    md="12"
-                    lg="4"
-                  >
-                    <v-select
-                      v-model="form.final_hospital_result"
-                      :items="final_hospital_result"
-                      outlined
-                      label="نتيجة العرض علي المست"
-                      :rules="
-                        form.final_opinion == final_opinion[0] ? required : []
-                      "
-                    ></v-select>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-            <v-expansion-panel v-if="permissions.admin.includes(user.type)">
-              <v-expansion-panel-header>
-                <v-card-title>رأي القائم بالمقابله (فرع)</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-row>
-                  <v-col cols="12">
-                    <v-textarea
-                      v-model="form.interviewer_opinion"
-                      outlined
-                      color="primary"
-                      label="رأي القائم بالمقابله"
-                      rows="8"
-                    ></v-textarea>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-            <v-expansion-panel v-if="permissions.admin.includes(user.type)">
-              <v-expansion-panel-header>
-                <v-card-title>التوصيه و نتيجة التوصيه</v-card-title>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-row>
-                  <v-col cols="12" sm="6">
-                    <v-select
-                      v-model="form.recommendation"
-                      :items="helperData.recommendation"
-                      outlined
-                      label="التوصية"
-                      :rules="form.interviewer_opinion ? required : []"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <v-select
-                      v-model="form.recommendation_res"
-                      :items="helperData.recommendation_res"
-                      outlined
-                      label="نتيجة التوصية"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12">
-                    <v-textarea
-                      v-model="form.recommendation_summary"
-                      outlined
-                      color="primary"
-                      label="ملخص التوصيه"
-                      rows="4"
-                    ></v-textarea>
-                  </v-col>
-                  <v-col cols="12">
-                    <v-textarea
-                      v-model="form.interviewer"
-                      outlined
-                      color="primary"
-                      label="القائم بالمقابله"
-                      :rules="form.interviewer_opinion ? required : []"
-                    ></v-textarea>
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </keep-alive>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.timeAware"
+                    :items="helperData.timeAware"
+                    outlined
+                    label="مدرك للزمان والمكان والاشخاص"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.situationAware"
+                    :items="helperData.situationAware"
+                    outlined
+                    label="مستبصر بموقفه الحالي"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.judgeAbility"
+                    :items="helperData.judgeAbility"
+                    outlined
+                    label="قدرته علي الحكم علي الامور"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.awareDisorder"
+                    :items="helperData.awareDisorder"
+                    outlined
+                    label="اضطراب بالادراك"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-if="permissions.admin.includes(user.type)"
+                  cols="12"
+                  sm="6"
+                  md="6"
+                  lg="4"
+                  xl="3"
+                >
+                  <v-select
+                    v-model="form.thinkDisorder"
+                    :items="helperData.thinkDisorder"
+                    outlined
+                    label="اضطراب بالتفكير"
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <v-card-title>رأي القائم بالمقابله (مركز)</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row>
+                <v-col cols="12" sm="12" md="6" lg="4">
+                  <v-select
+                    v-model="form.final_opinion"
+                    :items="final_opinion"
+                    outlined
+                    :rules="required"
+                    label="رأي القائم بالمقابلة"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="12" md="6" lg="4">
+                  <v-select
+                    v-model="form.examiner_status"
+                    :items="examiner_status[form.final_opinion]"
+                    outlined
+                    :rules="required"
+                    label="موقف المجند"
+                  ></v-select>
+                </v-col>
+                <v-col
+                  v-show="form.final_opinion == final_opinion[0]"
+                  cols="12"
+                  sm="12"
+                  md="12"
+                  lg="4"
+                >
+                  <v-select
+                    v-model="form.final_hospital_result"
+                    :items="final_hospital_result"
+                    outlined
+                    label="نتيجة العرض علي المست"
+                    :rules="
+                      form.final_opinion == final_opinion[0] ? required : []
+                    "
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel v-if="permissions.admin.includes(user.type)">
+            <v-expansion-panel-header>
+              <v-card-title>رأي القائم بالمقابله (فرع)</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="form.interviewer_opinion"
+                    outlined
+                    color="primary"
+                    label="رأي القائم بالمقابله"
+                    rows="8"
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel v-if="permissions.admin.includes(user.type)">
+            <v-expansion-panel-header>
+              <v-card-title>التوصيه و نتيجة التوصيه</v-card-title>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="form.recommendation"
+                    :items="helperData.recommendation"
+                    outlined
+                    label="التوصية"
+                    :rules="form.interviewer_opinion ? required : []"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="form.recommendation_res"
+                    :items="helperData.recommendation_res"
+                    outlined
+                    label="نتيجة التوصية"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="form.recommendation_summary"
+                    outlined
+                    color="primary"
+                    label="ملخص التوصيه"
+                    rows="4"
+                  ></v-textarea>
+                </v-col>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="form.interviewer"
+                    outlined
+                    color="primary"
+                    label="القائم بالمقابله"
+                    :rules="form.interviewer_opinion ? required : []"
+                  ></v-textarea>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
         <v-card class="focusedCard">
           <v-card-text>
             <v-btn color="primary" :loading="loading" @click="save()"
