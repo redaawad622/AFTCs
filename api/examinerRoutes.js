@@ -128,7 +128,6 @@ module.exports = function (app, prisma, types) {
 
     if (register) {
       const id = req.headers.id
-      console.log(register)
       option.where.user_id = { equals: Number(id) }
     }
     if (again) {
@@ -152,7 +151,6 @@ module.exports = function (app, prisma, types) {
       }
     }
     if (user) {
-      console.log('IN USER : ' + user)
       option.where.user_id = { equals: Number(user) }
     }
     if (qualification || qualification === '0' || qualification === 0) {
