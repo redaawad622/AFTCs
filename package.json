@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "nuxt --open",
+    "updatedb": "npx prisma db push && npx prisma generate",
     "build:modern": "nuxt build --modern=client",
     "start:modern": "nuxt start --modern=client",
     "build": "nuxt build",
