@@ -107,7 +107,7 @@
 </template>
 <script>
 export default {
-  name: 'PlansTrainingPage',
+  name: 'PlansTrainingComponent',
   data() {
     return {
       openFilter: false,
@@ -138,7 +138,12 @@ export default {
   },
   methods: {
     expectedPlanTransaction() {
-      this.$store.dispatch('Report/expectedPlanTransaction', this.plansFilters)
+      this.$store
+        .dispatch('Report/expectedPlanTransaction', this.plansFilters)
+        .then((res) => {
+          console.log(res)
+          this.$store.commit('Plans/setPlan', res)
+        })
     },
   },
 }
