@@ -2,34 +2,39 @@ module.exports = function (app, prisma) {
   app.get('/getReports', async (req, res) => {
     const { examFinish, stage, report, user } = req.query
     let filteredExaminers = []
-    const option = { where: {} }
-    reportGeneralFilters(option, stage, user, examFinish)
+    let resultReportJson = []
+    const examinerOptions = { where: {} }
+    reportGeneralFilters(examinerOptions, stage, user, examFinish)
     switch (Number(report)) {
       case 1:
-        report1Filters(option)
+        report1ExaminerFilters(examinerOptions)
         break
       case 2:
-        report2Filters(option)
+        report2Filters(examinerOptions)
         break
       default:
         break
     }
 
-    filteredExaminers = await prisma.Examiners.findMany(option)
-
+    filteredExaminers = await prisma.Examiners.findMany(examinerOptions)
+    const expectedPlan = await prisma.ExpectedPlan.findMany()
     switch (Number(report)) {
       case 1:
-        filteredExaminers = getReport1(filteredExaminers)
+        resultReportJson = getReport1(filteredExaminers, expectedPlan)
         break
       case 2:
-        filteredExaminers = getReport2(filteredExaminers)
+        resultReportJson = getReport2(filteredExaminers)
         break
 
       default:
-        filteredExaminers = getReport1(filteredExaminers)
+        resultReportJson = getReport1(filteredExaminers)
         break
     }
-    res.json(filteredExaminers)
+    res.json(resultReportJson)
+  })
+
+  app.post('/expectedPlanTransaction', async (req, res) => {
+    await console.log(req)
   })
 }
 
@@ -54,7 +59,7 @@ function reportGeneralFilters(option, stage, user, examFinish) {
   }
 }
 
-function report1Filters(option) {
+function report1ExaminerFilters(option) {
   option.where.NOT = [{ user_id: null }]
   option.select = {
     user_id: true,
@@ -82,6 +87,7 @@ function report2Filters(option) {
     },
   }
 }
+
 function examinerQualification(examiner, qualificationCode) {
   return examiner.qualification_code === qualificationCode
 }
@@ -91,7 +97,7 @@ function getArraysIntersection(a1, a2) {
 function getArraysDifference(a1, a2) {
   return a2.filter((a2elem) => !a1.includes(a2elem))
 }
-function getReport1(filteredExaminers) {
+function getReport1(filteredExaminers, expectedPlan) {
   const totalNoticed = filteredExaminers.filter((item) => item.isNoticed)
 
   let groupedExaminers = filteredExaminers.reduce(
@@ -106,11 +112,9 @@ function getReport1(filteredExaminers) {
 
   groupedExaminers = Object.keys(groupedExaminers).map((k) => {
     const trainingCenterExaminers = groupedExaminers[k]
-    const noticed = trainingCenterExaminers.filter((item) => item.isNoticed)
-    const again = trainingCenterExaminers.filter((item) => item.again)
-    const noticedAgain = trainingCenterExaminers.filter(
-      (item) => item.isNoticedAgain
-    )
+    const noticed = trainingCenterExaminers.filter((_) => _.isNoticed)
+    const again = trainingCenterExaminers.filter((_) => _.again)
+    const noticedAgain = trainingCenterExaminers.filter((_) => _.isNoticedAgain)
     const high = trainingCenterExaminers.filter((item) =>
       examinerQualification(item, 2)
     )
@@ -123,11 +127,13 @@ function getReport1(filteredExaminers) {
     const usually = trainingCenterExaminers.filter((item) =>
       examinerQualification(item, 0)
     )
+
     return {
       user_id: k,
       total: trainingCenterExaminers.length,
       noticed: noticed.length,
       again: again.length,
+      expected_total: expectedPlan.expected_total,
       noticedAgain: noticedAgain.length,
       high: high.length,
       above: above.length,
@@ -152,7 +158,7 @@ function getReport1(filteredExaminers) {
     user_id: 'الكل',
     total: filteredExaminers.length,
     noticed: totalNoticed.length,
-    again: filteredExaminers.filter((item) => item.again),
+    again: filteredExaminers.filter((item) => item.again).length,
     noticedAgain: filteredExaminers.filter((item) => item.isNoticedAgain)
       .length,
     high: filteredExaminers.filter((item) => item.qualification_code === 2)
