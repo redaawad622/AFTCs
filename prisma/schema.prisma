@@ -278,7 +278,7 @@ model ExpectedPlan {
   actual_arrive_above   Int?
   actual_arrive_middle  Int?
   actual_arrive_usually Int?
-  user_id               Int?
+  user_id               Int           @unique
   users                 T_Categories? @relation(fields: [user_id], references: [Cat_ID], onDelete: Cascade)
 
 }
