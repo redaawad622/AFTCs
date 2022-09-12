@@ -268,12 +268,10 @@ model UnitNames {
 
 model ExpectedPlan {
   id                    Int           @id @default(autoincrement())
-  expected_total        Int?
   expected_high         Int?
   expected_above        Int?
   expected_middle       Int?
   expected_usually      Int?
-  actual_arrive_total   Int?
   actual_arrive_high    Int?
   actual_arrive_above   Int?
   actual_arrive_middle  Int?
