@@ -26,6 +26,32 @@ export default {
       hide: false,
     },
     {
+      text: 'المخطط وصوله',
+      value: 'expected_total',
+      hide: false,
+    },
+
+    {
+      text: 'المخطط عليا',
+      value: 'expected_high',
+      hide: false,
+    },
+    {
+      text: 'المخطط فوق متوسط',
+      value: 'expected_above',
+      hide: false,
+    },
+    {
+      text: 'المخطط متوسط',
+      value: 'expected_middle',
+      hide: false,
+    },
+    {
+      text: 'المخطط عادة',
+      value: 'expected_usually',
+      hide: false,
+    },
+    {
       text: 'عاده',
       value: 'usually',
       hide: false,
