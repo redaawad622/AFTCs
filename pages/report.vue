@@ -52,7 +52,7 @@
         ></v-select>
         <v-btn color="primary" @click="print()">طباعة</v-btn>
 
-        <plansTraining></plansTraining>
+        <plansTraining />
         <v-dialog v-model="dialog" width="500">
           <template #activator="{ on, attrs }">
             <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
@@ -126,7 +126,6 @@
       id="printTable"
       class="printTable"
       dense
-      v-bind="tableDataChanges"
       :single-select="true"
       :contenteditable="true"
     >
@@ -183,7 +182,6 @@
               <template v-else-if="column.value == 'user_id'">
                 {{ getName(item.user_id) }}
               </template>
-
               <template v-else>
                 {{ item[column.value] }}
               </template>
@@ -206,7 +204,6 @@ export default {
     return {
       filterData: [],
       removedReportData: [],
-      tableDataChanges: undefined,
       centersOrSitesValue: [2, 1],
       printedElementsCount: [],
       centersOrSitesDropDown: [
@@ -236,6 +233,9 @@ export default {
     report() {
       return this.$store.getters['Report/report']
     },
+    plan() {
+      return this.$store.getters['Plans/plan']
+    },
     reportData: {
       get() {
         return this.report.data
@@ -249,6 +249,12 @@ export default {
     },
   },
   watch: {
+    plan: {
+      handler(val) {
+        console.log(val.data)
+        this.filterData = { ...val.data }
+      },
+    },
     centersOrSitesValue: {
       deep: true,
       handler(val) {

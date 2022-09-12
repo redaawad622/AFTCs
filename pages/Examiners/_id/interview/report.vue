@@ -366,7 +366,6 @@ export default {
       }
     },
     getExamPercentage(val, fullMark) {
-      console.log(val, fullMark)
       if (fullMark > 0) {
         return Math.floor((val / fullMark) * 100)
       } else {

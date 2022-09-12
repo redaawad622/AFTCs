@@ -6,26 +6,6 @@ export default {
       hide: false,
     },
     {
-      text: 'عدد المختبرين',
-      value: 'total',
-      hide: false,
-    },
-    {
-      text: 'عليا',
-      value: 'high',
-      hide: false,
-    },
-    {
-      text: 'فوق متوسطه',
-      value: 'above',
-      hide: false,
-    },
-    {
-      text: 'متوسطه',
-      value: 'middle',
-      hide: false,
-    },
-    {
       text: 'المخطط',
       value: 'expected_total',
       hide: false,
@@ -82,8 +62,28 @@ export default {
       hide: false,
     },
     {
+      text: 'عدد المختبرين',
+      value: 'total',
+      hide: false,
+    },
+    {
       text: 'فرق اجمالي الوصول من إجمالي المختبرين',
       value: 'difference_actual_examined',
+      hide: false,
+    },
+    {
+      text: 'عليا',
+      value: 'high',
+      hide: false,
+    },
+    {
+      text: 'فوق متوسطه',
+      value: 'above',
+      hide: false,
+    },
+    {
+      text: 'متوسطه',
+      value: 'middle',
       hide: false,
     },
     {
@@ -121,6 +121,7 @@ export default {
       value: 'again',
       hide: false,
     },
+
     {
       text: 'تم الاعاده عليا',
       value: 'a_high',
