@@ -51,6 +51,9 @@
           dense
         ></v-select>
         <v-btn color="primary" @click="print()">طباعة</v-btn>
+        <v-btn color="primary" @click="expectedPlanTransaction()"
+          >حفظ المخطط</v-btn
+        >
         <v-dialog v-model="dialog" width="500">
           <template #activator="{ on, attrs }">
             <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
@@ -152,7 +155,10 @@
                 @change="onCheckBoxClicked(k - 1)"
               />
             </td>
-            <td>{{ ++k }}</td>
+
+            <td>
+              {{ ++k }}
+            </td>
             <td
               v-for="column in filterColumns"
               :key="column.text + k + 'repTd'"
@@ -160,6 +166,7 @@
               <template v-if="column.value === 'Answers'">
                 {{ item.Answers[column.id] }}%
               </template>
+
               <template v-else-if="column.value == '_count'">
                 <v-chip
                   small
@@ -257,7 +264,6 @@ export default {
     removeElementFromArray(array, index) {
       return array.slice(0, index).concat(array.slice(index + 1))
     },
-
     onCheckBoxClicked(key) {
       if (this.removedReportData.includes(key)) {
         this.removedReportData = this.removeElementFromArray(
@@ -284,22 +290,32 @@ export default {
     },
     print() {
       this.$setLocal('repTitle', this.$refs.repTitle.innerText, false, true)
+
       print()
     },
     exportWord() {
       const style =
         '<style> table {display: table;border-collapse: separate;box-sizing: border-box;text-indent: initial;border-spacing: 2px;border-color: grey;} th,td { border: 1px solid #000;} </style>'
       const preHtml = `<html> <head> <meta charset='utf-8'/> <title>test</title> ${style} </head> <body>`
+
       const table = document.getElementById('printTable').innerHTML
+
       const postHtml = '</body></html>'
+
       const url =
         'data:application/vnd.ms-word;charset=utf-8,' +
         encodeURIComponent(preHtml + table + postHtml)
+
       const downloadLink = document.createElement('a')
+
       document.body.appendChild(downloadLink)
+
       downloadLink.href = url
+
       downloadLink.download = this.msFileName
+
       downloadLink.click()
+
       document.body.removeChild(downloadLink)
     },
     exportCsv() {
@@ -320,7 +336,9 @@ export default {
       elm.download = `${this.fileName}.csv`
       elm.click()
       this.dialog = false
-      // this.$store.dispatch('Examiner/Export')
+    },
+    expectedPlanTransaction() {
+      this.$store.dispatch('Report/expectedPlanTransaction')
     },
   },
 }

@@ -11,3 +11,8 @@ export const mutations = {
     state.report = payload
   },
 }
+export const actions = {
+  expectedPlanTransaction(_, payload) {
+    return this.$axios.post(`/api/expectedPlanTransaction`, payload)
+  },
+}
