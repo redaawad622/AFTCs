@@ -51,9 +51,8 @@
           dense
         ></v-select>
         <v-btn color="primary" @click="print()">طباعة</v-btn>
-        <v-btn color="primary" @click="expectedPlanTransaction()"
-          >حفظ المخطط</v-btn
-        >
+
+        <plansTraining></plansTraining>
         <v-dialog v-model="dialog" width="500">
           <template #activator="{ on, attrs }">
             <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
@@ -127,6 +126,7 @@
       id="printTable"
       class="printTable"
       dense
+      v-bind="tableDataChanges"
       :single-select="true"
       :contenteditable="true"
     >
@@ -183,6 +183,7 @@
               <template v-else-if="column.value == 'user_id'">
                 {{ getName(item.user_id) }}
               </template>
+
               <template v-else>
                 {{ item[column.value] }}
               </template>
@@ -195,13 +196,17 @@
 </template>
 
 <script>
+import plansTraining from '~/components/reports/plansTraining.vue'
+
 export default {
   name: 'ReportPage',
+  components: { plansTraining },
   layout: 'printing',
   data() {
     return {
       filterData: [],
       removedReportData: [],
+      tableDataChanges: undefined,
       centersOrSitesValue: [2, 1],
       printedElementsCount: [],
       centersOrSitesDropDown: [
@@ -244,10 +249,6 @@ export default {
     },
   },
   watch: {
-    printedElementsCount: {
-      deep: true,
-      handler() {},
-    },
     centersOrSitesValue: {
       deep: true,
       handler(val) {
@@ -293,7 +294,6 @@ export default {
     },
     print() {
       this.$setLocal('repTitle', this.$refs.repTitle.innerText, false, true)
-
       print()
     },
     exportWord() {
@@ -339,9 +339,6 @@ export default {
       elm.download = `${this.fileName}.csv`
       elm.click()
       this.dialog = false
-    },
-    expectedPlanTransaction() {
-      this.$store.dispatch('Report/expectedPlanTransaction')
     },
   },
 }
