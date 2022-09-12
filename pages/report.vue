@@ -134,7 +134,7 @@
         <thead>
           <tr>
             <th class="hideOnPrint">اختيار</th>
-            <th>م</th>
+            <th class="hideOnPrint">م</th>
             <th v-for="column in filterColumns" :key="column.text">
               {{ column.text }}
             </th>
@@ -156,9 +156,7 @@
               />
             </td>
 
-            <td>
-              {{ ++k }}
-            </td>
+            <td class="hideOnPrint">{{ ++k }}</td>
             <td
               v-for="column in filterColumns"
               :key="column.text + k + 'repTd'"
@@ -205,6 +203,7 @@ export default {
       filterData: [],
       removedReportData: [],
       centersOrSitesValue: [2, 1],
+      printedElementsCount: [],
       centersOrSitesDropDown: [
         {
           text: 'مراكز تدريب',
@@ -245,6 +244,10 @@ export default {
     },
   },
   watch: {
+    printedElementsCount: {
+      deep: true,
+      handler() {},
+    },
     centersOrSitesValue: {
       deep: true,
       handler(val) {
