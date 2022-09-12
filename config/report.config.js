@@ -26,11 +26,10 @@ export default {
       hide: false,
     },
     {
-      text: 'المخطط وصوله',
+      text: 'المخطط',
       value: 'expected_total',
       hide: false,
     },
-
     {
       text: 'المخطط عليا',
       value: 'expected_high',
@@ -49,6 +48,42 @@ export default {
     {
       text: 'المخطط عادة',
       value: 'expected_usually',
+      hide: false,
+    },
+    {
+      text: 'ما تم وصوله',
+      value: 'actual_arrive_total',
+      hide: false,
+    },
+    {
+      text: 'ما تم وصوله عليا',
+      value: 'actual_arrive_high',
+      hide: false,
+    },
+    {
+      text: 'ما تم وصوله فوق متوسط',
+      value: 'actual_arrive_above',
+      hide: false,
+    },
+
+    {
+      text: 'ما تم وصوله متوسط',
+      value: 'actual_arrive_middle',
+      hide: false,
+    },
+    {
+      text: 'ما تم وصوله عادة',
+      value: 'actual_arrive_usually',
+      hide: false,
+    },
+    {
+      text: 'تسربات',
+      value: 'difference_expected_actual',
+      hide: false,
+    },
+    {
+      text: 'فرق اجمالي الوصول من إجمالي المختبرين',
+      value: 'difference_actual_examined',
       hide: false,
     },
     {
