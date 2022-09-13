@@ -65,6 +65,7 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     proxy: true,
+
     baseURL:
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:3000'
