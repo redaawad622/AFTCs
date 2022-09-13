@@ -185,6 +185,50 @@ export const state = () => ({
       'رفت طبي',
       'رفت نفسي',
     ],
+
+    qualification: [
+      { name: 'عليا', value: 2 },
+      { name: 'فوق متوسطة', value: 8 },
+      { name: 'متوسطة', value: 1 },
+      { name: 'عادة', value: 0 },
+    ],
+    examFinish: [
+      { name: 'من انهوا', value: 1 },
+      { name: 'من لم ينتهوا بعد', value: 0 },
+    ],
+    hasUnit: [
+      { name: 'تم تسجيل وحدته', value: 1 },
+      { name: 'لم يتم تسجيل وحدته', value: 0 },
+    ],
+    interview: [
+      { name: 'تم عمل مقابلة لهم ', value: 1 },
+      { name: 'لم يتم عمل مقابلة لهم', value: 0 },
+    ],
+    register: [
+      { name: 'من تم تسجيلهم', value: 1 },
+      { name: 'من لم يتم تسجيلهم', value: 0 },
+    ],
+    again: [
+      { name: 'امتحن مره', value: 0 },
+      { name: 'امتحن مرتين', value: 1 },
+    ],
+    isNoticed: [
+      { name: 'تم تسجيلهم كملحوظين لاول مره', value: 1 },
+      { name: 'تم تسجيلهم كملحوظ لثاني مره', value: 2 },
+      { name: 'لم يتم تسجيلهم كملحوظين', value: 3 },
+    ],
+
+    final_opinion: [
+      'عرضه علي المست من قبل المركز',
+      'عرضه علي فرع الانتقاء و التوجيه',
+      'لا يعاني من اي مشاكل',
+    ],
+    noticedActions: [
+      { text: 'ملحوظ لاول مره', value: 1 },
+      { text: 'تم اعادة الاختبار', value: 2 },
+      { text: 'ملحوظ لثاني مره', value: 3 },
+    ],
+    examiner_status: ['عرض مست طبي', 'عرض مست نفسي'],
   },
 })
 export const getters = {

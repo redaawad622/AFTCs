@@ -13,13 +13,14 @@
               v-if="permissions.admin.includes(user.type)"
               v-model="noticedAction"
               outlined
-              :items="noticedActions"
+              :items="helperData.noticedActions"
               color="primary"
               label="الموقف"
               dense
               hide-details
               class="mx-1"
-            ></v-autocomplete>
+            >
+            </v-autocomplete>
             <v-btn
               v-if="permissions.admin.includes(user.type)"
               class="elevation-0 mx-1"
@@ -39,21 +40,7 @@
                 src="/icon/printer.png"
               ></v-img
             ></v-btn>
-            <v-btn
-              v-if="permissions.area.includes(user.type)"
-              color="white"
-              title="استخراج البيانات الي exam.db"
-              class="elevation-0 ms-2"
-              :loading="tagLoading"
-              @click="extractDialog = true"
-            >
-              <v-img
-                width="24px"
-                height="24px"
-                contain
-                src="/icon/database.png"
-              ></v-img>
-            </v-btn>
+
             <v-btn
               v-if="permissions.area.includes(user.type)"
               color="white"
@@ -69,6 +56,8 @@
                 src="/icon/database.png"
               ></v-img>
             </v-btn>
+
+            <extractDBComponentVue />
             <v-btn
               v-if="permissions.admin.includes(user.type)"
               title="سحب بيانات المختبرين من ملف الاكسس"
@@ -169,7 +158,7 @@
                         placeholder="المؤهل"
                         label="المؤهل"
                         cache-items
-                        :items="helpers.qualification"
+                        :items="helperData.qualification"
                         item-text="name"
                         item-value="value"
                       ></v-autocomplete>
@@ -183,7 +172,7 @@
                         placeholder="انتهاء الامتحان"
                         label="انتهاء الامتحان"
                         cache-items
-                        :items="helpers.examFinish"
+                        :items="helperData.examFinish"
                         item-text="name"
                         item-value="value"
                       ></v-autocomplete>
@@ -197,7 +186,7 @@
                         placeholder="تسجيل الوحده"
                         label="تسجيل الوحده"
                         cache-items
-                        :items="helpers.hasUnit"
+                        :items="helperData.hasUnit"
                         item-text="name"
                         item-value="value"
                       ></v-autocomplete>
@@ -211,7 +200,7 @@
                         placeholder="المقابلة"
                         label="المقابلة"
                         cache-items
-                        :items="helpers.interview"
+                        :items="helperData.interview"
                         item-text="name"
                         item-value="value"
                       ></v-autocomplete>
@@ -232,7 +221,7 @@
                         placeholder="رأي القائم بالمقابله"
                         label="رأي القائم بالمقابله"
                         cache-items
-                        :items="helpers.final_opinion"
+                        :items="helperData.final_opinion"
                       ></v-autocomplete>
                     </v-col>
                     <v-col
@@ -251,7 +240,7 @@
                         placeholder="التوصية مركز"
                         label="التوصية مركز"
                         cache-items
-                        :items="helpers.examiner_status"
+                        :items="helperData.examiner_status"
                       >
                       </v-autocomplete>
                     </v-col>
@@ -405,7 +394,7 @@
                         item-value="value"
                         item-text="name"
                         cache-items
-                        :items="helpers.register"
+                        :items="helperData.register"
                       ></v-autocomplete>
                     </v-col>
                     <v-col
@@ -426,7 +415,7 @@
                         item-value="value"
                         item-text="name"
                         cache-items
-                        :items="helpers.again"
+                        :items="helperData.again"
                       ></v-autocomplete>
                     </v-col>
                     <v-col
@@ -447,7 +436,7 @@
                         item-value="value"
                         item-text="name"
                         cache-items
-                        :items="helpers.isNoticed"
+                        :items="helperData.isNoticed"
                       ></v-autocomplete>
                     </v-col>
                     <v-col
@@ -541,16 +530,7 @@
                         label="استخراج نتيجه"
                       ></v-checkbox>
                     </v-col>
-                    <v-col cols="12" sm="6" md="3" lg="2" xl="1">
-                      <v-dialog
-                        ref="dialog"
-                        v-model="datePicker"
-                        :return-value.sync="filters.date"
-                        persistent
-                        width="290px"
-                      >
-                      </v-dialog>
-                    </v-col>
+
                     <v-col cols="12" sm="6" md="3" lg="2" xl="1">
                       <v-btn color="primary" block @click="fetchExaminers(true)"
                         >تطبيق</v-btn
@@ -635,6 +615,7 @@
             >استخراج النتائج</v-btn
           >
         </div>
+
         <v-data-table
           v-model="selectedExaminer"
           :headers="headers"
@@ -973,43 +954,6 @@
             </v-card>
           </v-dialog>
         </v-row>
-        <v-row justify="center">
-          <v-dialog v-model="extractDialog" persistent max-width="450px">
-            <v-card>
-              <v-card-title class="grey lighten-2">
-                استخراج المختبرين التاليين في exam.db
-              </v-card-title>
-
-              <v-card-text class="my-3">
-                <v-text-field
-                  v-model="ip"
-                  outlined
-                  color="primary"
-                  label="ال ip الخاص بالجهاز "
-                ></v-text-field>
-              </v-card-text>
-              <v-divider></v-divider>
-              <v-card-actions>
-                <v-btn
-                  :disabled="examUnitLoading"
-                  color="blue darken-1"
-                  text
-                  @click="extractDialog = false"
-                >
-                  الغاء
-                </v-btn>
-                <v-btn
-                  color="blue darken-1"
-                  :loading="extractLoading"
-                  text
-                  @click="extractToDevice()"
-                >
-                  استخراج
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-row>
       </div>
     </v-col>
     <v-text-field v-if="false" v-model="ans"></v-text-field>
@@ -1019,15 +963,14 @@
 
 <script>
 import reportHeaders from '../config/report.config'
+import extractDBComponentVue from '~/components/examinerManager/extractDBComponent.vue'
 export default {
   name: 'ExaminerManager',
+  components: { extractDBComponentVue },
   data() {
     return {
-      ip: '',
       reportLoading: false,
       openFilter: false,
-      extractDialog: false,
-      datePicker: false,
       extractLoading: false,
       filterExam: {},
       dialog: false,
@@ -1036,56 +979,10 @@ export default {
       currentUnitSelectedExaminer: null,
       exams: [],
       noticedAction: '',
-      noticedActions: [
-        { text: 'ملحوظ لاول مره', value: 1 },
-        { text: 'تم اعادة الاختبار', value: 2 },
-        { text: 'ملحوظ لثاني مره', value: 3 },
-      ],
       examsVal: {},
       audio: null,
       currentDelete: null,
       currentDeleteLoading: false,
-      helpers: {
-        qualification: [
-          { name: 'عليا', value: 2 },
-          { name: 'فوق متوسطة', value: 8 },
-          { name: 'متوسطة', value: 1 },
-          { name: 'عادة', value: 0 },
-        ],
-        examFinish: [
-          { name: 'من انهوا', value: 1 },
-          { name: 'من لم ينتهوا بعد', value: 0 },
-        ],
-        hasUnit: [
-          { name: 'تم تسجيل وحدته', value: 1 },
-          { name: 'لم يتم تسجيل وحدته', value: 0 },
-        ],
-        interview: [
-          { name: 'تم عمل مقابلة لهم ', value: 1 },
-          { name: 'لم يتم عمل مقابلة لهم', value: 0 },
-        ],
-        register: [
-          { name: 'من تم تسجيلهم', value: 1 },
-          { name: 'من لم يتم تسجيلهم', value: 0 },
-        ],
-        again: [
-          { name: 'امتحن مره', value: 0 },
-          { name: 'امتحن مرتين', value: 1 },
-        ],
-        isNoticed: [
-          { name: 'تم تسجيلهم كملحوظين لاول مره', value: 1 },
-          { name: 'تم تسجيلهم كملحوظ لثاني مره', value: 2 },
-          { name: 'لم يتم تسجيلهم كملحوظين', value: 3 },
-        ],
-
-        final_opinion: [
-          'عرضه علي المست من قبل المركز',
-          'عرضه علي فرع الانتقاء و التوجيه',
-          'لا يعاني من اي مشاكل',
-        ],
-
-        examiner_status: ['عرض مست طبي', 'عرض مست نفسي'],
-      },
       tagLoading: false,
       selectedExaminer: [],
       deleteItems: false,
@@ -1400,7 +1297,7 @@ export default {
         ) {
           res[elm] = this.getTextByValue(elm, res[elm])
         } else
-          res[elm] = this.helpers[elm].find((x) => x.value === res[elm]).name
+          res[elm] = this.helperData[elm].find((x) => x.value === res[elm]).name
       })
       return res
     },
@@ -1606,29 +1503,6 @@ export default {
         })
         .finally(() => {
           this.actionLoading = false
-        })
-    },
-    extractToDevice() {
-      this.extractLoading = true
-      this.$store
-        .dispatch('Exam/extractToDevice', {
-          nationals: this.examiners.map((elm) => elm.national_id),
-          deviceIp: this.ip,
-        })
-        .then(() => {
-          this.$store.commit('Notifications/setNotification', {
-            text: 'تم استخراج المختبرين بنجاح بنجاح بنجاح',
-            color: 'success',
-          })
-        })
-        .catch(() => {
-          this.$store.commit('Notifications/setNotification', {
-            text: 'هناك مشكلة ',
-            color: 'error',
-          })
-        })
-        .finally(() => {
-          this.extractLoading = false
         })
     },
     setAsFNoticed(second = 0) {
