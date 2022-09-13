@@ -128,13 +128,6 @@ export default {
     users() {
       return this.$store.getters['User/users']
     },
-    usersList() {
-      const userList = {}
-      this.users.forEach((elm) => {
-        userList[elm.Cat_ID] = elm.Cat_Name
-      })
-      return userList
-    },
   },
   methods: {
     expectedPlanTransaction() {
@@ -142,19 +135,23 @@ export default {
         .dispatch('Plans/expectedPlanTransaction', this.plansFilters)
         .then((res) => {
           this.$store.commit('Plans/setPlan', res)
-          this.plansFilters = {
-            user_id: null,
-            expected_high: null,
-            expected_above: null,
-            expected_middle: null,
-            expected_usually: null,
-            actual_arrive_high: null,
-            actual_arrive_above: null,
-            actual_arrive_middle: null,
-            actual_arrive_usually: null,
-          }
+
           this.openFilter = false
         })
+      this.nullifyObject()
+    },
+    nullifyObject() {
+      this.plansFilters = {
+        user_id: null,
+        expected_high: null,
+        expected_above: null,
+        expected_middle: null,
+        expected_usually: null,
+        actual_arrive_high: null,
+        actual_arrive_above: null,
+        actual_arrive_middle: null,
+        actual_arrive_usually: null,
+      }
     },
   },
 }

@@ -54,6 +54,7 @@ module.exports = function (app, prisma) {
       }
     }
   }
+
   function report1ExaminerFilters(option) {
     option.where.NOT = [{ user_id: null }]
     option.select = {
@@ -64,6 +65,7 @@ module.exports = function (app, prisma) {
       qualification_code: true,
     }
   }
+
   function report2Filters(option) {
     option.where.NOT = [{ user_id: null }]
     option.select = {
@@ -81,15 +83,19 @@ module.exports = function (app, prisma) {
       },
     }
   }
+
   function examinerQualification(examiner, qualificationCode) {
     return examiner.qualification_code === qualificationCode
   }
+
   function getArraysIntersection(a1, a2) {
     return a2.filter((a2elem) => a1.includes(a2elem))
   }
+
   function getArraysDifference(a1, a2) {
     return a2.filter((a2elem) => !a1.includes(a2elem))
   }
+
   function getTrainingCenterPlan(expectedPlan, userId) {
     return expectedPlan.filter((plan) => plan.user_id === userId)[0]
   }
@@ -187,6 +193,7 @@ module.exports = function (app, prisma) {
     })
     return groupedExaminers
   }
+
   function getReport2(filteredExaminers) {
     const isNoticed = filteredExaminers.filter((_) => _.isNoticed)
     const isNoticedAgain = filteredExaminers.filter((_) => _.isNoticedAgain)

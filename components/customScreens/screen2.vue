@@ -162,9 +162,7 @@ export default {
       )
       this.$refs.wordAudio.play()
     },
-    getArraysIntersection(a1, a2) {
-      return a2.filter((n) => a1.includes(this.words[n]))
-    },
+
     save() {
       // calculate the res
       const res = this.getArraysIntersection(

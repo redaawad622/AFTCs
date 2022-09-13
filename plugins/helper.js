@@ -68,9 +68,11 @@ export default ({ app }, inject) => {
   inject('getArraysDifference', function getArraysDifference(a1, a2) {
     return a2.filter((a2elem) => !a1.includes(a2elem))
   })
+
   inject('getArraysIntersection', function getArraysIntersection(a1, a2) {
     return a2.filter((a2elem) => a1.includes(a2elem))
   })
+
   inject('deleteLocal', function (name) {
     localStorage.removeItem(name)
     sessionStorage.removeItem(name)
@@ -89,9 +91,7 @@ export default ({ app }, inject) => {
     }
     return true
   })
-  inject('round', function (num) {
-    return Math.round(num)
-  })
+
   inject('desktopNotify', function (notifiy) {
     if (!('Notification' in window)) {
       console.log('Notification not support')
