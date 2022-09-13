@@ -479,6 +479,27 @@
                       lg="2"
                       xl="1"
                     >
+                      <v-autocomplete
+                        v-model="filters.user"
+                        append-icon="mdi-menu-swap"
+                        outlined
+                        dense
+                        placeholder="المستخدمين"
+                        label="المستخدمين"
+                        item-value="Cat_ID"
+                        item-text="Cat_Name"
+                        cache-items
+                        :items="users"
+                      ></v-autocomplete>
+                    </v-col>
+                    <v-col
+                      v-if="permissions.admin.includes(user.type)"
+                      cols="12"
+                      sm="6"
+                      md="3"
+                      lg="2"
+                      xl="1"
+                    >
                       <v-checkbox
                         v-model="newSet"
                         label="الموقف الجديد"
@@ -1097,7 +1118,7 @@ export default {
         stage: '',
         user: '',
         interviewEntqaDone: '',
-        transReason: '',
+        transReason: '1',
         final_hospital_result: '',
         examiner_status: '',
         register: 1,

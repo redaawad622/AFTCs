@@ -15,7 +15,6 @@
       <v-avatar :size="40">
         <v-img src="/logo.png"></v-img>
       </v-avatar>
-
       <div
         ref="repTitle"
         contenteditable="true"
@@ -51,74 +50,83 @@
           dense
         >
         </v-select>
-        <v-btn color="primary" @click="print()">طباعة</v-btn>
-        <plansTraining />
-        <v-dialog v-model="dialog" width="500">
-          <template #activator="{ on, attrs }">
-            <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
-              تصدير لملف excel
-            </v-btn>
-          </template>
+        <div class="d-flex justify-space-between">
+          <v-btn color="primary" @click="print()">طباعة</v-btn>
+          <plansTraining v-if="report.filterData" />
 
-          <v-card>
-            <v-card-title class="text-h5 grey lighten-2">
-              تصدير الي ملف excel
-            </v-card-title>
-
-            <v-card-text class="pt-2">
-              <v-text-field
-                v-model="fileName"
-                color="primary"
-                label="اسم الملف"
-                outlined
-              ></v-text-field>
-            </v-card-text>
-
-            <v-divider></v-divider>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="exportCsv()"> تصدير </v-btn>
-
-              <v-btn color="error" text @click="dialog = false"> الغاء </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-dialog v-model="msDialog" width="500">
-          <template #activator="{ on, attrs }">
-            <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
-              تصدير لملف word
-            </v-btn>
-          </template>
-
-          <v-card>
-            <v-card-title class="text-h5 grey lighten-2">
-              تصدير الي ملف word
-            </v-card-title>
-
-            <v-card-text class="pt-2">
-              <v-text-field
-                v-model="msFileName"
-                color="primary"
-                label="اسم الملف"
-                outlined
-              ></v-text-field>
-            </v-card-text>
-
-            <v-divider></v-divider>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="exportWord()"> تصدير </v-btn>
-
-              <v-btn color="error" text @click="msDialog = false">
-                الغاء
+          <v-dialog v-model="dialog" width="500">
+            <template #activator="{ on, attrs }">
+              <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
+                تصدير لملف excel
               </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+            </template>
 
-        <v-btn text :to="report.backTo"><v-icon>mdi-arrow-left</v-icon></v-btn>
+            <v-card>
+              <v-card-title class="text-h5 grey lighten-2">
+                تصدير الي ملف excel
+              </v-card-title>
+
+              <v-card-text class="pt-2">
+                <v-text-field
+                  v-model="fileName"
+                  color="primary"
+                  label="اسم الملف"
+                  outlined
+                ></v-text-field>
+              </v-card-text>
+
+              <v-divider></v-divider>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" text @click="exportCsv()"> تصدير </v-btn>
+
+                <v-btn color="error" text @click="dialog = false">
+                  الغاء
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+          <v-dialog v-model="msDialog" width="500">
+            <template #activator="{ on, attrs }">
+              <v-btn color="primary" class="mx-2" dark v-bind="attrs" v-on="on">
+                تصدير لملف word
+              </v-btn>
+            </template>
+
+            <v-card>
+              <v-card-title class="text-h5 grey lighten-2">
+                تصدير الي ملف word
+              </v-card-title>
+
+              <v-card-text class="pt-2">
+                <v-text-field
+                  v-model="msFileName"
+                  color="primary"
+                  label="اسم الملف"
+                  outlined
+                ></v-text-field>
+              </v-card-text>
+
+              <v-divider></v-divider>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" text @click="exportWord()">
+                  تصدير
+                </v-btn>
+
+                <v-btn color="error" text @click="msDialog = false">
+                  الغاء
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+          <v-btn text :to="report.backTo"
+            ><v-icon>mdi-arrow-left</v-icon></v-btn
+          >
+        </div>
       </div>
     </v-sheet>
 
@@ -295,7 +303,7 @@ export default {
     const columns = [...this.columns]
     this.filterColumns = columns.filter((x) => !x.hide)
     this.title = this.$getLocal('repTitle', false) || 'كشف بأسماء'
-    this.filterData = this.reportData
+    this.filterData = { ...this.reportData }
   },
   methods: {
     expectedTotal(plan) {
@@ -317,6 +325,12 @@ export default {
     differenceExpectedActual(plan) {
       return this.actualArriveTotal(plan) - this.expectedTotal(plan)
     },
+    differenceActualExamined(item) {
+      return item.total - this.actualArriveTotal(item)
+    },
+    removeElementFromArray(array, index) {
+      return array.slice(0, index).concat(array.slice(index + 1))
+    },
     differenceExpectedActualMessage(plan) {
       if (isNaN(this.differenceExpectedActual(plan))) {
         return ''
@@ -330,12 +344,7 @@ export default {
         return 'لا يوجد فرق'
       }
     },
-    differenceActualExamined(item) {
-      return item.total - this.actualArriveTotal(item)
-    },
-    removeElementFromArray(array, index) {
-      return array.slice(0, index).concat(array.slice(index + 1))
-    },
+
     onCheckBoxClicked(key) {
       if (this.removedReportData.includes(key)) {
         this.removedReportData = this.removeElementFromArray(
@@ -363,6 +372,9 @@ export default {
     print() {
       this.$setLocal('repTitle', this.$refs.repTitle.innerText, false, true)
       print()
+    },
+    getdifference(object, array) {
+      object.filter((_, index) => array.includes(index))
     },
     exportWord() {
       const style =
