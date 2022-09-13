@@ -65,6 +65,12 @@ export default ({ app }, inject) => {
     }
     return item
   })
+  inject('getArrayDifference', function getArraysDifference(a1, a2) {
+    return a2.filter((a2elem) => !a1.includes(a2elem))
+  })
+  inject('getArrayIntersection', function getArraysIntersection(a1, a2) {
+    return a2.filter((a2elem) => a1.includes(a2elem))
+  })
   inject('deleteLocal', function (name) {
     localStorage.removeItem(name)
     sessionStorage.removeItem(name)
