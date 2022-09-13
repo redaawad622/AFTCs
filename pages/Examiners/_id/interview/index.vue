@@ -602,7 +602,11 @@
                 >
                   <v-select
                     v-model="form.final_hospital_result"
-                    :items="final_hospital_result"
+                    :items="
+                      form.examiner_status === 'عرض مست طبي'
+                        ? final_hospital_result.filter((x) => x !== 'رفت نفسي')
+                        : final_hospital_result.filter((x) => x !== 'رفت طبي')
+                    "
                     outlined
                     label="نتيجة العرض علي المست"
                     :rules="
