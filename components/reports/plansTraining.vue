@@ -85,18 +85,20 @@
               <v-autocomplete
                 v-model.number="plansFilters.user_id"
                 color="primary"
+                outlined
                 label="اسم المركز"
                 cache-items
                 item-value="Cat_ID"
                 item-text="Cat_Name"
                 :items="users"
-                dense
                 hide-details
               ></v-autocomplete>
             </v-col>
-            <v-btn color="primary" @click="expectedPlanTransaction()">
-              حفظ المخطط
-            </v-btn>
+            <v-col cols="12" sm="6" md="3" lg="2" xl="1">
+              <v-btn color="primary" @click="expectedPlanTransaction()">
+                حفظ المخطط
+              </v-btn>
+            </v-col>
           </v-row>
         </v-card-text>
       </v-card>
@@ -138,7 +140,22 @@ export default {
     expectedPlanTransaction() {
       this.$store
         .dispatch('Plans/expectedPlanTransaction', this.plansFilters)
-        .then((res) => this.$store.commit('Plans/setPlan', res))
+        .then((res) => {
+          this.$store.commit('Plans/setPlan', res)
+
+          this.plansFilters = {
+            user_id: null,
+            expected_high: null,
+            expected_above: null,
+            expected_middle: null,
+            expected_usually: null,
+            actual_arrive_high: null,
+            actual_arrive_above: null,
+            actual_arrive_middle: null,
+            actual_arrive_usually: null,
+          }
+          this.openFilter = false
+        })
     },
   },
 }
