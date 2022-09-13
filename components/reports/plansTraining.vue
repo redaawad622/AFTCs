@@ -1,8 +1,6 @@
 <template>
   <div>
-    <v-btn min-width="36px" title="تصفية النتائج" @click="openFilter = true">
-      اضافة مخطط
-    </v-btn>
+    <v-btn title="تصفية النتائج" @click="openFilter = true"> اضافة مخطط </v-btn>
 
     <v-bottom-sheet v-model="openFilter" scrollable>
       <v-card min-width="400px" class="pa-4">
@@ -96,9 +94,9 @@
                 hide-details
               ></v-autocomplete>
             </v-col>
-            <v-btn color="primary" @click="expectedPlanTransaction()"
-              >حفظ المخطط</v-btn
-            >
+            <v-btn color="primary" @click="expectedPlanTransaction()">
+              حفظ المخطط
+            </v-btn>
           </v-row>
         </v-card-text>
       </v-card>
@@ -139,11 +137,8 @@ export default {
   methods: {
     expectedPlanTransaction() {
       this.$store
-        .dispatch('Report/expectedPlanTransaction', this.plansFilters)
-        .then((res) => {
-          console.log(res)
-          this.$store.commit('Plans/setPlan', res)
-        })
+        .dispatch('Plans/expectedPlanTransaction', this.plansFilters)
+        .then((res) => this.$store.commit('Plans/setPlan', res))
     },
   },
 }
