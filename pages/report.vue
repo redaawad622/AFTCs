@@ -49,9 +49,9 @@
           outlined
           color="primary"
           dense
-        ></v-select>
+        >
+        </v-select>
         <v-btn color="primary" @click="print()">طباعة</v-btn>
-
         <plansTraining />
         <v-dialog v-model="dialog" width="500">
           <template #activator="{ on, attrs }">
@@ -182,6 +182,29 @@
               <template v-else-if="column.value == 'user_id'">
                 {{ getName(item.user_id) }}
               </template>
+              <template v-else-if="column.value == 'expected_total'">
+                {{ isNaN(expectedTotal(item)) ? '' : expectedTotal(item) }}
+              </template>
+              <template v-else-if="column.value == 'actual_arrive_total'">
+                {{
+                  isNaN(actualArriveTotal(item)) ? '' : actualArriveTotal(item)
+                }}
+              </template>
+              <template
+                v-else-if="column.value == 'difference_expected_actual'"
+              >
+                {{ differenceExpectedActualMessage(item) }}
+              </template>
+              <template
+                v-else-if="column.value == 'difference_actual_examined'"
+              >
+                {{
+                  isNaN(differenceActualExamined(item))
+                    ? ''
+                    : differenceActualExamined(item)
+                }}
+              </template>
+
               <template v-else>
                 {{ item[column.value] }}
               </template>
@@ -251,8 +274,12 @@ export default {
   watch: {
     plan: {
       handler(val) {
-        console.log(val.data)
-        this.filterData = { ...val.data }
+        this.filterData = this.filterData.map((data) => {
+          if (Number(data.user_id) === val.data.user_id) {
+            return { ...data, ...val.data }
+          }
+          return data
+        })
       },
     },
     centersOrSitesValue: {
@@ -271,6 +298,41 @@ export default {
     this.filterData = this.reportData
   },
   methods: {
+    expectedTotal(plan) {
+      return (
+        plan?.expected_high +
+        plan?.expected_above +
+        plan?.expected_middle +
+        plan?.expected_usually
+      )
+    },
+    actualArriveTotal(plan) {
+      return (
+        plan?.actual_arrive_high +
+        plan?.actual_arrive_above +
+        plan?.actual_arrive_middle +
+        plan?.actual_arrive_usually
+      )
+    },
+    differenceExpectedActual(plan) {
+      return this.actualArriveTotal(plan) - this.expectedTotal(plan)
+    },
+    differenceExpectedActualMessage(plan) {
+      if (isNaN(this.differenceExpectedActual(plan))) {
+        return ''
+      } else if (this.differenceExpectedActual(plan) > 0) {
+        return `وصول  ${this.differenceExpectedActual(plan)} فوق المخطط`
+      } else if (this.differenceExpectedActual(plan) < 0) {
+        return `وصول  ${Math.abs(
+          this.differenceExpectedActual(plan)
+        )} تحت المخطط`
+      } else {
+        return 'لا يوجد فرق'
+      }
+    },
+    differenceActualExamined(item) {
+      return item.total - this.actualArriveTotal(item)
+    },
     removeElementFromArray(array, index) {
       return array.slice(0, index).concat(array.slice(index + 1))
     },

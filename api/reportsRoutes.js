@@ -18,6 +18,7 @@ module.exports = function (app, prisma) {
 
     filteredExaminers = await prisma.Examiners.findMany(examinerOptions)
     const expectedPlan = await prisma.ExpectedPlan.findMany()
+
     switch (Number(report)) {
       case 1:
         resultReportJson = getReport1(filteredExaminers, expectedPlan)
@@ -127,43 +128,19 @@ module.exports = function (app, prisma) {
       )
       const plan = getTrainingCenterPlan(expectedPlan, Number(k))
 
-      const expectedTotal =
-        plan?.expected_high +
-        plan?.expected_above +
-        plan?.expected_middle +
-        plan?.expected_usually
-
-      const actualArrive =
-        plan?.actual_arrive_high +
-        plan?.actual_arrive_above +
-        plan?.actual_arrive_middle +
-        plan?.actual_arrive_usually
-
-      const differenceExpectedActual = actualArrive - expectedTotal
-
       return {
         user_id: k,
         total: trainingCenterExaminers.length,
         noticed: noticed.length,
         again: again.length,
-        expected_total: expectedTotal,
         expected_high: plan?.expected_high,
         expected_above: plan?.expected_above,
         expected_middle: plan?.expected_middle,
         expected_usually: plan?.expected_usually,
-        actual_arrive_total: actualArrive,
         actual_arrive_high: plan?.actual_arrive_high,
         actual_arrive_above: plan?.actual_arrive_above,
         actual_arrive_middle: plan?.actual_arrive_middle,
         actual_arrive_usually: plan?.actual_arrive_usually,
-        difference_expected_actual:
-          isNaN(differenceExpectedActual) || differenceExpectedActual === 0
-            ? ''
-            : differenceExpectedActual > 0
-            ? `وصول  ${differenceExpectedActual} فوق المخطط`
-            : `وصول  ${Math.abs(differenceExpectedActual)} تحت المخطط`,
-        difference_actual_examined:
-          trainingCenterExaminers.length - actualArrive,
         noticedAgain: noticedAgain.length,
         high: high.length,
         above: above.length,
