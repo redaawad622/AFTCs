@@ -1118,7 +1118,7 @@ export default {
         stage: '',
         user: '',
         interviewEntqaDone: '',
-        transReason: '1',
+        transReason: '',
         final_hospital_result: '',
         examiner_status: '',
         register: 1,
