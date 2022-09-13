@@ -142,7 +142,6 @@ export default {
         .dispatch('Plans/expectedPlanTransaction', this.plansFilters)
         .then((res) => {
           this.$store.commit('Plans/setPlan', res)
-
           this.plansFilters = {
             user_id: null,
             expected_high: null,

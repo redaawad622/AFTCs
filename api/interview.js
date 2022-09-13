@@ -42,6 +42,7 @@ module.exports = function (app, prisma) {
         educational_degree,
       },
     })
+
     interviewData.examiner_id = examinerData.id
     delete interviewData.marital_state
     delete interviewData.educational_degree
