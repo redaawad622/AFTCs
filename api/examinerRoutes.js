@@ -140,17 +140,22 @@ module.exports = function (app, prisma, types) {
       option,
       prisma
     )
-    // Filter interviews
-    examinerFilterOptions.filterInterviewDB(interviewFilter, examiners)
-    examinerFilterOptions.interviewEntqaDoneFilter(
+    // Filter interviews locally
+    examiners = examinerFilterOptions.filterInterviewDB(
+      interviewFilter,
+      examiners
+    )
+    examiners = examinerFilterOptions.interviewEntqaDoneFilter(
       interviewEntqaDone,
       examiners
     )
     // End Interview filter
-    examinerFilterOptions.calculateExaminerGrades(examiners)
-    examinerFilterOptions.calculateAllExaminersGrades(showAllExaminers)
-    examinerFilterOptions.cleanOptions(option)
 
+    examiners = examinerFilterOptions.calculateExaminerGrades(examiners)
+    showAllExaminers =
+      examinerFilterOptions.calculateAllExaminersGrades(showAllExaminers)
+
+    examinerFilterOptions.cleanOptions(option)
     allExaminers = await prisma.Examiners.count(option)
     examinerFilterOptions.deleteExaminersDeveloperOptions(
       option,

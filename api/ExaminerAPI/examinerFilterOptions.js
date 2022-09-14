@@ -142,6 +142,7 @@ export const examinerFilterOptions = {
   /**
    * Query on examiners who have interviews (مقابلة شخصية)
    */
+
   doneInterviewOptions(interview, option) {
     if (interview) {
       if (Number(interview)) {
@@ -208,7 +209,6 @@ export const examinerFilterOptions = {
       if (nafsy) {
         await this.withNafsyResultOptions(option, prisma)
       }
-
       option.include.Answers.select = {
         id: true,
         exam_id: true,
@@ -223,7 +223,6 @@ export const examinerFilterOptions = {
       }
     }
   },
-
   async withNafsyResultOptions(option, prisma) {
     let battary = await prisma.Battries.findUnique({
       where: {
@@ -252,7 +251,6 @@ export const examinerFilterOptions = {
         delete interviewFilter[key]
       }
     }
-
     if (Object.keys(interviewFilter).length > 0) {
       examiners = examiners.filter((elm) => {
         let isTrue = true
@@ -271,6 +269,7 @@ export const examinerFilterOptions = {
         return isTrue
       })
     }
+    return examiners
   },
   interviewEntqaDoneFilter(interviewEntqaDone, examiners) {
     if (interviewEntqaDone) {
@@ -284,6 +283,7 @@ export const examinerFilterOptions = {
         })
       }
     }
+    return examiners
   },
   calculateExaminerGrades(examiners) {
     if (examiners && examiners.length > 0) {
@@ -291,6 +291,7 @@ export const examinerFilterOptions = {
         examiners = this.calculateExamGrades(examiners)
       }
     }
+    return examiners
   },
   calculateAllExaminersGrades(showAllExaminers) {
     if (showAllExaminers && showAllExaminers.length > 0) {
@@ -298,9 +299,10 @@ export const examinerFilterOptions = {
         showAllExaminers = this.calculateExamGrades(showAllExaminers)
       }
     }
+    return showAllExaminers
   },
   calculateExamGrades(examiners) {
-    examiners.map((examiner) => {
+    examiners = examiners.map((examiner) => {
       const exm = Object.assign({}, examiner, {
         Answers: examiner.Answers.reduce((r, a) => {
           r[a.exam_id] = [...(r[a.exam_id] || []), a]
@@ -314,6 +316,7 @@ export const examinerFilterOptions = {
       })
       return exm
     })
+    return examiners
   },
   async deleteExaminersDeveloperOptions(option, deleteItems, prisma) {
     if (deleteItems) {
