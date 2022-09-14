@@ -142,7 +142,6 @@ export const examinerFilterOptions = {
   /**
    * Query on examiners who have interviews (مقابلة شخصية)
    */
-
   doneInterviewOptions(interview, option) {
     if (interview) {
       if (Number(interview)) {
@@ -170,6 +169,30 @@ export const examinerFilterOptions = {
       }
     }
   },
+  /**
+   * Select Exam answers from database if `withResult` is checked
+   */
+  async withResultOptions(withResult, option, nafsy, prisma) {
+    if (withResult) {
+      option.include.Answers = {}
+      if (nafsy) await this.withNafsyResultOptions(option, prisma)
+      option.include.Answers.select = {
+        id: true,
+        exam_id: true,
+        question_id: true,
+        answer_id: true,
+        examiner_id: true,
+        answer: {
+          select: {
+            Ans_Value: true,
+          },
+        },
+      }
+    }
+  },
+  /**
+   * Select `Exam` column from database
+   */
   examinerGradesOptions(option) {
     option.include = {
       _count: {
@@ -186,15 +209,49 @@ export const examinerFilterOptions = {
       },
     }
   },
+  calculateExaminerGrades(examiners) {
+    if (examiners && examiners.length > 0) {
+      if (examiners[0].Answers) examiners = this.calculateExamGrades(examiners)
+    }
+    return examiners
+  },
+  calculateAllExaminersGrades(showAllExaminers) {
+    if (showAllExaminers && showAllExaminers.length > 0)
+      if (showAllExaminers[0].Answers)
+        showAllExaminers = this.calculateExamGrades(showAllExaminers)
+
+    return showAllExaminers
+  },
+
+  /**
+   * Calculate final grade for each Exam answer.
+   */
+  calculateExamGrades(examiners) {
+    examiners = examiners.map((examiner) => {
+      const exm = Object.assign({}, examiner, {
+        Answers: examiner.Answers.reduce((r, a) => {
+          r[a.exam_id] = [...(r[a.exam_id] || []), a]
+          return r
+        }, {}),
+      })
+      Object.keys(exm.Answers).forEach((k) => {
+        exm.Answers[k] = exm.Answers[k].reduce((a, b) => {
+          return a + b.answer.Ans_Value
+        }, 0)
+      })
+      return exm
+    })
+    return examiners
+  },
   interviewFiltersOptions(interviewFilters, interviewEntqaDone, option) {
     if (
+      interviewEntqaDone ||
       interviewFilters.final_opinion ||
       interviewFilters.transReason ||
       interviewFilters.recommendation ||
       interviewFilters.recommendation_res ||
       interviewFilters.examiner_status ||
-      interviewFilters.final_hospital_result ||
-      interviewEntqaDone
+      interviewFilters.final_hospital_result
     ) {
       option.where.Interview = {
         some: {},
@@ -203,26 +260,9 @@ export const examinerFilterOptions = {
     }
   },
 
-  async withResultOptions(withResult, option, nafsy, prisma) {
-    if (withResult) {
-      option.include.Answers = {}
-      if (nafsy) {
-        await this.withNafsyResultOptions(option, prisma)
-      }
-      option.include.Answers.select = {
-        id: true,
-        exam_id: true,
-        question_id: true,
-        answer_id: true,
-        examiner_id: true,
-        answer: {
-          select: {
-            Ans_Value: true,
-          },
-        },
-      }
-    }
-  },
+  /**
+   * Includes `Nafsy` battery if enabled
+   */
   async withNafsyResultOptions(option, prisma) {
     let battary = await prisma.Battries.findUnique({
       where: {
@@ -285,44 +325,14 @@ export const examinerFilterOptions = {
     }
     return examiners
   },
-  calculateExaminerGrades(examiners) {
-    if (examiners && examiners.length > 0) {
-      if (examiners[0].Answers) {
-        examiners = this.calculateExamGrades(examiners)
-      }
-    }
-    return examiners
-  },
-  calculateAllExaminersGrades(showAllExaminers) {
-    if (showAllExaminers && showAllExaminers.length > 0) {
-      if (showAllExaminers[0].Answers) {
-        showAllExaminers = this.calculateExamGrades(showAllExaminers)
-      }
-    }
-    return showAllExaminers
-  },
-  calculateExamGrades(examiners) {
-    examiners = examiners.map((examiner) => {
-      const exm = Object.assign({}, examiner, {
-        Answers: examiner.Answers.reduce((r, a) => {
-          r[a.exam_id] = [...(r[a.exam_id] || []), a]
-          return r
-        }, {}),
-      })
-      Object.keys(exm.Answers).forEach((k) => {
-        exm.Answers[k] = exm.Answers[k].reduce((a, b) => {
-          return a + b.answer.Ans_Value
-        }, 0)
-      })
-      return exm
-    })
-    return examiners
-  },
   async deleteExaminersDeveloperOptions(option, deleteItems, prisma) {
     if (deleteItems) {
       await prisma.Examiners.deleteMany(option)
     }
   },
+  /**
+   * Clean option filters
+   */
   cleanOptions(option) {
     delete option.skip
     delete option.take

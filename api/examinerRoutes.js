@@ -150,7 +150,6 @@ module.exports = function (app, prisma, types) {
       examiners
     )
     // End Interview filter
-
     examiners = examinerFilterOptions.calculateExaminerGrades(examiners)
     showAllExaminers =
       examinerFilterOptions.calculateAllExaminersGrades(showAllExaminers)
