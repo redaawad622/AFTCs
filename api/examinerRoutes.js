@@ -294,55 +294,6 @@ module.exports = function (app, prisma, types) {
     res.json(result)
   })
 
-  app.get('/checkIsDone', async (req, res) => {
-    const { id, examId } = req.query
-    const examiner = await prisma.Examiners.findFirst({
-      where: {
-        OR: [
-          {
-            national_id: {
-              equals: id,
-            },
-          },
-          {
-            triple_number: {
-              equals: id,
-            },
-          },
-          {
-            barcode: {
-              equals: id,
-            },
-          },
-          {
-            sold_id: {
-              equals: id,
-            },
-          },
-        ],
-      },
-    })
-    let done = 0
-    if (examiner) {
-      const exam = await prisma.CustomExam.findUnique({
-        where: {
-          examiner_id_exam_id: {
-            examiner_id: examiner.id,
-            exam_id: Number(examId),
-          },
-        },
-      })
-
-      if (exam) {
-        done = 1
-      }
-      res.json({ done })
-    } else {
-      res.json({ done })
-    }
-    // check if done
-  })
-
   app.post('/getDatesByUser', async (req, res) => {
     const { user_id } = req.body
     const dates = await prisma.Examiners.groupBy({
