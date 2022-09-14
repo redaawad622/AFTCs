@@ -1,14 +1,21 @@
 export const state = () => ({
   examiner: null,
+  examiners: null,
 })
 export const getters = {
   examiner(state) {
     return state.examiner
   },
+  examiners(state) {
+    return state.examiners
+  },
 }
 export const mutations = {
   setExaminer(state, payload) {
     state.examiner = payload
+  },
+  setExaminers(state, payload) {
+    state.examiners = payload
   },
 }
 export const actions = {

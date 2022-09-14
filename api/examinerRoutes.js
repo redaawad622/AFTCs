@@ -1,8 +1,9 @@
-/* eslint-disable no-unused-vars */
+const { examinerFilterOptions } = require('./ExaminerAPI/examinerFilterOptions')
+
 /* eslint-disable camelcase */
 module.exports = function (app, prisma, types) {
   app.get('/getExaminer', async (req, res) => {
-    const { id, search } = req.query
+    const { id } = req.query
     const examiner = await prisma.Examiners.findFirst({
       where: {
         OR: [
@@ -84,203 +85,12 @@ module.exports = function (app, prisma, types) {
       showAll,
       hasUnit,
     } = req.query
+
     const option = {
       where: {},
       orderBy: {},
     }
-    // eslint-disable-next-line
-    if (itemsPerPage != -1) {
-      option.skip = (page - 1) * Number(itemsPerPage) || 0
-      option.take = Number(itemsPerPage) || 50
-    }
-    option.where.isDeleted = { equals: Boolean(false) }
 
-    if (search) {
-      option.where.OR = [
-        {
-          national_id: {
-            contains: search,
-          },
-        },
-        {
-          name: {
-            contains: search,
-          },
-        },
-
-        {
-          barcode: {
-            contains: search,
-          },
-        },
-        {
-          sold_id: {
-            contains: search,
-          },
-        },
-        {
-          triple_number: {
-            contains: search,
-          },
-        },
-      ]
-    }
-
-    if (register) {
-      const id = req.headers.id
-      option.where.user_id = { equals: Number(id) }
-    }
-    if (again) {
-      option.where.again = { equals: Boolean(Number(again)) }
-    }
-    if (isNoticed) {
-      const noticed = Number(isNoticed)
-      switch (noticed) {
-        case 1:
-          option.where.isNoticed = { equals: true }
-          if (newSet) {
-            option.where.isNoticedAgain = { equals: false }
-          }
-          break
-        case 2:
-          option.where.isNoticedAgain = { equals: true }
-          break
-        case 3:
-          option.where.isNoticed = { equals: false }
-          break
-      }
-    }
-    if (user) {
-      option.where.user_id = { equals: Number(user) }
-    }
-    if (qualification || qualification === '0' || qualification === 0) {
-      option.where.qualification_code = { equals: Number(qualification) }
-    }
-    if (battaryId) {
-      option.where.battary_id = { equals: Number(battaryId) }
-    }
-    if (stage) {
-      option.where.stage = { equals: stage }
-    }
-
-    if (hasUnit) {
-      if (Number(hasUnit)) {
-        option.where.NOT = [
-          {
-            UNIT_NAME: null,
-          },
-        ]
-      } else {
-        option.where.UNIT_NAME = {
-          equals: null,
-        }
-      }
-    }
-    if (examFinish) {
-      if (Number(examFinish)) {
-        option.where.Answers = {
-          some: {},
-        }
-      } else {
-        option.where.Answers = {
-          none: {},
-        }
-      }
-    }
-    if (interview) {
-      if (Number(interview)) {
-        option.where.Interview = {
-          some: {},
-        }
-      } else {
-        option.where.Interview = {
-          none: {},
-        }
-      }
-    }
-    if (sortBy && sortBy.length > 0) {
-      const sorts = sortBy[0].split('.')
-      if (sorts.length > 1) {
-        const dir = Boolean(sortDesc[0])
-        option.orderBy[sorts[0]] = {
-          [sorts[1]]: dir ? 'desc' : 'asc',
-        }
-      } else {
-        const dir = Boolean(sortDesc[0])
-        option.orderBy[sortBy[0]] = dir ? 'desc' : 'asc'
-      }
-    }
-    option.include = {
-      _count: {
-        select: { Interview: true, Answers: true },
-      },
-      CustomExam: {
-        include: {
-          exam: {
-            select: {
-              Exm_Name: true,
-            },
-          },
-        },
-      },
-    }
-
-    if (
-      final_opinion ||
-      transReason ||
-      recommendation ||
-      recommendation_res ||
-      examiner_status ||
-      final_hospital_result ||
-      interviewEntqaDone
-    ) {
-      option.where.Interview = {
-        some: {},
-      }
-      option.include.Interview = {}
-    }
-
-    if (withResult) {
-      option.include.Answers = {}
-      if (nafsy) {
-        let battary = await prisma.Battries.findUnique({
-          where: {
-            id: 11, // بطارية النفسي
-          },
-          include: {
-            Battary_Exam: true,
-          },
-        })
-        battary = battary.Battary_Exam.map((ex) => ex.exam_id)
-        option.include.Answers.where = { exam_id: { in: battary } }
-      }
-
-      option.include.Answers.select = {
-        id: true,
-        exam_id: true,
-        question_id: true,
-        answer_id: true,
-        examiner_id: true,
-        answer: {
-          select: {
-            Ans_Value: true,
-          },
-        },
-      }
-    }
-
-    let examiners = await prisma.Examiners.findMany(option)
-
-    // after fe
-
-    let showAllExaminers = null
-    if (showAll) {
-      delete option.skip
-      delete option.take
-      showAllExaminers = await prisma.Examiners.findMany(option)
-    }
-
-    // filter interview
     const interviewFilter = {
       final_opinion,
       transReason,
@@ -289,94 +99,64 @@ module.exports = function (app, prisma, types) {
       examiner_status,
       final_hospital_result,
     }
-    for (const key in interviewFilter) {
-      if (
-        Object.hasOwnProperty.call(interviewFilter, key) &&
-        !interviewFilter[key]
-      ) {
-        delete interviewFilter[key]
-      }
-    }
-
-    if (Object.keys(interviewFilter).length > 0) {
-      examiners = examiners.filter((elm) => {
-        let isTrue = true
-        for (const key in interviewFilter) {
-          const type = typeof elm.Interview[0][key]
-          let filter = interviewFilter[key]
-
-          if (type === 'number') {
-            filter = Number(filter)
-          }
-          if (filter !== elm.Interview[0][key]) {
-            isTrue = false
-            return false
-          }
-        }
-        return isTrue
-      })
-    }
-    if (interviewEntqaDone) {
-      if (Number(interviewEntqaDone)) {
-        examiners = examiners.filter((elm) => {
-          return elm.Interview[0].recommendation
-        })
-      } else {
-        examiners = examiners.filter((elm) => {
-          return !elm.Interview[0].recommendation
-        })
-      }
-    }
-    // end filter
-    if (examiners && examiners.length > 0) {
-      if (examiners[0].Answers) {
-        examiners = examiners.map((examiner) => {
-          const exm = Object.assign({}, examiner, {
-            Answers: examiner.Answers.reduce((r, a) => {
-              r[a.exam_id] = [...(r[a.exam_id] || []), a]
-              return r
-            }, {}),
-          })
-          Object.keys(exm.Answers).forEach((k) => {
-            exm.Answers[k] = exm.Answers[k].reduce((a, b) => {
-              return a + b.answer.Ans_Value
-            }, 0)
-          })
-          return exm
-        })
-      }
-    }
-    if (showAllExaminers && showAllExaminers.length > 0) {
-      if (showAllExaminers[0].Answers) {
-        showAllExaminers = showAllExaminers.map((examiner) => {
-          const exm = Object.assign({}, examiner, {
-            Answers: examiner.Answers.reduce((r, a) => {
-              r[a.exam_id] = [...(r[a.exam_id] || []), a]
-              return r
-            }, {}),
-          })
-          Object.keys(exm.Answers).forEach((k) => {
-            exm.Answers[k] = exm.Answers[k].reduce((a, b) => {
-              return a + b.answer.Ans_Value
-            }, 0)
-          })
-          return exm
-        })
-      }
-    }
+    let examiners = null
+    let showAllExaminers = null
     let allExaminers = 0
-    // if (Object.keys(interviewFilter).length > 0) {
-    //   allExaminers = examiners.length
-    // } else {
-    delete option.skip
-    delete option.take
-    delete option.orderBy
-    delete option.include
-    if (deleteItems) {
-      await prisma.Examiners.deleteMany(option)
+
+    // eslint-disable-next-line
+    if (itemsPerPage != -1) {
+      option.skip = (page - 1) * Number(itemsPerPage) || 0
+      option.take = Number(itemsPerPage) || 50
     }
+    option.where.isDeleted = { equals: Boolean(false) }
+
+    examinerFilterOptions.searchOptions(search, option)
+    examinerFilterOptions.registerOptions(register, option, req.headers.id)
+    examinerFilterOptions.againOptions(again, option)
+    examinerFilterOptions.isNoticedOptions(isNoticed, option, newSet)
+    examinerFilterOptions.userOptions(user, option)
+    examinerFilterOptions.qualificationOptions(qualification, option)
+    examinerFilterOptions.batteryOptions(battaryId, option)
+    examinerFilterOptions.stageOptions(stage, option)
+    examinerFilterOptions.hasUnitOptions(hasUnit, option)
+    examinerFilterOptions.examFinishedOptions(examFinish, option)
+    examinerFilterOptions.doneInterviewOptions(interview, option)
+    examinerFilterOptions.sortOptions(sortBy, option, sortDesc)
+    examinerFilterOptions.examinerGradesOptions(option)
+    examinerFilterOptions.interviewFiltersOptions(
+      interviewFilter,
+      interviewEntqaDone,
+      option
+    )
+    await examinerFilterOptions.withResultOptions(
+      withResult,
+      option,
+      nafsy,
+      prisma
+    )
+    examiners = await prisma.Examiners.findMany(option)
+    showAllExaminers = await examinerFilterOptions.showAllExaminersFilter(
+      showAll,
+      option,
+      prisma
+    )
+    // Filter interviews
+    examinerFilterOptions.filterInterviewDB(interviewFilter, examiners)
+    examinerFilterOptions.interviewEntqaDoneFilter(
+      interviewEntqaDone,
+      examiners
+    )
+    // End Interview filter
+    examinerFilterOptions.calculateExaminerGrades(examiners)
+    examinerFilterOptions.calculateAllExaminersGrades(showAllExaminers)
+    examinerFilterOptions.cleanOptions(option)
+
     allExaminers = await prisma.Examiners.count(option)
-    // }
+    examinerFilterOptions.deleteExaminersDeveloperOptions(
+      option,
+      deleteItems,
+      prisma
+    )
     res.json({ examiners, allExaminers, showAllExaminers })
   })
 
