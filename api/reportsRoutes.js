@@ -400,14 +400,13 @@ module.exports = function (app, prisma) {
       {
         name: 'رفت نفسي مركز',
         value: filteredExaminers.filter(
-          (item) =>
-            item.Interview[0]?.final_hospital_allExaminers === 'رفت نفسي'
+          (item) => item.Interview[0]?.final_hospital_result === 'رفت نفسي'
         ).length,
       },
       {
         name: 'رفت طبي مركز',
         value: filteredExaminers.filter(
-          (item) => item.Interview[0]?.final_hospital_allExaminers === 'رفت طبي'
+          (item) => item.Interview[0]?.final_hospital_result === 'رفت طبي'
         ).length,
       },
       {

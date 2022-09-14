@@ -326,7 +326,7 @@ export default {
       return this.actualArriveTotal(plan) - this.expectedTotal(plan)
     },
     differenceActualExamined(item) {
-      return item.total - this.actualArriveTotal(item)
+      return this.actualArriveTotal(item) - item.total
     },
     removeElementFromArray(array, index) {
       return array.slice(0, index).concat(array.slice(index + 1))
