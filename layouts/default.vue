@@ -201,7 +201,6 @@ export default {
           return el.checkPermission('admin')
         })(),
       },
-
       {
         icon: 'mdi-account-multiple-plus-outline',
         img: 'add-user.png',

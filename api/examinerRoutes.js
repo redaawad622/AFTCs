@@ -247,53 +247,6 @@ module.exports = function (app, prisma, types) {
     })
   })
 
-  app.post('/saveExam', async (req, res) => {
-    const { barcode, examid, result } = req.body
-    const examiner = await prisma.Examiners.findFirst({
-      where: {
-        OR: [
-          {
-            national_id: {
-              equals: barcode,
-            },
-          },
-          {
-            triple_number: {
-              equals: barcode,
-            },
-          },
-          {
-            barcode: {
-              equals: barcode,
-            },
-          },
-          {
-            sold_id: {
-              equals: barcode,
-            },
-          },
-        ],
-      },
-    })
-    if (examiner) {
-      await prisma.CustomExam.upsert({
-        where: {
-          examiner_id_exam_id: {
-            examiner_id: examiner.id,
-            exam_id: Number(examid),
-          },
-        },
-        create: {
-          examiner_id: examiner.id,
-          value: result,
-          exam_id: Number(examid),
-        },
-        update: {},
-      })
-    }
-    res.json(result)
-  })
-
   app.post('/getDatesByUser', async (req, res) => {
     const { user_id } = req.body
     const dates = await prisma.Examiners.groupBy({
