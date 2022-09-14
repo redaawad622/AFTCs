@@ -246,7 +246,6 @@ module.exports = function (app, prisma, types) {
       color: 'success',
     })
   })
-
   app.post('/getDatesByUser', async (req, res) => {
     const { user_id } = req.body
     const dates = await prisma.Examiners.groupBy({
@@ -277,7 +276,6 @@ module.exports = function (app, prisma, types) {
         sold_id: true,
       },
     })
-
     // update qualification_code
     if (data.length > 0) {
       data = data.map((v) => {

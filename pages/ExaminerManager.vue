@@ -468,27 +468,6 @@
                       lg="2"
                       xl="1"
                     >
-                      <v-autocomplete
-                        v-model="filters.user"
-                        append-icon="mdi-menu-swap"
-                        outlined
-                        dense
-                        placeholder="المستخدمين"
-                        label="المستخدمين"
-                        item-value="Cat_ID"
-                        item-text="Cat_Name"
-                        cache-items
-                        :items="users"
-                      ></v-autocomplete>
-                    </v-col>
-                    <v-col
-                      v-if="permissions.admin.includes(user.type)"
-                      cols="12"
-                      sm="6"
-                      md="3"
-                      lg="2"
-                      xl="1"
-                    >
                       <v-checkbox
                         v-model="newSet"
                         label="الموقف الجديد"
@@ -1343,7 +1322,6 @@ export default {
   mounted() {
     this.audio = new Audio(`${this.$audioPath}4357/4357.mp3`)
   },
-
   methods: {
     getTextByValue(arr, val) {
       const item = this.helperData[arr].find((elm) => elm.value === Number(val))
