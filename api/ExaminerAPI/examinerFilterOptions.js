@@ -1,6 +1,6 @@
 export const examinerFilterOptions = {
   /**
-   * Checks if user searched by {nat_id,name,barcode,sold_id,triple_no}
+   * Checks if user searched by `nat_id,name,barcode,sold_id,triple_no`
    */
   searchOptions(search, option) {
     if (search) {
