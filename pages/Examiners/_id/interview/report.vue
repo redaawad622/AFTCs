@@ -76,7 +76,7 @@
           <table-title> الشكوي كما ذكرها المجند بالفرع :- </table-title>
           <p>{{ form.complaint_f }}</p>
         </div>
-
+        <interviewerOpinionChecks />
         <div v-if="form.interviewer_opinion">
           <table-title>الدلالات التشخيصية :- </table-title>
           <p>{{ form.interviewer_opinion }}</p>
@@ -119,6 +119,7 @@
           <table-title class="ml-2"> القائم بالمقابلة :- </table-title>
           <p>{{ form.interviewer }}</p>
         </div>
+
         <div class="d-flex justify-space-between mt-5" :contenteditable="true">
           <div class="font-weight-bold">
             <div>التوقيع /</div>
