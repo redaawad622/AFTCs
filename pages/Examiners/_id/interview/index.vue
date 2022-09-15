@@ -635,29 +635,44 @@
                     v-model="interviewerOpinionSelect"
                     :items="helperData.endfa"
                     label="الاندفاعية"
-                    hide-details="true"
                     multiple
-                    solo
-                  ></v-select>
+                    outlined
+                  >
+                    <template #selection="{ item }">
+                      <v-chip x-small color="primary">{{
+                        item
+                      }}</v-chip></template
+                    >
+                  </v-select>
                   <v-divider></v-divider>
                   <v-select
                     v-model="interviewerOpinionSelect"
                     :items="helperData.shchezo"
                     label="الفصــــــاميه"
-                    hide-details="true"
                     multiple
-                    solo
-                  ></v-select>
+                    outlined
+                  >
+                    <template #selection="{ item }">
+                      <v-chip x-small color="primary">{{
+                        item
+                      }}</v-chip></template
+                    >
+                  </v-select>
                   <v-divider></v-divider>
 
                   <v-select
                     v-model="interviewerOpinionSelect"
                     :items="helperData.depression"
                     label="الإكــــتئابيه "
-                    hide-details="true"
                     multiple
-                    solo
-                  ></v-select>
+                    outlined
+                  >
+                    <template #selection="{ item }">
+                      <v-chip x-small color="primary">{{
+                        item
+                      }}</v-chip></template
+                    >
+                  </v-select>
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
