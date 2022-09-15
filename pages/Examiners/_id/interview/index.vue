@@ -631,6 +631,33 @@
                     label="رأي القائم بالمقابله"
                     rows="8"
                   ></v-textarea>
+                  <v-select
+                    v-model="interviewerOpinionSelect"
+                    :items="helperData.endfa"
+                    label="الاندفاعية"
+                    hide-details="true"
+                    multiple
+                    solo
+                  ></v-select>
+                  <v-divider></v-divider>
+                  <v-select
+                    v-model="interviewerOpinionSelect"
+                    :items="helperData.shchezo"
+                    label="الفصــــــاميه"
+                    hide-details="true"
+                    multiple
+                    solo
+                  ></v-select>
+                  <v-divider></v-divider>
+
+                  <v-select
+                    v-model="interviewerOpinionSelect"
+                    :items="helperData.depression"
+                    label="الإكــــتئابيه "
+                    hide-details="true"
+                    multiple
+                    solo
+                  ></v-select>
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
@@ -770,13 +797,14 @@ export default {
       },
       loading: false,
       fLoading: false,
-
+      interviewerOpinionSelect: [],
       speaking_disorder: [
         'معتدل',
         'كثير الكلام',
         'قليل الكلام',
         'ضحك بدون سبب',
       ],
+      lastOpinionSelectedState: [],
       medicine_type: ['لا يوجد', 'نفسية', 'علاجية'],
       has_medical_history: ['نعم', 'لا'],
       focusCard: null,
@@ -827,6 +855,23 @@ export default {
     },
   },
   watch: {
+    interviewerOpinionSelect(val, oldVal) {
+      if (val[val.length - 1]) {
+        if (!this.form.interviewer_opinion.includes(val[val.length - 1])) {
+          this.form.interviewer_opinion += val[val.length - 1] + ' '
+        } else {
+          this.form.interviewer_opinion = this.form.interviewer_opinion.replace(
+            this.getArraysDifference(val, oldVal),
+            ''
+          )
+        }
+      } else {
+        this.form.interviewer_opinion = this.form.interviewer_opinion.replace(
+          this.getArraysDifference(val, oldVal),
+          ''
+        )
+      }
+    },
     'form.recommendation'(val) {
       if (val)
         this.form.recommendation_summary = this.helperData.recommendation.find(
@@ -916,6 +961,10 @@ export default {
       })
   },
   methods: {
+    getArraysDifference(a1, a2) {
+      return a2.filter((a2elem) => !a1.includes(a2elem))
+    },
+
     save() {
       if (this.$refs.form.validate()) {
         this.loading = true
