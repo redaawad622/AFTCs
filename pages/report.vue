@@ -198,11 +198,31 @@
                   isNaN(actualArriveTotal(item)) ? '' : actualArriveTotal(item)
                 }}
               </template>
-              <template
+              <differenceExpectedActual
                 v-else-if="column.value == 'difference_expected_actual'"
-              >
-                {{ differenceExpectedActualMessage(item) }}
-              </template>
+                :item="item"
+              />
+              <differenceExpectedActual
+                v-else-if="column.value == 'difference_expected_actual_high'"
+                :item="item"
+                category="high"
+              />
+              <differenceExpectedActual
+                v-else-if="column.value == 'difference_expected_actual_above'"
+                :item="item"
+                category="above"
+              />
+              <differenceExpectedActual
+                v-else-if="column.value == 'difference_expected_actual_middle'"
+                category="middle"
+                :item="item"
+              />
+              <differenceExpectedActual
+                v-else-if="column.value == 'difference_expected_actual_usually'"
+                :item="item"
+                category="usually"
+              />
+
               <template
                 v-else-if="column.value == 'difference_actual_examined'"
               >
@@ -226,10 +246,13 @@
 
 <script>
 import plansTraining from '~/components/reports/plansTraining.vue'
+import differenceExpectedActual from '~/components/reports/differenceExpectedActual.vue'
+import expectedPlanMixin from '~/mixins/Reports/expectedPlanMixin'
 
 export default {
   name: 'ReportPage',
-  components: { plansTraining },
+  components: { plansTraining, differenceExpectedActual },
+  mixins: [expectedPlanMixin],
   layout: 'printing',
   data() {
     return {
@@ -303,48 +326,15 @@ export default {
     const columns = [...this.columns]
     this.filterColumns = columns.filter((x) => !x.hide)
     this.title = this.$getLocal('repTitle', false) || 'كشف بأسماء'
-    this.filterData = { ...this.reportData }
+    this.filterData = [...this.reportData]
   },
   methods: {
-    expectedTotal(plan) {
-      return (
-        plan?.expected_high +
-        plan?.expected_above +
-        plan?.expected_middle +
-        plan?.expected_usually
-      )
-    },
-    actualArriveTotal(plan) {
-      return (
-        plan?.actual_arrive_high +
-        plan?.actual_arrive_above +
-        plan?.actual_arrive_middle +
-        plan?.actual_arrive_usually
-      )
-    },
-    differenceExpectedActual(plan) {
-      return this.actualArriveTotal(plan) - this.expectedTotal(plan)
-    },
     differenceActualExamined(item) {
       return this.actualArriveTotal(item) - item.total
     },
     removeElementFromArray(array, index) {
       return array.slice(0, index).concat(array.slice(index + 1))
     },
-    differenceExpectedActualMessage(plan) {
-      if (isNaN(this.differenceExpectedActual(plan))) {
-        return ''
-      } else if (this.differenceExpectedActual(plan) > 0) {
-        return `وصول  ${this.differenceExpectedActual(plan)} فوق المخطط`
-      } else if (this.differenceExpectedActual(plan) < 0) {
-        return `وصول  ${Math.abs(
-          this.differenceExpectedActual(plan)
-        )} تحت المخطط`
-      } else {
-        return 'لا يوجد فرق'
-      }
-    },
-
     onCheckBoxClicked(key) {
       if (this.removedReportData.includes(key)) {
         this.removedReportData = this.removeElementFromArray(
@@ -372,9 +362,6 @@ export default {
     print() {
       this.$setLocal('repTitle', this.$refs.repTitle.innerText, false, true)
       print()
-    },
-    getdifference(object, array) {
-      object.filter((_, index) => array.includes(index))
     },
     exportWord() {
       const style =

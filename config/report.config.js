@@ -62,6 +62,26 @@ export default {
       hide: false,
     },
     {
+      text: 'تسربات عليا',
+      value: 'difference_expected_actual_high',
+      hide: true,
+    },
+    {
+      text: 'تسربات فوق المتوسط',
+      value: 'difference_expected_actual_above',
+      hide: true,
+    },
+    {
+      text: 'تسربات متوسط',
+      value: 'difference_expected_actual_middle',
+      hide: true,
+    },
+    {
+      text: 'تسربات عادة',
+      value: 'difference_expected_actual_usually',
+      hide: true,
+    },
+    {
       text: 'عدد المختبرين',
       value: 'total',
       hide: false,
@@ -70,6 +90,27 @@ export default {
       text: 'فرق اجمالي الوصول من إجمالي المختبرين',
       value: 'difference_actual_examined',
       hide: false,
+    },
+    {
+      text: 'فرق اجمالي الوصول من إجمالي المختبرين عليا',
+      value: 'difference_actual_examined_high',
+      hide: true,
+    },
+    {
+      text: 'فرق اجمالي الوصول من إجمالي المختبرين فوق المتوسط',
+      value: 'difference_actual_examined_above',
+      hide: true,
+    },
+    {
+      text: 'فرق اجمالي الوصول من إجمالي المختبرين متوسط',
+      value: 'difference_actual_examined_middle',
+      hide: true,
+    },
+
+    {
+      text: 'فرق اجمالي الوصول من إجمالي المختبرين عادة',
+      value: 'difference_actual_examined_usually',
+      hide: true,
     },
     {
       text: 'عليا',
