@@ -76,7 +76,6 @@
           <table-title> الشكوي كما ذكرها المجند بالفرع :- </table-title>
           <p>{{ form.complaint_f }}</p>
         </div>
-        <interviewerOpinionChecks />
         <div v-if="form.interviewer_opinion">
           <table-title>الدلالات التشخيصية :- </table-title>
           <p>{{ form.interviewer_opinion }}</p>
@@ -114,7 +113,7 @@
             {{ getTextByValue('recommendation_res', form.recommendation_res) }}
           </p>
         </div>
-
+        <ResultChart />
         <div v-if="form.interviewer" class="d-flex">
           <table-title class="ml-2"> القائم بالمقابلة :- </table-title>
           <p>{{ form.interviewer }}</p>
@@ -144,10 +143,11 @@
 import signture from '../../../../assets/fixed-signature-text.json'
 import tableContent from '~/components/examiners/interview/tableContent.vue'
 import TableTitle from '~/components/examiners/interview/tableTitle.vue'
+import ResultChart from '~/components/reports/resultChart.vue'
 
 export default {
   name: 'InterviewReport',
-  components: { tableContent, TableTitle },
+  components: { tableContent, TableTitle, ResultChart },
   layout: 'printing',
   data() {
     return {

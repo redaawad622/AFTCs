@@ -19,7 +19,11 @@ export default {
   css: [],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ['~/plugins/helper.js', '~/plugins/axios.js'],
+  plugins: [
+    '~/plugins/helper.js',
+    '~/plugins/axios.js',
+    { src: '~/plugins/vue_global.js', mode: 'client' },
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
