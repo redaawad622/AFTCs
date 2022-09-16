@@ -64,6 +64,9 @@
           title="نتائج الاختبارات  :-"
           :content="examiner.Answers"
         ></table-content>
+        <center>
+          <ResultChart v-if="examiner && withDeg" :answers="examiner.Answers" />
+        </center>
         <div v-if="form.transReason">
           <table-title class="ml-2">سبب الاحالة :- </table-title>
           <p>{{ getTextByValue('transReason', form.transReason) }}</p>
@@ -113,7 +116,6 @@
             {{ getTextByValue('recommendation_res', form.recommendation_res) }}
           </p>
         </div>
-        <ResultChart />
         <div v-if="form.interviewer" class="d-flex">
           <table-title class="ml-2"> القائم بالمقابلة :- </table-title>
           <p>{{ form.interviewer }}</p>

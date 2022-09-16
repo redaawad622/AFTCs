@@ -11,20 +11,26 @@
 <script>
 export default {
   name: 'ResultChart',
+  props: {
+    answers: {
+      type: Object,
+      default: null,
+    },
+  },
   data() {
     return {
       chartOptions: {
         chart: {
-          id: 'vuechart',
+          id: 'gradesChart',
         },
         xaxis: {
-          categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998],
+          categories: Object.keys(this.answers),
         },
       },
       series: [
         {
-          name: 'series-1',
-          data: [30, 40, 35, 50, 49, 60, 70, 91],
+          name: '',
+          data: Object.values(this.answers),
         },
       ],
     }
