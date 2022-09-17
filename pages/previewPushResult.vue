@@ -127,7 +127,7 @@ export default {
   },
   computed: {
     previewResult() {
-      return this.$store.getters['Exam/previewResult']
+      return this.$store.getters['PushResult/previewResult']
     },
   },
   methods: {
@@ -137,9 +137,9 @@ export default {
         ? this.previewResult.examiners.map((elm) => elm.national_id)
         : []
       this.$store
-        .dispatch('Exam/loadExaminerDataFromLocalServer', ids)
+        .dispatch('PushResult/loadExaminerDataFromLocalServer', ids)
         .then((res) => {
-          this.$store.commit('Exam/setPreviewResult', res.data)
+          this.$store.commit('PushResult/setPreviewResult', res.data)
           this.$router.push('/previewPushResult')
         })
         .catch((err) => {
@@ -155,9 +155,9 @@ export default {
         ? this.previewResult.examiners.map((elm) => elm.national_id)
         : []
       this.$store
-        .dispatch('Exam/deleteExaminerDataFromLocalServer', { ids })
+        .dispatch('PushResult/deleteExaminerDataFromLocalServer', { ids })
         .then((res) => {
-          this.$store.commit('Exam/setPreviewResult', res.data)
+          this.$store.commit('PushResult/setPreviewResult', res.data)
           this.$router.push('/previewPushResult')
         })
         .catch((err) => {

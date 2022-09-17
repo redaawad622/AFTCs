@@ -175,7 +175,7 @@ export default {
         icon: 'mdi-update',
         img: 'update.png',
         title: 'التحديثات',
-        to: '/new',
+        to: '/uploadResults',
         permission: (function () {
           return el.checkPermission([
             ...el.permissions.center,

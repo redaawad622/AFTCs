@@ -90,9 +90,9 @@ export default {
     loadAndSendAnswersData() {
       this.loadLoading = true
       this.$store
-        .dispatch('Exam/loadAndSendAnswersData')
+        .dispatch('PushResult/loadAndSendAnswersData')
         .then((res) => {
-          this.$store.commit('Exam/setPreviewResult', res.data)
+          this.$store.commit('PushResult/setPreviewResult', res.data)
           this.$router.push('/previewPushResult')
         })
         .catch((err) => {

@@ -235,33 +235,7 @@ module.exports = function (app, prisma, types) {
     })
     res.json('done')
   })
-  app.post('/deleteExaminerDataFromLocalServer', async (req, res) => {
-    const { ids } = req.body
-    await prisma.Examiners.updateMany({
-      where: {
-        national_id: { in: ids },
-      },
-      data: {
-        isDeleted: true,
-      },
-    })
-    const userId = req.headers.id
-    await prisma.Log.create({
-      data: {
-        user_id: Number(userId),
-        operation_type: 'delete',
-        description:
-          ' مسح بيانات ممتحنين يحملون ارقام قومية ' + ids.join(' , '),
-        type: types[4],
-      },
-    })
-    res.json({
-      message: 'تم مسح المختبرين  بنجاح',
-      examiners: [],
-      type: 'delete',
-      color: 'success',
-    })
-  })
+
   app.post('/getDatesByUser', async (req, res) => {
     const { user_id } = req.body
     const dates = await prisma.Examiners.groupBy({
