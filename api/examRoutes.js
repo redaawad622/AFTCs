@@ -842,34 +842,55 @@ module.exports = function (app, prisma) {
           // SAVE INTERVIEW
           const queryToRunInterview = examinerInterviews.map((elm) => {
             const inter = elm.interview
-            const updateQuery = `Update \`Interview\` SET parent_job='${
-              inter.parent_job
-            }',siblings_num=${Number(
-              inter.siblings_num || 0
-            )},family_relation='${inter.family_relation}'
-            ,complaint='${inter.complaint}'
-            ,appearance='${inter.appearance}',focus_ability='${
-              inter.focus_ability
-            }',mood='${inter.mood}',speaking_disorder='${
-              inter.speaking_disorder
-            }',medicine_type='${inter.medicine_type}',has_medical_history='${
-              inter.has_medical_history
-            }',hospital_name='${inter.hospital_name || ''}',
-                drugs_history='${inter.drugs_history}',drug_type='${
-              inter.drug_type || ''
-            }',final_opinion='${inter.final_opinion}',examiner_status='${
-              inter.examiner_status
-            }',final_hospital_result='${
-              inter.final_hospital_result
-            }' WHERE examiner_id = ${Number(elm.examiner_id)}`
-            return prisma.$executeRawUnsafe(updateQuery)
+            return prisma.Interview.upsert({
+              create: {
+                examiner_id: Number(elm.examiner_id),
+                parent_job: inter.parent_job,
+                siblings_num: inter.siblings_num || 0,
+                family_relation: inter.family_relation,
+                complaint: inter.complaint,
+                appearance: inter.appearance,
+                focus_ability: inter.focus_ability,
+                mood: inter.mood,
+                speaking_disorder: inter.speaking_disorder,
+                medicine_type: inter.medicine_type,
+                has_medical_history: inter.has_medical_history,
+                hospital_name: inter.hospital_name || '',
+                drugs_history: inter.drugs_history,
+                drug_type: inter.drug_type || '',
+                final_opinion: inter.final_opinion,
+                examiner_status: inter.examiner_status,
+                final_hospital_result: inter.final_hospital_result,
+              },
+              update: {
+                parent_job: inter.parent_job,
+                siblings_num: inter.siblings_num || 0,
+                family_relation: inter.family_relation,
+                complaint: inter.complaint,
+                appearance: inter.appearance,
+                focus_ability: inter.focus_ability,
+                mood: inter.mood,
+                speaking_disorder: inter.speaking_disorder,
+                medicine_type: inter.medicine_type,
+                has_medical_history: inter.has_medical_history,
+                hospital_name: inter.hospital_name || '',
+                drugs_history: inter.drugs_history,
+                drug_type: inter.drug_type || '',
+                final_opinion: inter.final_opinion,
+                examiner_status: inter.examiner_status,
+                final_hospital_result: inter.final_hospital_result,
+              },
+              where: {
+                examiner_id: Number(elm.examiner_id),
+              },
+            })
           })
-
           if (queryToRunInterview && queryToRunInterview.length > 0) {
             const out = await prisma.$transaction(queryToRunInterview)
+
             report.interview = {
-              failNum: out.filter((elm) => elm === 0).length,
-              successNum: out.filter((elm) => elm === 1).length,
+              failNum: queryToRunInterview.length - out.length,
+              successNum: out.length,
             }
           }
         }
