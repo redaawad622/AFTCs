@@ -412,7 +412,7 @@ module.exports = function (app, prisma) {
           Exm_ID: Number(data.id),
         },
         create: { ...data.formData },
-        update: { ...data.formData },
+        update: { ...data.formData, isBackuped: false },
       })
       res.json(exam)
     } catch (e) {
@@ -428,6 +428,7 @@ module.exports = function (app, prisma) {
         },
         data: {
           show: false,
+          isBackuped: false,
         },
       })
       res.json(exam)
@@ -539,7 +540,7 @@ module.exports = function (app, prisma) {
         id: Number(id),
       },
       create: data,
-      update: data,
+      update: { ...data, isBackuped: false },
     })
 
     res.json(battary)
@@ -571,6 +572,7 @@ module.exports = function (app, prisma) {
       },
       data: {
         again: true,
+        isBackuped: false,
       },
     })
     let battary = await prisma.Battries.findUnique({
@@ -598,6 +600,7 @@ module.exports = function (app, prisma) {
       },
       data: {
         again: true,
+        isBackuped: false,
       },
     })
 
@@ -612,6 +615,7 @@ module.exports = function (app, prisma) {
       data: {
         isNoticed: true,
         isNoticedAgain: Boolean(Number(second)),
+        isBackuped: false,
       },
     })
 
@@ -623,7 +627,7 @@ module.exports = function (app, prisma) {
       where: {
         id: Number(id),
       },
-      data: unit,
+      data: { ...unit, isBackuped: false },
     })
 
     res.json('done')

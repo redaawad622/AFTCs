@@ -195,7 +195,7 @@ module.exports = function (app, prisma, types) {
           national_id: data.national_id,
         },
         create: { ...data },
-        update: { ...data },
+        update: { ...data, isBackuped: false },
       })
       await prisma.Log.create({
         data: {

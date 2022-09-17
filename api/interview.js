@@ -39,6 +39,7 @@ module.exports = function (app, prisma) {
       },
       data: {
         marital_state,
+        isBackuped: false,
         educational_degree,
       },
     })
@@ -61,6 +62,7 @@ module.exports = function (app, prisma) {
       create: interviewData,
       update: {
         ...interviewData,
+        isBackuped: false,
         updated_at: new Date(),
       },
     })
