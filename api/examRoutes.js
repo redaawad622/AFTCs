@@ -719,6 +719,7 @@ module.exports = function (app, prisma) {
   // check and save data from another server
   app.post('/checkAndSaveAnswers', async (req, res) => {
     const { customExam, answers, interviews } = req.body
+
     const report = {
       customExam: null,
       answers: null,
@@ -781,6 +782,7 @@ module.exports = function (app, prisma) {
               )},${Number(elm.answer_id)}`
             )
           )
+
           if (queryToRun && queryToRun.length > 0) {
             const out = await prisma.$transaction(queryToRun)
             report.answers = {
@@ -791,6 +793,7 @@ module.exports = function (app, prisma) {
         }
       }
     }
+
     if (interviews) {
       let examinerInterviews = JSON.parse(interviews)
       if (examinerInterviews.length < 0) {
@@ -809,6 +812,7 @@ module.exports = function (app, prisma) {
             national_id: true,
           },
         })
+
         const exNationals = examiners.map((elm) => elm.national_id)
         const diff = examinerInterviews.filter(
           (elm) => !exNationals.includes(elm.national_id)
@@ -838,23 +842,29 @@ module.exports = function (app, prisma) {
           // SAVE INTERVIEW
           const queryToRunInterview = examinerInterviews.map((elm) => {
             const inter = elm.interview
-            return prisma.$executeRawUnsafe(
-              `INSERT OR REPLACE INTO \`Interview\` (examiner_id,parent_job,siblings_num,family_relation,complaint,
-                appearance,focus_ability,mood,speaking_disorder,medicine_type,has_medical_history,hospital_name,
-                drugs_history,drug_type,final_opinion,examiner_status,final_hospital_result)
-          select ${Number(elm.examiner_id)},'${inter.parent_job}',${Number(
-                inter.siblings_num || 0
-              )},'${inter.family_relation}','${inter.complaint}','${
-                inter.appearance
-              }','${inter.focus_ability}','${inter.mood}','${
-                inter.speaking_disorder
-              }','${inter.medicine_type}','${inter.has_medical_history}','${
-                inter.hospital_name || ''
-              }','${inter.drugs_history}','${inter.drug_type || ''}','${
-                inter.final_opinion
-              }','${inter.examiner_status}','${inter.final_hospital_result}'`
-            )
+            const updateQuery = `Update \`Interview\` SET parent_job='${
+              inter.parent_job
+            }',siblings_num=${Number(
+              inter.siblings_num || 0
+            )},family_relation='${inter.family_relation}'
+            ,complaint='${inter.complaint}'
+            ,appearance='${inter.appearance}',focus_ability='${
+              inter.focus_ability
+            }',mood='${inter.mood}',speaking_disorder='${
+              inter.speaking_disorder
+            }',medicine_type='${inter.medicine_type}',has_medical_history='${
+              inter.has_medical_history
+            }',hospital_name='${inter.hospital_name || ''}',
+                drugs_history='${inter.drugs_history}',drug_type='${
+              inter.drug_type || ''
+            }',final_opinion='${inter.final_opinion}',examiner_status='${
+              inter.examiner_status
+            }',final_hospital_result='${
+              inter.final_hospital_result
+            }' WHERE examiner_id = ${Number(elm.examiner_id)}`
+            return prisma.$executeRawUnsafe(updateQuery)
           })
+
           if (queryToRunInterview && queryToRunInterview.length > 0) {
             const out = await prisma.$transaction(queryToRunInterview)
             report.interview = {
@@ -985,7 +995,6 @@ module.exports = function (app, prisma) {
 
       res.json(result.data)
     } catch (error) {
-      console.log(error)
       res.json({
         message: 'لا يمكن الاتصال بالسيرفر',
         examiners: [],
