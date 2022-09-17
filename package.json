@@ -1,7 +1,7 @@
 {
   "name": "AFTCs",
-  "version": "1.1.5",
-  "version_date": "16/9/2022",
+  "version": "1.1.6",
+  "version_date": "18/9/2022",
   "private": true,
   "scripts": {
     "dev": "nuxt --open",
