@@ -69,7 +69,6 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     proxy: true,
-
     baseURL:
       process.env.NODE_ENV === 'development'
         ? 'http://localhost:3000'
@@ -97,14 +96,12 @@ export default {
     },
     customVariables: ['~/assets/variables.scss'],
     treeShake: true,
-
     rtl: true,
     lang: { current: 'ar', locales: { ar } },
 
     theme: {
       dark: false,
       options: { customProperties: true },
-
       themes: {
         dark: {
           primary: '#7048eb',
@@ -147,9 +144,10 @@ export default {
     },
   },
   server: {
-    port: 3000,
     host: '0.0.0.0',
+    port: 3000,
   },
+
   serverMiddleware: [
     {
       path: '/api',
