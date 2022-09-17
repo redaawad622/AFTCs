@@ -95,6 +95,7 @@
 <script>
 import Timer from '~/components/common/timer.vue'
 import examGroup from '~/components/exam/examGroup.vue'
+
 export default {
   name: 'ExamPage',
   components: { examGroup, Timer },
