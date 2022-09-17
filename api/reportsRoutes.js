@@ -361,7 +361,7 @@ module.exports = function (app, prisma) {
         ).length,
       },
       {
-        // Depricated
+        // Deprecated
         name: 'عودة للوحدة بعد العرض علي المست طبي (مركز)',
         value: examinerStatusTebyMarkaz.filter(
           (item) =>
