@@ -5,6 +5,7 @@ module.exports = function (app, prisma) {
     let resultReportJson = []
     const examinerOptions = { where: {} }
     reportGeneralFilters(examinerOptions, stage, user, examFinish)
+
     switch (Number(report)) {
       case 1:
         report1ExaminerFilters(examinerOptions)

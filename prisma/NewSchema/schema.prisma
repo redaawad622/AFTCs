@@ -6,7 +6,6 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = "file:./exam.db"
-
 }
 
 model T_Answers {
@@ -241,7 +240,6 @@ model Interview {
   recommendation_summary String?
   interviewer            String?
 
-
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 }
@@ -279,5 +277,4 @@ model ExpectedPlan {
   actual_arrive_usually Int?
   user_id               Int           @unique
   users                 T_Categories? @relation(fields: [user_id], references: [Cat_ID], onDelete: Cascade)
-
 }

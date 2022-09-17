@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import axios from 'axios'
+
 module.exports = function (app, prisma) {
   app.get('/getAssignExams', async (req, res) => {
     const { examinerId } = req.query
@@ -708,7 +709,6 @@ module.exports = function (app, prisma) {
 
       res.json(result.data)
     } catch (error) {
-      console.log(error)
       res.json({
         message: 'لا يمكن الاتصال بالسيرفر',
         examiners: [],
