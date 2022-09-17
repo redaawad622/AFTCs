@@ -103,8 +103,20 @@ module.exports = function (app, prisma, types) {
     let showAllExaminers = null
     let allExaminers = 0
 
-    // eslint-disable-next-line
-    if (itemsPerPage != -1) {
+    if (
+      // eslint-disable-next-line
+      itemsPerPage == -1 ||
+      final_opinion ||
+      transReason ||
+      recommendation ||
+      recommendation_res ||
+      examiner_status ||
+      final_hospital_result ||
+      interviewEntqaDone
+    ) {
+      delete option.skip
+      delete option.take
+    } else {
       option.skip = (page - 1) * Number(itemsPerPage) || 0
       option.take = Number(itemsPerPage) || 50
     }
@@ -143,18 +155,22 @@ module.exports = function (app, prisma, types) {
     // Filter interviews locally
     examiners = examinerFilterOptions.filterInterviewDB(
       interviewFilter,
-      examiners
+      examiners,
+      option
     )
     examiners = examinerFilterOptions.interviewEntqaDoneFilter(
       interviewEntqaDone,
-      examiners
+      examiners,
+      option
     )
+
     // End Interview filter
     examiners = examinerFilterOptions.calculateExaminerGrades(examiners)
     showAllExaminers =
       examinerFilterOptions.calculateAllExaminersGrades(showAllExaminers)
 
     examinerFilterOptions.cleanOptions(option)
+
     allExaminers = await prisma.Examiners.count(option)
     examinerFilterOptions.deleteExaminersDeveloperOptions(
       option,
