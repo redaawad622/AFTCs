@@ -178,13 +178,7 @@ export const state = () => ({
       { text: 'مختبرين لكل مركز', value: 1 },
       { text: 'تقرير مجمع للمرحلة', value: 2 },
     ],
-    final_hospital_result: [
-      'لا يوجد',
-      'عودة للوحدة',
-      'علاج و عودة للوحدة',
-      'رفت طبي',
-      'رفت نفسي',
-    ],
+    final_hospital_result: ['لا يوجد', 'عودة للوحدة', 'رفت طبي', 'رفت نفسي'],
 
     qualification: [
       { name: 'عليا', value: 2 },
