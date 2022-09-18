@@ -221,6 +221,7 @@ module.exports = function (app, prisma, types) {
       },
       data: {
         isDeleted: true,
+        isBackuped: false,
       },
     })
     const userId = req.headers.id
@@ -235,7 +236,6 @@ module.exports = function (app, prisma, types) {
     })
     res.json('done')
   })
-
   app.post('/getDatesByUser', async (req, res) => {
     const { user_id } = req.body
     const dates = await prisma.Examiners.groupBy({

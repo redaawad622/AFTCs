@@ -62,7 +62,6 @@ module.exports = function (app, prisma) {
       create: interviewData,
       update: {
         ...interviewData,
-        isBackuped: false,
         updated_at: new Date(),
       },
     })
