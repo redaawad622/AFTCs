@@ -428,6 +428,7 @@ module.exports = function (app, prisma) {
         },
         data: {
           show: false,
+          isBackuped: false,
         },
       })
       res.json(exam)
@@ -539,7 +540,7 @@ module.exports = function (app, prisma) {
         id: Number(id),
       },
       create: data,
-      update: data,
+      update: { ...data, isBackuped: false },
     })
 
     res.json(battary)
