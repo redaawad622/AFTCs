@@ -87,7 +87,7 @@ model Examiners {
   battary_id         Int?
   isDeleted          Boolean       @default(false)
   again              Boolean       @default(false)
-  // UNIT DETAILS
+  //unit details
   UNIT_NAME          String?
   GEHA_NAME          String?
   TAMARKZ_NAME       String?
@@ -97,7 +97,6 @@ model Examiners {
   isNoticedAgain     Boolean       @default(false)
   nextFollowDate     DateTime?
   numFollowUps       Int           @default(0)
-  isBackuped         Boolean       @default(false)
   CustomExam         CustomExam[]
   T_Categories       T_Categories? @relation(fields: [t_CategoriesCat_ID], references: [Cat_ID])
   t_CategoriesCat_ID Int?
