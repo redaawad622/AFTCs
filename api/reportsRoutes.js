@@ -365,7 +365,7 @@ module.exports = function (app, prisma) {
         name: 'عودة للوحدة بعد العرض علي المست طبي (مركز)',
         value: examinerStatusTebyMarkaz.filter(
           (item) =>
-            item.Interview[0]?.final_hospital_result === 'عودة للوحدة' &&
+            item.Interview[0]?.final_hospital_result === 'عودة للوحدة' ||
             item.Interview[0]?.final_hospital_result === 'علاج و عودة للوحدة'
         ).length,
       },
@@ -373,7 +373,7 @@ module.exports = function (app, prisma) {
         name: 'عودة للوحدة بعد العرض علي المست نفسي (مركز)',
         value: examinerStatusNafsyMarkaz.filter(
           (item) =>
-            item.Interview[0]?.final_hospital_result === 'عودة للوحدة' &&
+            item.Interview[0]?.final_hospital_result === 'عودة للوحدة' ||
             item.Interview[0]?.final_hospital_result === 'علاج و عودة للوحدة'
         ).length,
       },
