@@ -80,7 +80,7 @@ module.exports = function (app, prisma) {
         password: pass,
         // connectString: '192.9.202.125:1521/REDA',
         connectString:
-          '(DESCRIPTION =(ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST =192.9.202.16)(PORT = 1521)))(CONNECT_DATA = (SERVICE_NAME = entnew)))',
+          '(DESCRIPTION =(ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST =192.9.202.17)(PORT = 1521)))(CONNECT_DATA = (SERVICE_NAME = entnew)))',
       })
       console.log('connected to database')
     } catch (err) {
@@ -94,16 +94,16 @@ module.exports = function (app, prisma) {
           const query = 'select * from ent.V_MRAKEZ_TADREEB'
           let data = await connection.execute(query)
           await connection.close()
-          console.log('data', data[0])
           console.log('close connection success')
           // prisma code to insert
           data = data.rows
+          console.log('data', data[0])
           const queryToRun = data.map((value) =>
             prisma.$executeRawUnsafe(
               ` INSERT or replace INTO \`Examiners\` (national_id,triple_number,name,stage,mohafza_code,qualification_code,marital_state,educational_degree)
                   select '${value[2]}','${value[0] || null}', '${value[1]}', '${
                 value[3]
-              }', ${value[4] || null}, ${value[5] || null},'${
+              }', ${value[4] || null}, ${value[5] || 0},'${
                 value[7] || null
               }','${value[6] || null}'
                   where NOT EXISTS (SELECT 1 FROM Examiners WHERE national_id = '${
