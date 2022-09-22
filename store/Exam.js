@@ -294,4 +294,10 @@ export const actions = {
   saveUnit(_, payload) {
     return this.$axios.post(`/api/saveUnit`, payload)
   },
+  deleteQ(_, id) {
+    return this.$axios.post(`/api/deleteQ`, { id })
+  },
+  updateQ(_, payload) {
+    return this.$axios.post(`/api/updateQ`, payload)
+  },
 }

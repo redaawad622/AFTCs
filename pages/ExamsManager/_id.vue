@@ -29,6 +29,12 @@
                   :src="toBase64(item.Qus_image)"
                 />
               </div>
+              <div>
+                <v-btn color="primary" class="mx-2" @click="updateQ(item)"
+                  >حفظ</v-btn
+                >
+                <v-btn color="red" @click="deleteQ(item.Qus_ID)">حذف</v-btn>
+              </div>
             </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content class="py-2">
@@ -202,6 +208,15 @@ export default {
         .finally(() => {
           this.saveLoading = false
         })
+    },
+    updateQ(item) {
+      this.$store.dispatch('Exam/updateQ', item)
+    },
+    deleteQ(id) {
+      this.$store.dispatch('Exam/deleteQ', id).then(() => {
+        const index = this.exam.Questions.findIndex((elm) => elm.Qus_ID === id)
+        this.exam.Questions.splice(index, 1)
+      })
     },
     reset() {
       this.newQ = {

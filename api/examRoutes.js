@@ -495,8 +495,9 @@ module.exports = function (app, prisma) {
         Qus_Exm_ID: Number(newQ.Qus_Exm_ID),
       },
     })
-    newQ.T_Answers.forEach(async (ans) => {
-      await prisma.T_Answers.create({
+    let query = [...newQ.T_Answers]
+    query = query.map((ans) => {
+      return prisma.T_Answers.create({
         data: {
           Ans_Text: ans.Ans_Text,
           Ans_Value: parseFloat(ans.Ans_Value),
@@ -504,8 +505,10 @@ module.exports = function (app, prisma) {
         },
       })
     })
+    await prisma.$transaction(query)
     return res.json(q)
   })
+
   app.get('/battaryData', async (req, res) => {
     const { id } = req.query
     const battary = await prisma.Battries.findUnique({
@@ -621,6 +624,40 @@ module.exports = function (app, prisma) {
         id: Number(id),
       },
       data: unit,
+    })
+
+    res.json('done')
+  })
+  app.post('/updateQ', async (req, res) => {
+    const newQ = req.body
+    const q = await prisma.T_Questions.update({
+      where: { Qus_ID: Number(newQ.Qus_ID) },
+      data: {
+        Qus_Text: newQ.Qus_Text,
+      },
+    })
+    let query = [...newQ.T_Answers]
+    query = query.map((ans) => {
+      return prisma.T_Answers.update({
+        where: { Ans_ID: Number(ans.Ans_ID) },
+        data: {
+          Ans_Text: ans.Ans_Text,
+          Ans_Value: parseFloat(ans.Ans_Value),
+        },
+      })
+    })
+    await prisma.$transaction(query)
+    return res.json(q)
+  })
+  app.post('/deleteQ', async (req, res) => {
+    const { id } = req.body
+    await prisma.T_Answers.deleteMany({
+      where: { Ans_Qus_ID: Number(id) },
+    })
+    await prisma.T_Questions.delete({
+      where: {
+        Qus_ID: Number(id),
+      },
     })
 
     res.json('done')
