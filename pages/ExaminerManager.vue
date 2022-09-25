@@ -57,7 +57,6 @@
               ></v-img>
             </v-btn>
 
-            <extractDBComponentVue />
             <v-btn
               v-if="permissions.admin.includes(user.type)"
               title="سحب بيانات المختبرين من ملف الاكسس"
@@ -942,10 +941,8 @@
 
 <script>
 import reportHeaders from '../config/report.config'
-import extractDBComponentVue from '~/components/examinerManager/extractDBComponent.vue'
 export default {
   name: 'ExaminerManager',
-  components: { extractDBComponentVue },
   data() {
     return {
       reportLoading: false,
