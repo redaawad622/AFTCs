@@ -1,7 +1,7 @@
 {
   "name": "AFTCs",
-  "production_side": "E",
-  "version": "1.1.6",
+  "production_side": "M",
+  "version": "1.2.0-beta",
   "version_date": "18/9/2022",
   "private": true,
   "scripts": {
