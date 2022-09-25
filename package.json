@@ -26,6 +26,8 @@
     "@serialport/parser-readline": "^9.2.4",
     "apexcharts": "^3.35.5",
     "bcryptjs": "^2.4.3",
+    "boxen": "^7.0.0",
+    "chalk": "^5.0.1",
     "cookie-universal-nuxt": "^2.1.5",
     "core-js": "^3.19.3",
     "cors": "^2.8.5",
@@ -46,7 +48,8 @@
     "vue-chartjs": "^4.1.1",
     "vue-server-renderer": "^2.6.14",
     "vue-template-compiler": "^2.6.14",
-    "vuetify": "^2.6.1"
+    "vuetify": "^2.6.1",
+    "yargs": "13.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.3",
