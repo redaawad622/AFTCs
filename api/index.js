@@ -3,13 +3,13 @@ const express = require('express')
 const { PrismaClient } = require('@prisma/client')
 const app = express()
 const httpServer = createServer(app)
-const { Server } = require('socket.io')
+// const { Server } = require('socket.io')
 
-const io = new Server(httpServer, {
-  cors: {
-    origin: '*',
-  },
-})
+// const io = new Server(httpServer, {
+//   cors: {
+//     origin: '*',
+//   },
+// })
 
 const types = [
   'T_Answers',
@@ -36,7 +36,7 @@ require('./plansRoutes')(app, prisma, types)
 require('./userRoutes')(app, prisma, types)
 require('./badanyRoutes')(app, prisma, types)
 require('./oracleRoutes')(app, prisma, types)
-require('./followRoutes')(app, prisma, io, types)
+// require('./followRoutes')(app, prisma, io, types)
 require('./logRoute')(app, prisma, types)
 require('./interview')(app, prisma, types)
 require('./fake')(app, prisma, types)
