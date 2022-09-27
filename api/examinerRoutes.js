@@ -195,7 +195,7 @@ module.exports = function (app, prisma, types) {
           national_id: data.national_id,
         },
         create: { ...data },
-        update: { ...data, isBackuped: false },
+        update: { ...data, toBackup: true },
       })
       await prisma.Log.create({
         data: {
@@ -221,7 +221,7 @@ module.exports = function (app, prisma, types) {
       },
       data: {
         isDeleted: true,
-        isBackuped: false,
+        toBackup: true,
       },
     })
     const userId = req.headers.id
