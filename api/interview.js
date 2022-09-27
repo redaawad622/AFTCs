@@ -24,7 +24,6 @@ module.exports = function (app, prisma) {
       req.body
 
     const interviewData = { ...req.body }
-    console.log(interviewData)
     for (const key in interviewData) {
       if (
         Object.hasOwnProperty.call(interviewData, key) &&
