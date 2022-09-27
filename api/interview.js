@@ -24,6 +24,7 @@ module.exports = function (app, prisma) {
       req.body
 
     const interviewData = { ...req.body }
+    console.log(interviewData)
     for (const key in interviewData) {
       if (
         Object.hasOwnProperty.call(interviewData, key) &&
@@ -39,7 +40,7 @@ module.exports = function (app, prisma) {
       },
       data: {
         marital_state,
-        isBackuped: false,
+        toBackup: true,
         educational_degree,
       },
     })
@@ -59,7 +60,7 @@ module.exports = function (app, prisma) {
       where: {
         id: Number(id),
       },
-      create: interviewData,
+      create: { ...interviewData, examiner_id: examinerData.id },
       update: {
         ...interviewData,
         updated_at: new Date(),
