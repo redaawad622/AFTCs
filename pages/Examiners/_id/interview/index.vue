@@ -874,8 +874,10 @@ export default {
   watch: {
     interviewerOpinionSelect(val, oldVal) {
       if (val[val.length - 1]) {
-        if (!this.form.interviewer_opinion.includes(val[val.length - 1])) {
-          this.form.interviewer_opinion += val[val.length - 1] + ' '
+        if (!this.form.interviewer_opinion?.includes(val[val.length - 1])) {
+          this.form.interviewer_opinion === null
+            ? (this.form.interviewer_opinion = val[val.length - 1] + ' ')
+            : (this.form.interviewer_opinion += val[val.length - 1] + ' ')
         } else {
           this.form.interviewer_opinion = this.form.interviewer_opinion.replace(
             this.getArraysDifference(val, oldVal),
