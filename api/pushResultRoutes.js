@@ -1,11 +1,70 @@
 import axios from 'axios'
 
 module.exports = function (app, prisma, types) {
+  // load all examiner data and send it to primary device
+  app.post('/loadExaminerDataFromLocalServer', async (req, res) => {
+    const ids = req.body.ids || []
+    const option = {
+      select: {
+        national_id: true,
+        triple_number: true,
+        sold_id: true,
+        name: true,
+        stage: true,
+      },
+    }
+    if (ids.length > 0) {
+      option.where = {
+        isDeleted: { equals: Boolean(false) },
+        toBackup: { equals: Boolean(true) },
+        national_id: { in: ids },
+      }
+    } else {
+      option.where = {
+        isDeleted: { equals: Boolean(false) },
+        toBackup: { equals: Boolean(true) },
+        OR: [
+          {
+            Answers: {
+              some: {},
+            },
+          },
+          {
+            CustomExam: {
+              some: {},
+            },
+          },
+        ],
+      }
+    }
+    const examiners = await prisma.Examiners.findMany(option)
+    try {
+      const result = await axios.post(
+        'http://192.9.202.154:3000/api/saveDataFromLocalServer',
+        {
+          examiners: JSON.stringify(examiners),
+        },
+        {
+          maxBodyLength: Infinity,
+          maxContentLength: Infinity,
+        }
+      )
+
+      res.json(result.data)
+    } catch (error) {
+      res.json({
+        message: 'لا يمكن الاتصال بالسيرفر',
+        examiners: [],
+        color: 'error',
+      })
+    }
+  })
   // load all data and send it to primary device
   app.post('/loadAndSendAnswersData', async (_, res) => {
     const answers = await prisma.Examiners.findMany({
       where: {
         isDeleted: { equals: Boolean(false) },
+        toBackup: { equals: Boolean(true) },
         Answers: {
           some: {},
         },
@@ -31,6 +90,7 @@ module.exports = function (app, prisma, types) {
     const interviews = await prisma.Examiners.findMany({
       where: {
         isDeleted: { equals: Boolean(false) },
+        toBackup: { equals: Boolean(true) },
         Interview: {
           some: {},
         },
@@ -63,11 +123,25 @@ module.exports = function (app, prisma, types) {
         },
       },
     })
+    const trainingCenterExaminers = await prisma.Examiners.findMany({
+      where: {
+        isDeleted: { equals: Boolean(false) },
+        toBackup: { equals: Boolean(true) },
+      },
+      select: {
+        id: true,
+        national_id: true,
+        toBackup: true,
+        again: true,
+      },
+    })
+
     try {
       const result = await axios.post(
-        'http://192.9.202.150:3000/api/checkAndSaveAnswers',
+        'http://192.9.202.154:3000/api/checkAndSaveAnswers',
         {
           answers: JSON.stringify(answers),
+          trainingCenterExaminers: JSON.stringify(trainingCenterExaminers),
           customExam: JSON.stringify(customExam),
           interviews: JSON.stringify(interviews),
         },
@@ -88,13 +162,51 @@ module.exports = function (app, prisma, types) {
   })
   // check and save data from another server
   app.post('/checkAndSaveAnswers', async (req, res) => {
-    const { customExam, answers, interviews } = req.body
+    const { customExam, answers, interviews, trainingCenterExaminers } =
+      req.body
 
     const report = {
       customExam: null,
       answers: null,
     }
+    if (trainingCenterExaminers) {
+      /**
+       * Checks if examiner is `not Noticed` but is `again` which means examined again, which is considered
+       * @violation
+       */
+      const parsedTrainingExaminers = JSON.parse(trainingCenterExaminers)
+      const nationals = parsedTrainingExaminers.map((elm) => elm.national_id)
+      const examiners = await prisma.Examiners.findMany({
+        where: {
+          national_id: { in: nationals },
+        },
+        select: {
+          id: true,
+          national_id: true,
+          toBackup: true,
+          name: true,
+          isNoticed: true,
+        },
+      })
 
+      const notNoticed = examiners.filter((examiner) => !examiner.isNoticed)
+
+      const examinedAgain = parsedTrainingExaminers.filter(
+        (examiner) => examiner.again
+      )
+      const notNoticedExaminedAgain = getArraysIntersection(
+        notNoticed,
+        examinedAgain
+      )
+      if (notNoticedExaminedAgain.length > 0) {
+        res.json({
+          message: 'هؤلاء المختبرين أعادوا الاختبار ولم يكونوا ملحوظين',
+          examiners: notNoticedExaminedAgain,
+          type: 'notNoticedExaminedAgain',
+          color: 'error',
+        })
+      }
+    }
     if (answers) {
       let ans = JSON.parse(answers)
       if (ans.length < 1) {
@@ -115,8 +227,10 @@ module.exports = function (app, prisma, types) {
             national_id: true,
           },
         })
+
         const exNationals = examiners.map((elm) => elm.national_id)
         const diff = ans.filter((elm) => !exNationals.includes(elm.national_id))
+
         if (diff.length > 0) {
           res.json({
             message:
@@ -337,63 +451,9 @@ module.exports = function (app, prisma, types) {
       color: 'success',
     })
   })
-  // load all examiner data and send it to primary device
-  app.post('/loadExaminerDataFromLocalServer', async (req, res) => {
-    const ids = req.body.ids || []
-    const option = {
-      select: {
-        national_id: true,
-        triple_number: true,
-        sold_id: true,
-        name: true,
-        stage: true,
-      },
-    }
-    if (ids.length > 0) {
-      option.where = {
-        isDeleted: { equals: Boolean(false) },
-        national_id: { in: ids },
-      }
-    } else {
-      option.where = {
-        isDeleted: { equals: Boolean(false) },
-        OR: [
-          {
-            Answers: {
-              some: {},
-            },
-          },
-          {
-            CustomExam: {
-              some: {},
-            },
-          },
-        ],
-      }
-    }
-    const examiners = await prisma.Examiners.findMany(option)
-    try {
-      const result = await axios.post(
-        'http://192.9.202.150:3000/api/saveDataFromLocalServer',
-        {
-          examiners: JSON.stringify(examiners),
-        },
-        {
-          maxBodyLength: Infinity,
-          maxContentLength: Infinity,
-        }
-      )
 
-      res.json(result.data)
-    } catch (error) {
-      res.json({
-        message: 'لا يمكن الاتصال بالسيرفر',
-        examiners: [],
-        color: 'error',
-      })
-    }
-  })
   // save all examiner data in primary device
+
   app.post('/saveDataFromLocalServer', async (req, res) => {
     const { examiners } = req.body
     const data = JSON.parse(examiners)
@@ -428,6 +488,7 @@ module.exports = function (app, prisma, types) {
       })
     }
   })
+
   app.post('/deleteExaminerDataFromLocalServer', async (req, res) => {
     const { ids } = req.body
     await prisma.Examiners.updateMany({
@@ -436,6 +497,34 @@ module.exports = function (app, prisma, types) {
       },
       data: {
         isDeleted: true,
+      },
+    })
+    const userId = req.headers.id
+    await prisma.Log.create({
+      data: {
+        user_id: Number(userId),
+        operation_type: 'delete',
+        description:
+          ' مسح بيانات ممتحنين يحملون ارقام قومية ' + ids.join(' , '),
+        type: types[4],
+      },
+    })
+    res.json({
+      message: 'تم مسح المختبرين  بنجاح',
+      examiners: [],
+      type: 'delete',
+      color: 'success',
+    })
+  })
+
+  app.post('/removeNotNoticedExaminedAgain', async (req, res) => {
+    const { ids } = req.body
+    await prisma.Examiners.updateMany({
+      where: {
+        national_id: { in: ids },
+      },
+      data: {
+        again: false,
       },
     })
     const userId = req.headers.id
@@ -498,4 +587,10 @@ async function updateSoldNo(examiners, prisma, again) {
     })
   }
   await prisma.$transaction(examiners)
+}
+function getArraysIntersection(a, b) {
+  const results = a.filter(({ national_id: id1 }) =>
+    b.some(({ national_id: id2 }) => id2 === id1)
+  )
+  return results
 }

@@ -21,6 +21,14 @@
         </tbody>
       </v-simple-table>
       <v-btn
+        v-if="previewResult && previewResult.type == 'notNoticedExaminedAgain'"
+        color="error"
+        :loading="loadLoading3"
+        class="mx-1"
+        @click="removeNotNoticedExaminedAgain()"
+        >مسح الاعادة</v-btn
+      >
+      <v-btn
         v-if="previewResult && previewResult.type == 'notRegister'"
         color="error"
         :loading="loadLoading2"
@@ -36,6 +44,7 @@
         @click="deleteExaminerDataFromLocalServer()"
         >مسح الممتحنين</v-btn
       >
+
       <v-sheet
         v-if="previewResult.report"
         class="d-flex justify-space-between my-3"
@@ -156,6 +165,24 @@ export default {
         : []
       this.$store
         .dispatch('PushResult/deleteExaminerDataFromLocalServer', { ids })
+        .then((res) => {
+          this.$store.commit('PushResult/setPreviewResult', res.data)
+          this.$router.push('/previewPushResult')
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+        .finally(() => {
+          this.loadLoading3 = false
+        })
+    },
+    removeNotNoticedExaminedAgain() {
+      this.loadLoading3 = true
+      const ids = this.previewResult.examiners
+        ? this.previewResult.examiners.map((elm) => elm.national_id)
+        : []
+      this.$store
+        .dispatch('PushResult/removeNotNoticedExaminedAgain', { ids })
         .then((res) => {
           this.$store.commit('PushResult/setPreviewResult', res.data)
           this.$router.push('/previewPushResult')

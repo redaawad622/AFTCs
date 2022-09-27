@@ -23,4 +23,7 @@ export const actions = {
   deleteExaminerDataFromLocalServer(_, payload) {
     return this.$axios.post(`/api/deleteExaminerDataFromLocalServer`, payload)
   },
+  removeNotNoticedExaminedAgain(_, payload) {
+    return this.$axios.post(`/api/removeNotNoticedExaminedAgain`, payload)
+  },
 }
