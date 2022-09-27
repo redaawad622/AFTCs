@@ -8,11 +8,13 @@
       }}</v-card-title>
 
       <v-btn
+        v-if="permissions.admin.includes(user.type)"
         color="primary"
         :to="`/Examiners/${$route.params.id}/interview/report?withDeg=${withDeg}`"
         >استخراج التقرير</v-btn
       >
       <v-checkbox
+        v-if="permissions.admin.includes(user.type)"
         v-model="withDeg"
         :true-value="1"
         :false-value="0"
@@ -27,7 +29,7 @@
             <v-expansion-panel-header>
               <v-card-title>البيانات الاساسية</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-row>
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-text-field
@@ -151,7 +153,7 @@
             <v-expansion-panel-header>
               <v-card-title>البيانات الاجتماعيه</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-row>
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-text-field
@@ -257,7 +259,7 @@
             <v-expansion-panel-header>
               <v-card-title>معلومات تمهيدية</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-row>
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-select
@@ -386,7 +388,7 @@
             <v-expansion-panel-header>
               <v-card-title>الشكوي</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-textarea
                 v-model="form.complaint"
                 outlined
@@ -410,7 +412,7 @@
             <v-expansion-panel-header>
               <v-card-title>المظهر و السلوك</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-row>
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-select
@@ -478,7 +480,7 @@
             <v-expansion-panel-header>
               <v-card-title>المشكلات المعرفية</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-row>
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-select
@@ -573,7 +575,7 @@
             <v-expansion-panel-header>
               <v-card-title>رأي القائم بالمقابله (مركز)</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-row>
                 <v-col cols="12" sm="12" md="6" lg="4">
                   <v-select
@@ -621,7 +623,7 @@
             <v-expansion-panel-header>
               <v-card-title>رأي القائم بالمقابله (فرع)</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-row>
                 <v-col cols="12">
                   <v-textarea
@@ -681,7 +683,7 @@
             <v-expansion-panel-header>
               <v-card-title>التوصيه و نتيجة التوصيه</v-card-title>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content eager>
               <v-row>
                 <v-col cols="12" sm="6">
                   <v-select
@@ -896,15 +898,6 @@ export default {
   },
   created() {
     this.fLoading = true
-
-    this.interval = setInterval(() => {
-      this.openPanel += 1
-      if (this.openPanel > 7) {
-        this.openPanel = 0
-        clearInterval(this.interval)
-      }
-    }, 0)
-
     this.$store
       .dispatch('Interview/getInterview', { id: this.$route.params.id })
       .then((res) => {
@@ -983,6 +976,7 @@ export default {
     save() {
       if (this.$refs.form.validate()) {
         this.loading = true
+        console.log(this.form)
         this.$store
           .dispatch('Interview/saveInterview', this.form)
           .then(() => {
