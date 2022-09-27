@@ -410,7 +410,7 @@
                         outlined
                         dense
                         placeholder="اعادة الامتحان"
-                        label="اعادة الامتحان"
+                        label="اعادة الامتحان للملحوظين"
                         item-value="value"
                         item-text="name"
                         cache-items
@@ -679,15 +679,14 @@
             <template v-if="item._count.Answers > 0">
               <v-chip v-if="item.again" outlined>تم الاعاده</v-chip>
               <v-btn
-                v-else-if="item.isNoticed"
+                v-else
                 color="primary"
                 text
                 title="تعديل المختبر"
                 @click="currentDelete = item"
               >
-                اعادة
+                اعادة للملحوظ
               </v-btn>
-              <v-chip v-else outlined>ليس ملحوظ</v-chip>
             </template>
 
             <v-chip v-else>لم يتم امتحانه بعد</v-chip>
@@ -791,7 +790,8 @@
         <v-dialog v-if="currentDelete" :value="true" max-width="300px">
           <v-card :loading="currentDeleteLoading">
             <v-card-title class="text-h5"
-              >هل انت متاكد انك تريد الاعادة؟</v-card-title
+              >هل انت متاكد انك تريد الاعادة (هذه الخاصية للملحوظين
+              فقط)؟</v-card-title
             >
             <v-card-text v-if="currentDelete">
               سيتم حذف جميع اجابات {{ currentDelete.name }}
@@ -1042,7 +1042,7 @@ export default {
           sortable: false,
         },
         {
-          text: 'اعادة الاختبار',
+          text: 'اعادة الاختبار للملحوظين',
           value: 'again',
           sortable: false,
           align: 'center',
@@ -1162,7 +1162,7 @@ export default {
         },
 
         {
-          text: 'اعادة الاختبار',
+          text: 'اعادة الاختبار للملحوظين',
           value: 'again',
           sortable: false,
           align: 'center',
