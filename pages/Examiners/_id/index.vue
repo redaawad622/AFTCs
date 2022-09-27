@@ -92,7 +92,7 @@
       ></v-text-field>
       <v-select
         v-model="form.stage"
-        :items="currentYerars"
+        :items="currentYear"
         outlined
         color="primary"
         append-icon="mdi-star"
@@ -212,7 +212,7 @@ export default {
     }
   },
   computed: {
-    currentYerars() {
+    currentYear() {
       const year = new Date().getFullYear()
 
       return [year + '1', year + '2', year + '3', year + '4']
