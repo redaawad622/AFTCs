@@ -97,7 +97,7 @@ model Examiners {
   isNoticedAgain     Boolean       @default(false)
   nextFollowDate     DateTime?
   numFollowUps       Int           @default(0)
-  isBackuped         Boolean       @default(false)
+  toBackup           Boolean       @default(false)
   CustomExam         CustomExam[]
   T_Categories       T_Categories? @relation(fields: [t_CategoriesCat_ID], references: [Cat_ID])
   t_CategoriesCat_ID Int?
@@ -205,10 +205,10 @@ model Interview {
   focus_ability          String
   mood                   String
   speaking_disorder      String
-  medicine_type          String
+  medicine_type          String?
   has_medical_history    String
   hospital_name          String?
-  drugs_history          String
+  drugs_history          String?
   drug_type              String?
   final_opinion          String
   examiner_status        String
