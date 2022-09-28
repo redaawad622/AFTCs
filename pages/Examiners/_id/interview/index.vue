@@ -264,7 +264,7 @@
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-select
                     v-model="form.medicine_type"
-                    :items="medicine_type"
+                    :items="helperData.medicine_type"
                     outlined
                     label="تعاطي ادوية"
                     :rules="required"
@@ -273,7 +273,7 @@
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-select
                     v-model="form.has_medical_history"
-                    :items="has_medical_history"
+                    :items="helperData.has_medical_history"
                     :rules="required"
                     outlined
                     label="سبق عرضه علي  أي مست/عياده"
@@ -298,7 +298,7 @@
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-select
                     v-model="form.drugs_history"
-                    :items="has_medical_history"
+                    :items="helperData.has_medical_history"
                     outlined
                     :rules="required"
                     label="لديه خبره بتعاطي مواد مخدره"
@@ -426,7 +426,7 @@
                 <v-col cols="12" sm="6" md="6" lg="4" xl="3">
                   <v-select
                     v-model="form.speaking_disorder"
-                    :items="speaking_disorder"
+                    :items="helperData.speaking_disorder"
                     outlined
                     label="اضطراب الكلام"
                     :rules="required"
@@ -580,7 +580,7 @@
                 <v-col cols="12" sm="12" md="6" lg="4">
                   <v-select
                     v-model="form.final_opinion"
-                    :items="final_opinion"
+                    :items="helperData.final_opinion"
                     outlined
                     :rules="required"
                     label="رأي القائم بالمقابلة"
@@ -589,14 +589,14 @@
                 <v-col cols="12" sm="12" md="6" lg="4">
                   <v-select
                     v-model="form.examiner_status"
-                    :items="examiner_status[form.final_opinion]"
+                    :items="helperData.examiner_status[form.final_opinion]"
                     outlined
                     :rules="required"
                     label="موقف المجند"
                   ></v-select>
                 </v-col>
                 <v-col
-                  v-show="form.final_opinion == final_opinion[0]"
+                  v-show="form.final_opinion == helperData.final_opinion[0]"
                   cols="12"
                   sm="12"
                   md="12"
@@ -606,13 +606,19 @@
                     v-model="form.final_hospital_result"
                     :items="
                       form.examiner_status === 'عرض مست طبي'
-                        ? final_hospital_result.filter((x) => x !== 'رفت نفسي')
-                        : final_hospital_result.filter((x) => x !== 'رفت طبي')
+                        ? helperData.final_hospital_result.filter(
+                            (x) => x !== 'رفت نفسي'
+                          )
+                        : helperData.final_hospital_result.filter(
+                            (x) => x !== 'رفت طبي'
+                          )
                     "
                     outlined
                     label="نتيجة العرض علي المست"
                     :rules="
-                      form.final_opinion == final_opinion[0] ? required : []
+                      form.final_opinion == helperData.final_opinion[0]
+                        ? required
+                        : []
                     "
                   ></v-select>
                 </v-col>
@@ -701,6 +707,14 @@
                     outlined
                     label="نتيجة التوصية"
                   ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <!-- <v-date-picker
+                    v-model="filters.date"
+                    :active-picker.sync="activePicker"
+                    max=`1950-01-01
+                    @change="save"
+                  ></v-date-picker> -->
                 </v-col>
                 <v-col cols="12">
                   <v-textarea
@@ -806,6 +820,7 @@ export default {
         recommendation_res: null,
         recommendation_summary: null,
         interviewer: null,
+        due_date: null,
         historyDate: new Date(
           Date.now() - new Date().getTimezoneOffset() * 60000
         )
@@ -815,40 +830,8 @@ export default {
       loading: false,
       fLoading: false,
       interviewerOpinionSelect: [],
-      speaking_disorder: [
-        'معتدل',
-        'كثير الكلام',
-        'قليل الكلام',
-        'ضحك بدون سبب',
-      ],
       lastOpinionSelectedState: [],
-      medicine_type: ['لا يوجد', 'نفسية', 'علاجية'],
-      has_medical_history: ['نعم', 'لا'],
       focusCard: null,
-      final_opinion: [
-        'عرضه علي المست من قبل المركز',
-        'عرضه علي فرع الانتقاء و التوجيه',
-        'لا يعاني من اي مشاكل',
-      ],
-      examiner_status: {
-        'عرضه علي المست من قبل المركز': ['عرض مست طبي', 'عرض مست نفسي'],
-        'عرضه علي فرع الانتقاء و التوجيه': [
-          'لائق',
-          'لا يوجد',
-          'غياب',
-          'ترحيل',
-          'عرض مست طبي',
-          'عرض مست نفسي',
-        ],
-        'لا يعاني من اي مشاكل': ['لائق'],
-      },
-      final_hospital_result: [
-        'لا يوجد',
-        'عودة للوحدة',
-        'علاج و عودة للوحدة',
-        'رفت طبي',
-        'رفت نفسي',
-      ],
     }
   },
   computed: {
@@ -978,7 +961,6 @@ export default {
     save() {
       if (this.$refs.form.validate()) {
         this.loading = true
-        console.log(this.form)
         this.$store
           .dispatch('Interview/saveInterview', this.form)
           .then(() => {
