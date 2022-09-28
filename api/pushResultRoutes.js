@@ -185,11 +185,13 @@ module.exports = function (app, prisma, types) {
           national_id: true,
           toBackup: true,
           name: true,
-          isNoticed: true,
+          isNoticed: 1,
         },
       })
 
-      const notNoticed = examiners.filter((examiner) => !examiner.isNoticed)
+      const notNoticed = examiners.filter(
+        (examiner) => examiner.isNoticed === 0
+      )
 
       const examinedAgain = parsedTrainingExaminers.filter(
         (examiner) => examiner.again

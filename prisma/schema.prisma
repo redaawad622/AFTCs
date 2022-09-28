@@ -93,8 +93,7 @@ model Examiners {
   TAMARKZ_NAME       String?
   UNIT_ARMY_NAME     String?
   ARMY_TAGNEED_NAME  String?
-  isNoticed          Boolean       @default(false)
-  isNoticedAgain     Boolean       @default(false)
+  isNoticed          Int           @default(0)
   nextFollowDate     DateTime?
   numFollowUps       Int           @default(0)
   toBackup           Boolean       @default(false)

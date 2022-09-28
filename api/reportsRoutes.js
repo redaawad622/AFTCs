@@ -62,7 +62,6 @@ module.exports = function (app, prisma) {
       user_id: true,
       again: true,
       isNoticed: true,
-      isNoticedAgain: true,
       qualification_code: true,
     }
   }
@@ -74,7 +73,6 @@ module.exports = function (app, prisma) {
       again: true,
       UNIT_NAME: true,
       isNoticed: true,
-      isNoticedAgain: true,
       qualification_code: true,
       Interview: true,
     }
@@ -102,7 +100,9 @@ module.exports = function (app, prisma) {
   }
 
   function getReport1(filteredExaminers, expectedPlan) {
-    const totalNoticed = filteredExaminers.filter((item) => item.isNoticed)
+    const totalNoticed = filteredExaminers.filter(
+      (item) => item.isNoticed === 1 || item.isNoticed === 2
+    )
 
     let groupedExaminers = filteredExaminers.reduce(
       (groupedByTrainingCenter, nextExaminer) => {
@@ -116,10 +116,12 @@ module.exports = function (app, prisma) {
 
     groupedExaminers = Object.keys(groupedExaminers).map((k) => {
       const trainingCenterExaminers = groupedExaminers[k]
-      const noticed = trainingCenterExaminers.filter((_) => _.isNoticed)
+      const noticed = trainingCenterExaminers.filter(
+        (_) => _.isNoticed === 1 || _.isNoticed === 2
+      )
       const again = trainingCenterExaminers.filter((_) => _.again)
       const noticedAgain = trainingCenterExaminers.filter(
-        (_) => _.isNoticedAgain
+        (_) => _.isNoticed === 2
       )
       const high = trainingCenterExaminers.filter((item) =>
         examinerQualification(item, 2)
@@ -173,7 +175,7 @@ module.exports = function (app, prisma) {
       total: filteredExaminers.length,
       noticed: totalNoticed.length,
       again: filteredExaminers.filter((item) => item.again).length,
-      noticedAgain: filteredExaminers.filter((item) => item.isNoticedAgain)
+      noticedAgain: filteredExaminers.filter((item) => item.isNoticed === 2)
         .length,
       high: filteredExaminers.filter((item) => item.qualification_code === 2)
         .length,
@@ -196,8 +198,10 @@ module.exports = function (app, prisma) {
   }
 
   function getReport2(filteredExaminers) {
-    const isNoticed = filteredExaminers.filter((_) => _.isNoticed)
-    const isNoticedAgain = filteredExaminers.filter((_) => _.isNoticedAgain)
+    const isNoticed = filteredExaminers.filter(
+      (_) => _.isNoticed === 0 || _.isNoticed === 1
+    )
+    const isNoticedAgain = filteredExaminers.filter((_) => _.isNoticed === 2)
     const allReExamed = filteredExaminers.filter((_) => _.again)
     const interviewDone = filteredExaminers.filter(
       (_) => _.Interview.length > 0

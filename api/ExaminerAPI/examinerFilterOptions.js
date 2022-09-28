@@ -59,16 +59,16 @@ export const examinerFilterOptions = {
       const noticed = Number(isNoticed)
       switch (noticed) {
         case 1:
-          option.where.isNoticed = { equals: true }
+          option.where.isNoticed = { equals: 1 }
           if (newSet) {
-            option.where.isNoticedAgain = { equals: false }
+            option.where.isNoticed = { equals: 2 }
           }
           break
         case 2:
-          option.where.isNoticedAgain = { equals: true }
+          option.where.isNoticed = { equals: 2 }
           break
         case 3:
-          option.where.isNoticed = { equals: false }
+          option.where.isNoticed = { equals: 0 }
           break
       }
     }
