@@ -18,7 +18,6 @@ export const state = () => ({
     marital_states: ['أعزب', 'متزوج', 'مطلق', 'أرمل'],
     appearance: ['لائق', 'غير لائق'],
     focus_ability: ['جيد', 'مشتت'],
-
     mood: ['معتدل', 'مكتئب', 'الرغبة بالبكاء', 'تهته'],
     parent_rel: [
       {
@@ -66,7 +65,6 @@ export const state = () => ({
       { text: 'مستبصر', value: 1 },
       { text: 'غير مستبصر', value: 2 },
     ],
-
     awareDisorder: [
       { text: 'لا يوجد', value: 1 },
       { text: 'هلاوس سمعية', value: 2 },

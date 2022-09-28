@@ -384,9 +384,7 @@ module.exports = function (app, prisma, types) {
     }
     if (customExam) {
       let customEx = JSON.parse(customExam)
-      if (customEx.length < 1) {
-        console.log('no custom exam')
-      } else {
+      if (customEx.length >= 1) {
         const nationals = customEx.map((elm) => elm.national_id)
         const examiners = await prisma.Examiners.findMany({
           where: {
