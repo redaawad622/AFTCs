@@ -708,13 +708,33 @@
                     label="نتيجة التوصية"
                   ></v-select>
                 </v-col>
-                <v-col cols="12" sm="6">
-                  <!-- <v-date-picker
-                    v-model="filters.date"
-                    :active-picker.sync="activePicker"
-                    max=`1950-01-01
-                    @change="save"
-                  ></v-date-picker> -->
+
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-menu
+                    v-model="releaseDateMenu"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="form.release_date"
+                        label="تاريخ التسريح"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        outlined
+                        v-bind="attrs"
+                        :rules="required"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="form.release_date"
+                      @input="releaseDateMenu = false"
+                    ></v-date-picker>
+                  </v-menu>
                 </v-col>
                 <v-col cols="12">
                   <v-textarea
@@ -726,13 +746,47 @@
                   ></v-textarea>
                 </v-col>
                 <v-col cols="12">
-                  <v-textarea
-                    v-model="form.interviewer"
-                    outlined
-                    color="primary"
+                  <v-select
+                    v-model="form.interviewer_id"
+                    :items="helperData.interviewers"
                     label="القائم بالمقابله"
+                    outlined
+                    :return-object="false"
+                    item-text="text"
+                    item-value="value"
+                    color="primary"
                     :rules="form.interviewer_opinion ? required : []"
-                  ></v-textarea>
+                  >
+                  </v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="6" lg="4" xl="3">
+                  <v-menu
+                    v-model="dueDateMenu"
+                    :close-on-content-click="false"
+                    nudge-right="40"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template #activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="form.due_date"
+                        label="حد أقصى لتاريخ المتابعة"
+                        prepend-inner-icon="mdi-calendar"
+                        readonly
+                        outlined
+                        v-bind="attrs"
+                        :rules="required"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="form.due_date"
+                      :max="addWeeksToDate(new Date(), 4)"
+                      :min="new Date().toISOString()"
+                      @input="dueDateMenu = false"
+                    ></v-date-picker>
+                  </v-menu>
                 </v-col>
               </v-row>
             </v-expansion-panel-content>
@@ -767,11 +821,14 @@ export default {
       withDeg: 0,
       valid: false,
       menu2: false,
+      releaseDateMenu: false,
+      dueDateMenu: false,
       openPanel: 0,
       interval: null,
       form: {
         id: 0,
         national_id: null,
+        interviewer_id: null,
         name: null,
         stage: null,
         sold_id: null,
@@ -819,8 +876,8 @@ export default {
         recommendation: null,
         recommendation_res: null,
         recommendation_summary: null,
-        interviewer: null,
         due_date: null,
+        release_date: null,
         historyDate: new Date(
           Date.now() - new Date().getTimezoneOffset() * 60000
         )
@@ -900,6 +957,7 @@ export default {
                   family_relation: null,
                   parent_rel: null,
                   complaint: null,
+                  interviewer_id: null,
                   appearance: null,
                   focus_ability: null,
                   mood: null,
@@ -935,8 +993,9 @@ export default {
                   interviewer_opinion: null,
                   recommendation: null,
                   recommendation_res: null,
+                  release_date: null,
+                  due_date: null,
                   recommendation_summary: null,
-                  interviewer: null,
                   historyDate: new Date(
                     Date.now() - new Date().getTimezoneOffset() * 60000
                   )
@@ -957,7 +1016,10 @@ export default {
     getArraysDifference(a1, a2) {
       return a2.filter((a2elem) => !a1.includes(a2elem))
     },
-
+    addWeeksToDate(dateObj, numberOfWeeks) {
+      dateObj.setDate(dateObj.getDate() + numberOfWeeks * 7)
+      return dateObj.toISOString()
+    },
     save() {
       if (this.$refs.form.validate()) {
         this.loading = true

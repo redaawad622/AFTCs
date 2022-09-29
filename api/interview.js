@@ -55,6 +55,9 @@ module.exports = function (app, prisma) {
     delete interviewData.sold_id
     delete interviewData.examiner_id
 
+    interviewData.due_date = new Date(interviewData?.due_date)
+    interviewData.release_date = new Date(interviewData?.release_date)
+
     const interview = await prisma.Interview.upsert({
       where: {
         id: Number(id),
@@ -65,6 +68,7 @@ module.exports = function (app, prisma) {
         updated_at: new Date(),
       },
     })
+
     res.json(interview)
   })
 }
