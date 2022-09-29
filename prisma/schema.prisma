@@ -87,6 +87,7 @@ model Examiners {
   battary_id         Int?
   isDeleted          Boolean       @default(false)
   again              Boolean       @default(false)
+  toBackup           Boolean       @default(false)
   // UNIT DETAILS
   UNIT_NAME          String?
   GEHA_NAME          String?
@@ -96,8 +97,8 @@ model Examiners {
   isNoticed          Int           @default(0)
   nextFollowDate     DateTime?
   numFollowUps       Int           @default(0)
-  toBackup           Boolean       @default(false)
   CustomExam         CustomExam[]
+  releaseDate        DateTime?
   T_Categories       T_Categories? @relation(fields: [t_CategoriesCat_ID], references: [Cat_ID])
   t_CategoriesCat_ID Int?
   Interview          Interview[]
@@ -193,9 +194,9 @@ model CustomExam {
 }
 
 model Interview {
-  id                     Int        @id @default(autoincrement())
-  examiner_id            Int        @unique
-  Examiners              Examiners? @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
+  id                     Int          @id @default(autoincrement())
+  examiner_id            Int          @unique
+  Examiners              Examiners?   @relation(fields: [examiner_id], references: [id], onDelete: Cascade)
   parent_job             String
   siblings_num           Int
   family_relation        String
@@ -219,6 +220,7 @@ model Interview {
   family_medical         Int?
   personal_medical       Int?
   half_brothers          Int?
+  // Clinic
   complaint_f            String?
   transReason            Int?
   moving                 Int?
@@ -237,10 +239,13 @@ model Interview {
   recommendation         Int?
   recommendation_res     Int?
   recommendation_summary String?
-  interviewer            String?
-
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  release_date           DateTime?
+  isUnitReport           Boolean?     @default(false)
+  due_date               DateTime?
+  interviewer_id         Int?
+  Interviewer            Interviewer? @relation(fields: [interviewer_id], references: [id], onDelete: Cascade)
+  created_at             DateTime     @default(now())
+  updated_at             DateTime     @default(now())
 }
 
 model Weapons {
@@ -276,4 +281,11 @@ model ExpectedPlan {
   actual_arrive_usually Int?
   user_id               Int           @unique
   users                 T_Categories? @relation(fields: [user_id], references: [Cat_ID], onDelete: Cascade)
+}
+
+model Interviewer {
+  id              Int         @id @default(autoincrement())
+  interviewerName String
+  cpuInfo         String?
+  Interview       Interview[]
 }
