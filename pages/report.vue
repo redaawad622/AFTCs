@@ -365,7 +365,7 @@ export default {
     },
     exportWord() {
       const style =
-        '<style> table {display: table;border-collapse: separate;box-sizing: border-box;text-indent: initial;border-spacing: 2px;border-color: grey;} th,td { border: 1px solid #000;} </style>'
+        '<style> table {display: table;direction:rtl;border-collapse: separate;box-sizing: border-box;text-indent: initial;border-spacing: 2px;border-color: grey;} th,td { border: 1px solid #000;} </style>'
       const preHtml = `<html><head><meta charset='UTF-8'/>${style}</head><body>`
 
       const table = document.getElementById('printTable').innerHTML
