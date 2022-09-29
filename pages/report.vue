@@ -366,7 +366,7 @@ export default {
     exportWord() {
       const style =
         '<style> table {display: table;border-collapse: separate;box-sizing: border-box;text-indent: initial;border-spacing: 2px;border-color: grey;} th,td { border: 1px solid #000;} </style>'
-      const preHtml = `<html> <head> <meta charset='utf-8'/> <title>test</title> ${style} </head> <body>`
+      const preHtml = `<html><head><meta charset='UTF-8'/>${style}</head><body>`
 
       const table = document.getElementById('printTable').innerHTML
 
@@ -401,7 +401,7 @@ export default {
       }
       const csv = data.join('\n')
       const elm = document.createElement('a')
-      elm.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv)
+      elm.href = 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURI(csv)
       elm.target = '_blank'
       elm.download = `${this.fileName}.csv`
       elm.click()
