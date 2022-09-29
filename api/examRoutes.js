@@ -412,7 +412,7 @@ module.exports = function (app, prisma) {
           Exm_ID: Number(data.id),
         },
         create: { ...data.formData },
-        update: { ...data.formData, toBackup: true },
+        update: { ...data.formData, toBackup: false },
       })
       res.json(exam)
     } catch (e) {
@@ -428,7 +428,7 @@ module.exports = function (app, prisma) {
         },
         data: {
           show: false,
-          isBackuped: false,
+          toBackup: false,
         },
       })
       res.json(exam)
@@ -540,7 +540,7 @@ module.exports = function (app, prisma) {
         id: Number(id),
       },
       create: data,
-      update: { ...data, isBackuped: false },
+      update: { ...data, toBackup: false },
     })
 
     res.json(battary)
@@ -572,7 +572,7 @@ module.exports = function (app, prisma) {
       },
       data: {
         again: true,
-        toBackup: true,
+        toBackup: false,
       },
     })
     let battary = await prisma.Battries.findUnique({
@@ -600,21 +600,22 @@ module.exports = function (app, prisma) {
       },
       data: {
         again: true,
-        toBackup: true,
+        toBackup: false,
       },
     })
 
     res.json('done')
   })
   app.post('/setAsFNoticed', async (req, res) => {
-    const { nationals } = req.body
+    const { nationals, second } = req.body
     await prisma.Examiners.updateMany({
       where: {
         national_id: { in: nationals },
       },
       data: {
-        isNoticed: 2,
-        toBackup: true,
+        isNoticed: true,
+        isNoticedAgain: Boolean(Number(second)),
+        toBackup: false,
       },
     })
 
@@ -626,7 +627,7 @@ module.exports = function (app, prisma) {
       where: {
         id: Number(id),
       },
-      data: { ...unit, toBackup: true },
+      data: { ...unit, toBackup: false },
     })
 
     res.json('done')
