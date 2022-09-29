@@ -239,7 +239,11 @@
                         placeholder="التوصية مركز"
                         label="التوصية مركز"
                         cache-items
-                        :items="helperData.examiner_status"
+                        :items="
+                          helperData.examiner_status[
+                            'عرضه علي المست من قبل المركز'
+                          ]
+                        "
                       >
                       </v-autocomplete>
                     </v-col>
