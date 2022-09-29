@@ -607,14 +607,14 @@ module.exports = function (app, prisma) {
     res.json('done')
   })
   app.post('/setAsFNoticed', async (req, res) => {
-    const { nationals, second } = req.body
+    const { nationals } = req.body
     await prisma.Examiners.updateMany({
       where: {
         national_id: { in: nationals },
       },
       data: {
-        isNoticed: true,
-        isNoticedAgain: Boolean(Number(second)),
+        isNoticed: 2,
+
         toBackup: false,
       },
     })
